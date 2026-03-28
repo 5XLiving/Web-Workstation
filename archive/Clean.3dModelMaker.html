@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>5X WorkStation • 3D Model Maker</title>
+
+  <style>
+    :root{
+      --bg:#030814;
+      --bg2:#071222;
+      --bg3:#040913;
+      --card:rgba(10,20,34,.84);
+      --card2:rgba(7,14,24,.94);
+      --text:#f4f8ff;
+      --muted:#9fb0c2;
+      --mint:#93f3de;
+      --mint2:#cafff1;
+      --mintLine:rgba(147,243,222,.20);
+      --shadow:0 24px 60px rgba(0,0,0,.34);
+      --radiusXL:28px;
+      --radiusLG:22px;
+      --gap:12px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 14% 8%, rgba(76,126,255,.18), transparent 24%),
+        radial-gradient(circle at 86% 16%, rgba(52,220,198,.14), transparent 22%),
+        radial-gradient(circle at 52% 0%, rgba(95,156,255,.07), transparent 28%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 55%, var(--bg3) 100%);
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(3,8,20,.78);
+      backdrop-filter: blur(14px) saturate(140%);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+
+    .head-inner{
+      max-width:1400px;
+      margin:0 auto;
+      padding:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .logo-img{
+      height:56px;
+      width:auto;
+      display:block;
+      object-fit:contain;
+      filter:drop-shadow(0 0 14px rgba(147,243,222,.18));
+    }
+
+    .brand-copy{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:flex-start;
+      gap:3px;
+    }
+
+    .brand-copy strong{
+      display:block;
+      margin:0;
+      line-height:1;
+      font-size:32px;
+      font-family:"Noto Serif SC","Noto Serif",serif;
+      font-weight:600;
+      letter-spacing:-.02em;
+    }
+
+    .brand-copy span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.1;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .sub{
+      color:var(--muted);
+      font-size:.9rem;
+      white-space:nowrap;
+    }
+
+    .layout{
+      max-width:1400px;
+      margin:0 auto;
+      padding:14px;
+    }
+
+    .hero-intro{
+      margin-bottom:14px;
+      padding:20px 22px;
+      border-radius:var(--radiusXL);
+      border:1px solid rgba(255,255,255,.06);
+      background:
+        radial-gradient(circle at top right, rgba(147,243,222,.08), transparent 24%),
+        radial-gradient(circle at 14% 0%, rgba(92,137,255,.10), transparent 20%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+        linear-gradient(180deg, var(--card), var(--card2));
+      box-shadow:var(--shadow);
+    }
+
+    .eyebrow{
+      margin:0 0 10px;
+      color:var(--mint);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    .hero-intro h1{
+      margin:0;
+      font-family:"Noto Serif SC","Noto Serif",serif;
+      font-size:clamp(2rem,4vw,3.2rem);
+      line-height:.98;
+      letter-spacing:-.03em;
+      max-width:13ch;
+    }
+
+    .hero-intro p{
+      margin:14px 0 0;
+      color:var(--muted);
+      line-height:1.75;
+      max-width:72ch;
+    }
+
+    .module-roadmap{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:14px;
+    }
+
+    .pill{
+      padding:9px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(9,12,18,.6);
+      color:var(--text);
+      font-size:.9rem;
+    }
+
+    .pill.active{
+      background:rgba(147,243,222,.08);
+      color:var(--mint2);
+      border-color:var(--mintLine);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:360px 1fr 320px;
+      gap:var(--gap);
+    }
+
+    @media (max-width:1100px){
+      .grid{grid-template-columns:1fr}
+    }
+
+    .card,
+    .canvasWrap{
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at top right, rgba(147,243,222,.08), transparent 24%),
+        radial-gradient(circle at 14% 0%, rgba(92,137,255,.10), transparent 20%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+        linear-gradient(180deg, var(--card), var(--card2));
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:var(--radiusLG);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(18px);
+    }
+
+    .card .inner{
+      position:relative;
+      z-index:1;
+      padding:14px;
+    }
+
+    .h2{
+      margin:0 0 12px;
+      font-size:1.02rem;
+      color:var(--mint2);
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .h2::before{
+      content:"";
+      width:4px;
+      height:16px;
+      border-radius:2px;
+      background:linear-gradient(180deg, var(--mint2), var(--mint));
+    }
+
+    .section-note{
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.6;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-bottom:10px;
+    }
+
+    .tab{
+      flex:1;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(9,12,18,.7);
+      color:var(--text);
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .tab.active{
+      border-color:var(--mintLine);
+      background:rgba(147,243,222,.07);
+      color:var(--mint2);
+      box-shadow:0 0 0 1px rgba(147,243,222,.08) inset;
+    }
+
+    input,select{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(150,170,200,.18);
+      background:rgba(9,12,18,.75);
+      color:var(--text);
+      outline:none;
+    }
+
+    input::placeholder{
+      color:#8f9dad;
+    }
+
+    .btn{
+      display:inline-grid;
+      place-items:center;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid var(--mintLine);
+      background:linear-gradient(135deg, #b8fff0 0%, #86efd8 100%);
+      color:#08221d;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s;
+      user-select:none;
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.55; cursor:not-allowed; transform:none}
+
+    .btn.ghost{
+      background:rgba(147,243,222,.06);
+      color:var(--text);
+      border:1px solid var(--mintLine);
+    }
+
+    .btn.block{width:100%}
+
+    .row{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .row .btn{flex:1}
+
+    .preview{
+      margin-top:10px;
+      border:1px solid rgba(150,170,200,.14);
+      border-radius:12px;
+      background:rgba(9,12,18,.6);
+      min-height:120px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      color:var(--muted);
+    }
+
+    .preview img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+
+    .settings-box,
+    .chat,
+    .log,
+    .stat,
+    .toolBox{
+      border:1px solid rgba(150,170,200,.14);
+      border-radius:12px;
+      background:rgba(9,12,18,.55);
+    }
+
+    .settings-box,
+    .toolBox{
+      padding:10px;
+    }
+
+    .canvasWrap{
+      min-height:620px;
+    }
+
+    @media (max-width:1100px){
+      .canvasWrap{min-height:400px}
+    }
+
+    #canvas3d{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .workspaceTop{
+      position:absolute;
+      top:12px;
+      left:12px;
+      right:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      z-index:3;
+      pointer-events:none;
+    }
+
+    .workspaceTop .group{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      pointer-events:auto;
+    }
+
+    .workspaceTools{
+      display:grid;
+      gap:8px;
+      pointer-events:auto;
+    }
+
+    .toolModeNote{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(147,243,222,.16);
+      background:rgba(9,12,18,.78);
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .toolModeNote strong{
+      color:var(--mint2);
+      font-size:11px;
+      letter-spacing:.14em;
+    }
+
+    .toolBtn,
+    .icon{
+      min-width:42px;
+      height:42px;
+      padding:0 12px;
+      border-radius:12px;
+      border:1px solid rgba(150,170,200,.18);
+      background:rgba(9,12,18,.72);
+      color:var(--text);
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .toolBtn{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      justify-content:center;
+      gap:2px;
+      min-height:52px;
+      padding:8px 12px;
+      text-align:left;
+    }
+
+    .toolBtn-main{
+      font-size:13px;
+      line-height:1.1;
+    }
+
+    .toolBtn-sub{
+      color:var(--muted);
+      font-size:10px;
+      font-weight:600;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      line-height:1;
+    }
+
+    .toolBtn.active{
+      border-color:var(--mintLine);
+      background:rgba(147,243,222,.08);
+      color:var(--mint2);
+      box-shadow:0 0 0 1px rgba(147,243,222,.12) inset, 0 10px 24px rgba(0,0,0,.18);
+    }
+
+    .toolBtn.active .toolBtn-sub{
+      color:var(--mint2);
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+
+    .stat{
+      padding:10px;
+    }
+
+    .stat .k{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .stat .v{
+      font-weight:900;
+      margin-top:4px;
+    }
+
+    .log{
+      padding:10px;
+      max-height:220px;
+      overflow:auto;
+      font-size:.9rem;
+    }
+
+    .chat{
+      overflow:hidden;
+    }
+
+    .chatMsgs{
+      max-height:220px;
+      overflow:auto;
+      padding:10px;
+    }
+
+    .msg{
+      margin:8px 0;
+      display:flex;
+      gap:8px;
+    }
+
+    .bubble{
+      padding:8px 10px;
+      border:1px solid rgba(150,170,200,.14);
+      border-radius:12px;
+      background:rgba(14,18,26,.75);
+      max-width:85%;
+      line-height:1.5;
+    }
+
+    .msg.me{justify-content:flex-end}
+
+    .msg.me .bubble{
+      background:rgba(20,30,46,.75);
+      border-color:rgba(147,243,222,.16);
+    }
+
+    .chatInput{
+      display:flex;
+      gap:8px;
+      padding:10px;
+      border-top:1px solid rgba(150,170,200,.14);
+    }
+
+    .chatInput input{flex:1}
+
+    footer{
+      text-align:center;
+      padding:26px 0 36px;
+      color:rgba(160,175,190,.65);
+      font-size:.85rem;
+    }
+  </style>
+
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="head-inner">
+      <div class="brand">
+        <img src="assets/images/logo.png" alt="5X logo" class="logo-img" onerror="this.style.display='none'">
+        <div class="brand-copy">
+          <strong>WorkStation</strong>
+          <span>Powered by 5xLiving</span>
+        </div>
+      </div>
+      <div class="sub">3D Model Maker Module</div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="hero-intro">
+      <div class="eyebrow">3D Model Maker Module</div>
+      <h1>Generate 3D models with less time, less manual work, and faster review.</h1>
+      <p>
+        This page is the 3D Model Maker module inside the 5xLiving WorkStation.
+        Keep this module focused on model input, preview, transform, export, and testing.
+      </p>
+      <div class="module-roadmap">
+        <div class="pill active">UI Structure</div>
+        <div class="pill active">Backend Hook</div>
+        <div class="pill">XYZ Controls</div>
+        <div class="pill">Selection Tools</div>
+        <div class="pill">Push / Pull</div>
+        <div class="pill">Recording / Screenshot</div>
+        <div class="pill">Dressing Room</div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <aside class="card">
+        <div class="inner">
+          <div class="h2">Choose Your Input Method</div>
+
+          <div class="tabs">
+            <button id="tabUpload" class="tab active">Upload</button>
+            <button id="tabAI" class="tab">AI Prompt</button>
+          </div>
+
+          <div id="paneUpload">
+            <div class="section-note">Upload a reference image to begin your model workflow.</div>
+
+            <div style="margin-top:10px">
+              <input id="uploadFile" type="file" accept="image/*">
+              <div id="uploadPreview" class="preview">No image uploaded yet</div>
+              <div class="row">
+                <button id="btnNext" class="btn" disabled>Continue</button>
+              </div>
+            </div>
+
+            <div id="step2" style="margin-top:14px; display:none">
+              <input id="itemPrompt" type="text" placeholder="Describe what you want to create">
+
+              <div class="settings-box" style="margin-top:10px">
+                <div class="section-note" style="margin-bottom:8px">Model Settings</div>
+
+                <label class="section-note" for="smoothRange">Smooth: <span id="smoothVal">0.50</span></label>
+                <input id="smoothRange" type="range" min="0" max="1" step="0.01" value="0.5">
+
+                <label class="section-note" for="decimateRange">Decimate: <span id="decimateVal">0.50</span></label>
+                <input id="decimateRange" type="range" min="0" max="1" step="0.01" value="0.5">
+
+                <label class="section-note" for="thicknessRange">Thickness: <span id="thicknessVal">0.50</span></label>
+                <input id="thicknessRange" type="range" min="0" max="1" step="0.01" value="0.5">
+              </div>
+
+              <div class="row">
+                <button id="btnBack" class="btn ghost">Back</button>
+                <button id="btnMesh" class="btn">Generate Model</button>
+                <button id="btnFinish" class="btn ghost" disabled>Save Model</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="paneAI" style="display:none">
+            <div class="section-note">Describe your idea and generate a concept image before modelling.</div>
+
+            <div style="margin-top:10px; display:grid; gap:8px">
+              <select id="aiStyle">
+                <option value="cartoon">Cartoon</option>
+                <option value="realistic">Realistic</option>
+              </select>
+              <select id="aiAspect">
+                <option value="1:1">1:1</option>
+                <option value="16:9">16:9</option>
+              </select>
+            </div>
+
+            <div class="chat" style="margin-top:10px">
+              <div id="aiMsgs" class="chatMsgs"></div>
+              <div class="chatInput">
+                <input id="aiInput" type="text" placeholder="Describe your model idea">
+                <button id="aiSend" class="btn">Generate</button>
+              </div>
+            </div>
+
+            <div id="aiPreview" class="preview" style="margin-top:10px; display:none"></div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="canvasWrap">
+        <div class="workspaceTop">
+          <div class="workspaceTools">
+            <div class="group">
+              <button id="toolSelect" class="toolBtn active" aria-pressed="true"><span class="toolBtn-main">Select</span><span class="toolBtn-sub">Early mode</span></button>
+              <button id="toolMove" class="toolBtn" aria-pressed="false"><span class="toolBtn-main">Move</span><span class="toolBtn-sub">Early mode</span></button>
+              <button id="toolRotate" class="toolBtn" aria-pressed="false"><span class="toolBtn-main">Rotate</span><span class="toolBtn-sub">Early mode</span></button>
+              <button id="toolScale" class="toolBtn" aria-pressed="false"><span class="toolBtn-main">Scale</span><span class="toolBtn-sub">Early mode</span></button>
+              <button id="toolPushPull" class="toolBtn" aria-pressed="false"><span class="toolBtn-main">Push/Pull</span><span class="toolBtn-sub">Early mode</span></button>
+            </div>
+            <div class="toolModeNote"><strong>Module Tools</strong> Early tool modes are active here while deeper behavior is staged.</div>
+          </div>
+
+          <div class="group">
+            <button id="resetCam" class="icon" title="Reset Camera">🔄</button>
+            <button id="shot" class="icon" title="Screenshot">📸</button>
+            <button id="recordBtn" class="icon" title="Record">⏺</button>
+          </div>
+        </div>
+
+        <canvas id="canvas3d"></canvas>
+      </main>
+
+      <aside class="card">
+        <div class="inner">
+          <div class="h2">Export</div>
+          <button id="dlGlb" class="btn block" disabled>Download .glb</button>
+          <button id="dlObj" class="btn block" disabled style="margin-top:8px">Download .obj</button>
+
+          <div style="height:14px"></div>
+
+          <div class="h2">Model Info</div>
+          <div class="stats">
+            <div class="stat"><div class="k">Triangles</div><div class="v" id="tri">0</div></div>
+            <div class="stat"><div class="k">Tier</div><div class="v" id="tier">-</div></div>
+            <div class="stat"><div class="k">Width</div><div class="v" id="w">0.0m</div></div>
+            <div class="stat"><div class="k">Height</div><div class="v" id="h">0.0m</div></div>
+          </div>
+
+          <div style="height:14px"></div>
+
+          <div class="h2">Activity</div>
+          <div id="log" class="log"></div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>©️ 2026 5xLiving • 3D Model Maker Module</footer>
+  </div>
+
+  <script>
+    const API_BASE = "https://api.5xliving.com";
+    const el = (id) => document.getElementById(id);
+    const TOOL_LABELS = {
+      select: "Select",
+      move: "Move",
+      rotate: "Rotate",
+      scale: "Scale",
+      pushpull: "Push/Pull"
+    };
+
+    const log = (msg) => {
+      const t = new Date().toLocaleTimeString();
+      el("log").innerHTML = `<div>[${t}] ${msg}</div>` + el("log").innerHTML;
+      console.log(msg);
+    };
+
+    function resolveAssetUrl(value) {
+      if (!value) return "";
+      if (/^(https?:|data:|blob:)/i.test(value)) return value;
+      if (value.startsWith("//")) return window.location.protocol + value;
+      return `${API_BASE}${value.startsWith("/") ? value : `/${value}`}`;
+    }
+
+    async function wakeBackend() {
+      try {
+        await fetch(`${API_BASE}/health`, { method: "GET", cache: "no-store" });
+      } catch (_) {}
+    }
+
+    async function fetchWithRetry(url, options = {}, retries = 3, delayMs = 3500) {
+      let lastErr = null;
+      for (let i = 0; i < retries; i++) {
+        try {
+          return await fetch(url, options);
+        } catch (err) {
+          lastErr = err;
+          if (i < retries - 1) {
+            log(`Backend waking up... retry ${i + 2}/${retries}`);
+            await new Promise(r => setTimeout(r, delayMs));
+          }
+        }
+      }
+      throw lastErr || new Error("Fetch failed");
+    }
+
+    const tabUpload = el("tabUpload");
+    const tabAI = el("tabAI");
+    const paneUpload = el("paneUpload");
+    const paneAI = el("paneAI");
+
+    tabUpload.onclick = () => {
+      tabUpload.classList.add("active");
+      tabAI.classList.remove("active");
+      paneUpload.style.display = "";
+      paneAI.style.display = "none";
+    };
+
+    tabAI.onclick = () => {
+      tabAI.classList.add("active");
+      tabUpload.classList.remove("active");
+      paneAI.style.display = "";
+      paneUpload.style.display = "none";
+      el("aiInput").focus();
+    };
+
+    const uploadFile = el("uploadFile");
+    const uploadPreview = el("uploadPreview");
+    const btnNext = el("btnNext");
+    const step2 = el("step2");
+    const btnBack = el("btnBack");
+    const btnMesh = el("btnMesh");
+    const btnFinish = el("btnFinish");
+    const dlGlb = el("dlGlb");
+    const dlObj = el("dlObj");
+
+    let sourceImageFile = null;
+    let currentMeshId = null;
+    let currentMesh = null;
+    let meshParams = { smooth: 0.5, decimate: 0.5, thickness: 0.5 };
+
+    uploadFile.addEventListener("change", () => {
+      const f = uploadFile.files && uploadFile.files[0];
+      if (!f) return;
+
+      sourceImageFile = f;
+      const localUrl = URL.createObjectURL(f);
+
+      uploadPreview.innerHTML = `<img src="${localUrl}" alt="preview">`;
+      btnNext.disabled = false;
+      btnFinish.disabled = true;
+      currentMeshId = null;
+      currentMesh = null;
+      dlGlb.disabled = true;
+      dlObj.disabled = true;
+
+      showImagePreview(localUrl);
+      log(`Uploaded image: ${f.name}`);
+    });
+
+    btnNext.onclick = () => {
+      step2.style.display = "";
+      btnNext.disabled = true;
+      log("Moved to model settings.");
+    };
+
+    btnBack.onclick = () => {
+      step2.style.display = "none";
+      btnNext.disabled = !sourceImageFile;
+      log("Returned to upload step.");
+    };
+
+    function bindSlider(id, key, valueId){
+      const slider = el(id);
+      const valueEl = el(valueId);
+      slider.addEventListener("input", () => {
+        meshParams[key] = Number(slider.value);
+        valueEl.textContent = Number(slider.value).toFixed(2);
+      });
+    }
+
+    bindSlider("smoothRange", "smooth", "smoothVal");
+    bindSlider("decimateRange", "decimate", "decimateVal");
+    bindSlider("thicknessRange", "thickness", "thicknessVal");
+
+    async function requestMeshFirst(file, species){
+      const fd = new FormData();
+      fd.append("image", file);
+      fd.append("species", species);
+
+      await wakeBackend();
+      const res = await fetchWithRetry(`${API_BASE}/api/mesh/first`, {
+        method: "POST",
+        body: fd
+      }, 3, 4000);
+
+      if(!res.ok){
+        const txt = await res.text();
+        throw new Error(txt || `mesh failed ${res.status}`);
+      }
+      return await res.json();
+    }
+
+    async function requestMeshRefine(meshId, params){
+      await wakeBackend();
+      const res = await fetchWithRetry(`${API_BASE}/api/mesh/refine`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ meshId, params })
+      }, 3, 4000);
+
+      if(!res.ok){
+        const txt = await res.text();
+        throw new Error(txt || `refine failed ${res.status}`);
+      }
+      return await res.json();
+    }
+
+    btnMesh.onclick = async () => {
+      if(!sourceImageFile){
+        log("No image selected.");
+        return;
+      }
+
+      btnMesh.disabled = true;
+      const species = (el("itemPrompt").value || "custom item").trim();
+      log("Generating model...");
+
+      try{
+        const mesh = await requestMeshFirst(sourceImageFile, species);
+        currentMesh = mesh;
+        currentMeshId = mesh.meshId;
+
+        el("tier").textContent = mesh.tier || "Generated";
+        el("tri").textContent = String(mesh.stats?.triangles ?? 0);
+        el("w").textContent = `${mesh.stats?.width ?? 0}m`;
+        el("h").textContent = `${mesh.stats?.height ?? 0}m`;
+
+        if(mesh.sourceImage){
+          showImagePreview(resolveAssetUrl(mesh.sourceImage));
+        }
+
+        btnFinish.disabled = false;
+        dlGlb.disabled = !mesh.glbUrl;
+        dlObj.disabled = !mesh.objUrl;
+        dlGlb.onclick = () => mesh.glbUrl && window.open(resolveAssetUrl(mesh.glbUrl), "_blank");
+        dlObj.onclick = () => mesh.objUrl && window.open(resolveAssetUrl(mesh.objUrl), "_blank");
+
+        log(mesh.note || "Model generated.");
+      }catch(e){
+        console.error(e);
+        alert("Backend error: " + (e.message || e));
+        log("Model generation failed.");
+      }finally{
+        btnMesh.disabled = false;
+      }
+    };
+
+    btnFinish.onclick = async () => {
+      if(!currentMeshId){
+        log("Generate a model first.");
+        return;
+      }
+
+      btnFinish.disabled = true;
+      log("Saving refined model...");
+
+      try{
+        const refined = await requestMeshRefine(currentMeshId, meshParams);
+        currentMesh = refined;
+
+        el("tier").textContent = refined.tier || "Saved";
+        el("tri").textContent = String(refined.stats?.triangles ?? 0);
+        el("w").textContent = `${refined.stats?.width ?? 0}m`;
+        el("h").textContent = `${refined.stats?.height ?? 0}m`;
+
+        dlGlb.disabled = !refined.glbUrl;
+        dlObj.disabled = !refined.objUrl;
+        dlGlb.onclick = () => refined.glbUrl && window.open(resolveAssetUrl(refined.glbUrl), "_blank");
+        dlObj.onclick = () => refined.objUrl && window.open(resolveAssetUrl(refined.objUrl), "_blank");
+
+        if(currentMesh.sourceImage){
+          showImagePreview(resolveAssetUrl(currentMesh.sourceImage));
+        }
+
+        log(refined.note || "Model saved.");
+      }catch(e){
+        console.error(e);
+        alert("Backend error: " + (e.message || e));
+        log("Save failed.");
+      }finally{
+        btnFinish.disabled = false;
+      }
+    };
+
+    const aiMsgs = el("aiMsgs");
+    const aiInput = el("aiInput");
+    const aiSend = el("aiSend");
+    const aiPreview = el("aiPreview");
+
+    function addMsg(who, text){
+      const d = document.createElement("div");
+      d.className = "msg " + (who === "me" ? "me" : "bot");
+      d.innerHTML = `<div class="bubble">${text}</div>`;
+      aiMsgs.appendChild(d);
+      aiMsgs.scrollTop = aiMsgs.scrollHeight;
+    }
+
+    async function requestAI(prompt, style, aspect){
+      await wakeBackend();
+      const res = await fetchWithRetry(`${API_BASE}/api/ai-image`, {
+        method:"POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify({ prompt, style, aspect })
+      }, 3, 4000);
+
+      if(res.status === 404){
+        throw new Error("AI_NOT_READY");
+      }
+      if(!res.ok){
+        const txt = await res.text();
+        throw new Error(txt || `ai failed ${res.status}`);
+      }
+      return await res.json();
+    }
+
+    async function onSendAI(){
+      const prompt = (aiInput.value || "").trim();
+      if(!prompt) return;
+
+      const style = el("aiStyle").value;
+      const aspect = el("aiAspect").value;
+
+      addMsg("me", prompt);
+      addMsg("bot", `Generating… <span style="opacity:.7;font-size:12px">(${style}, ${aspect})</span>`);
+      aiInput.value = "";
+
+      try{
+        const out = await requestAI(prompt, style, aspect);
+        const imageUrl = resolveAssetUrl(out.imageUrl);
+        aiPreview.style.display = "";
+        aiPreview.innerHTML = `<img src="${imageUrl}" alt="ai preview">`;
+        showImagePreview(imageUrl);
+        log(out.note || "AI concept generated.");
+      }catch(e){
+        console.error(e);
+        addMsg("bot", "AI unavailable or not configured yet.");
+        alert("Backend error: " + (e.message || e));
+        log("AI generation failed.");
+      }
+    }
+
+    aiSend.onclick = onSendAI;
+    aiInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter") onSendAI();
+    });
+
+    const canvas = el("canvas3d");
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 100);
+    camera.position.set(2.4, 1.8, 2.8);
+    camera.lookAt(0,0.7,0);
+
+    const key = new THREE.DirectionalLight(0xffffff, 1.2);
+    key.position.set(2,4,2);
+    scene.add(key);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+
+    const grid = new THREE.GridHelper(12, 12, 0x36506c, 0x15202e);
+    grid.material.opacity = 0.22;
+    grid.material.transparent = true;
+    scene.add(grid);
+
+    let imagePlane = null;
+    let backingPlane = null;
+    let activeTool = "select";
+    let isRecording = false;
+
+    function resize(){
+      const rect = canvas.parentElement.getBoundingClientRect();
+      renderer.setSize(rect.width, rect.height, false);
+      camera.aspect = rect.width / rect.height;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    function animate(){
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    function removeImagePlane(){
+      if(imagePlane){
+        scene.remove(imagePlane);
+        if(imagePlane.material.map) imagePlane.material.map.dispose();
+        imagePlane.material.dispose();
+        imagePlane.geometry.dispose();
+        imagePlane = null;
+      }
+
+      if(backingPlane){
+        scene.remove(backingPlane);
+        backingPlane.material.dispose();
+        backingPlane.geometry.dispose();
+        backingPlane = null;
+      }
+    }
+
+    function showImagePreview(url){
+      const loader = new THREE.TextureLoader();
+      loader.setCrossOrigin("anonymous");
+      loader.load(url, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        removeImagePlane();
+
+        const aspect = tex.image ? (tex.image.width / tex.image.height || 1) : 1;
+        const h = 1.9;
+        const w = Math.max(1.1, Math.min(2.8, h * aspect));
+
+        const backingGeo = new THREE.PlaneGeometry(w + 0.18, h + 0.18);
+        const backingMat = new THREE.MeshStandardMaterial({
+          color: 0x0f1720,
+          transparent: true,
+          opacity: 0.82,
+          roughness: 0.96,
+          metalness: 0.02,
+          side: THREE.DoubleSide
+        });
+        backingPlane = new THREE.Mesh(backingGeo, backingMat);
+        backingPlane.position.set(0, 0.95, -0.04);
+        scene.add(backingPlane);
+
+        const geo = new THREE.PlaneGeometry(w, h);
+        const mat = new THREE.MeshStandardMaterial({
+          map: tex,
+          transparent: true,
+          side: THREE.DoubleSide,
+          roughness: 0.48,
+          metalness: 0.02
+        });
+
+        imagePlane = new THREE.Mesh(geo, mat);
+        imagePlane.position.set(0, 0.95, 0);
+        scene.add(imagePlane);
+
+        log("Preview image loaded.");
+      }, undefined, () => {
+        log("Preview image failed to load.");
+      });
+    }
+
+    function setTool(name){
+      if (activeTool === name) {
+        log(`Tool mode: ${TOOL_LABELS[name] || name} already active.`);
+        return;
+      }
+
+      activeTool = name;
+      ["toolSelect","toolMove","toolRotate","toolScale","toolPushPull"].forEach(id => {
+        if (el(id)) {
+          el(id).classList.remove("active");
+          el(id).setAttribute("aria-pressed", "false");
+        }
+      });
+      const map = {
+        select:"toolSelect",
+        move:"toolMove",
+        rotate:"toolRotate",
+        scale:"toolScale",
+        pushpull:"toolPushPull"
+      };
+      if (map[name] && el(map[name])) {
+        el(map[name]).classList.add("active");
+        el(map[name]).setAttribute("aria-pressed", "true");
+      }
+      log(`Tool mode: ${TOOL_LABELS[name] || name} (early module mode).`);
+    }
+
+    if (el("toolSelect")) el("toolSelect").onclick = () => setTool("select");
+    if (el("toolMove")) el("toolMove").onclick = () => setTool("move");
+    if (el("toolRotate")) el("toolRotate").onclick = () => setTool("rotate");
+    if (el("toolScale")) el("toolScale").onclick = () => setTool("scale");
+    if (el("toolPushPull")) el("toolPushPull").onclick = () => setTool("pushpull");
+
+    if (el("resetCam")) {
+      el("resetCam").onclick = () => {
+        camera.position.set(2.4, 1.8, 2.8);
+        camera.lookAt(0,0.7,0);
+        log("Camera reset.");
+      };
+    }
+
+    if (el("shot")) {
+      el("shot").onclick = () => {
+        try{
+          const url = renderer.domElement.toDataURL("image/png");
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "5xliving-preview.png";
+          a.click();
+          log("Screenshot saved.");
+        }catch(_){
+          log("Screenshot blocked.");
+        }
+      };
+    }
+
+    if (el("recordBtn")) {
+      el("recordBtn").onclick = () => {
+        isRecording = !isRecording;
+        el("recordBtn").textContent = isRecording ? "⏹" : "⏺";
+        log(isRecording ? "Recording marker enabled for this module preview." : "Recording marker stopped.");
+      };
+    }
+
+    log("Early tool modes enabled for the 3D Model Maker module.");
+    log("3D Model Maker module initialized.");
+  </script>
+</body>
+</html>

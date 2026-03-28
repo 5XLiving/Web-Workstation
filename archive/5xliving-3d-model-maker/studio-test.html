@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Studio Flow Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    button { margin: 6px; }
+    pre { background:#f6f8fa; padding:12px; border:1px solid #ddd; max-height:360px; overflow:auto }
+  </style>
+</head>
+<body>
+  <h2>3D Studio Flow Test Harness</h2>
+  <div>
+    <button id="btn-run-flow">Run Full Test Flow</button>
+    <button id="btn-clear">Clear Output</button>
+  </div>
+
+  <h3>Responses</h3>
+  <pre id="output">(ready)</pre>
+
+  <script src="./api-client.js"></script>
+  <script src="./studio-test.js"></script>
+</body>
+</html>

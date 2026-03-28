@@ -1,0 +1,22 @@
+{
+  "asset_3c946380acbc426496259e0a5c15364c": {
+    "assetId": "asset_3c946380acbc426496259e0a5c15364c",
+    "title": "Test PetPaws Model",
+    "description": "",
+    "modelUrl": "/outputs/test.glb",
+    "previewImageUrl": "/outputs/test.png",
+    "modelType": "humanoid",
+    "rigType": "humanoid_rig",
+    "sourcePrompt": "",
+    "sourceImageDataUrl": null,
+    "tags": [
+      "test",
+      "petpaws"
+    ],
+    "metadata": {
+      "createdBy": "manual-test"
+    },
+    "createdAt": "2026-03-09T15:45:11.211838Z",
+    "updatedAt": "2026-03-09T15:45:11.211838Z"
+  }
+}

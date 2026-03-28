@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>5X WorkStation • Spatial System</title>
+
+  <style>
+    :root{
+      --bg:#020611;
+      --bg2:#06101d;
+      --bg3:#040913;
+      --glass:rgba(7,14,24,.72);
+      --glass2:rgba(10,20,34,.78);
+      --line:rgba(255,255,255,.08);
+      --text:#f4f8ff;
+      --muted:#9fb0c2;
+      --mint:#93f3de;
+      --mint2:#cafff1;
+      --mintLine:rgba(147,243,222,.20);
+      --shadow:0 24px 60px rgba(0,0,0,.36);
+      --radiusXL:28px;
+      --radiusLG:22px;
+      --radiusMD:16px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 14% 8%, rgba(76,126,255,.18), transparent 24%),
+        radial-gradient(circle at 86% 16%, rgba(52,220,198,.14), transparent 22%),
+        radial-gradient(circle at 52% 0%, rgba(95,156,255,.08), transparent 28%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 55%, var(--bg3) 100%);
+    }
+
+    .app{
+      position:relative;
+      width:100vw;
+      height:100vh;
+      overflow:hidden;
+    }
+
+    #spatialCanvas{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      touch-action:none;
+      cursor:grab;
+    }
+
+    #spatialCanvas.dragging{
+      cursor:grabbing;
+    }
+
+    .topbar{
+      position:absolute;
+      top:14px;
+      left:18px;
+      right:18px;
+      z-index:20;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      pointer-events:none;
+    }
+
+    .brand-wrap,
+    .toolbar-wrap,
+    .status-wrap,
+    .left-drawer,
+    .right-drawer,
+    .bottom-strip{
+      pointer-events:auto;
+      border:1px solid var(--line);
+      background:
+        radial-gradient(circle at top right, rgba(147,243,222,.08), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+        linear-gradient(180deg, var(--glass2), var(--glass));
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(16px) saturate(140%);
+    }
+
+    .brand-wrap{
+      border-radius:22px;
+      padding:12px 14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:280px;
+    }
+
+    .logo-img{
+      height:52px;
+      width:auto;
+      display:block;
+      object-fit:contain;
+      filter:drop-shadow(0 0 14px rgba(147,243,222,.18));
+    }
+
+    .brand-copy{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+
+    .brand-copy strong{
+      font-family:"Noto Serif SC","Noto Serif",serif;
+      font-size:28px;
+      line-height:1;
+      letter-spacing:-.02em;
+      font-weight:600;
+    }
+
+    .brand-copy span{
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .brand-copy small{
+      color:var(--mint2);
+      font-size:12px;
+    }
+
+    .toolbar-wrap{
+      border-radius:22px;
+      padding:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:center;
+      max-width:min(980px, 100%);
+    }
+
+    .tool-btn{
+      min-width:44px;
+      height:44px;
+      padding:0 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(8,14,24,.72);
+      color:var(--text);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.18s ease;
+      user-select:none;
+    }
+
+    .tool-btn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(147,243,222,.24);
+    }
+
+    .tool-btn.active{
+      background:rgba(147,243,222,.08);
+      border-color:var(--mintLine);
+      color:var(--mint2);
+      box-shadow:0 0 0 1px rgba(147,243,222,.08) inset;
+    }
+
+    .tool-btn svg{
+      width:18px;
+      height:18px;
+      flex:none;
+    }
+
+    .tool-btn .label{
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .status-wrap{
+      border-radius:22px;
+      padding:12px 14px;
+      min-width:250px;
+      display:grid;
+      gap:6px;
+    }
+
+    .status-line{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:13px;
+    }
+
+    .status-line .k{color:var(--muted)}
+    .status-line .v{color:var(--mint2); font-weight:700}
+
+    .left-drawer,
+    .right-drawer{
+      position:absolute;
+      top:108px;
+      bottom:92px;
+      width:300px;
+      border-radius:24px;
+      z-index:18;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+
+    .left-drawer{ left:18px; }
+    .right-drawer{ right:18px; }
+
+    .drawer-head{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+
+    .drawer-head strong{
+      color:var(--mint2);
+      font-size:15px;
+    }
+
+    .drawer-body{
+      padding:14px;
+      overflow:auto;
+      display:grid;
+      gap:12px;
+    }
+
+    .panel{
+      border:1px solid rgba(150,170,200,.14);
+      border-radius:14px;
+      background:rgba(9,12,18,.52);
+      padding:12px;
+      display:grid;
+      gap:10px;
+    }
+
+    .panel h3{
+      margin:0;
+      font-size:14px;
+      color:var(--mint2);
+    }
+
+    .panel p,
+    .muted{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    input, select, textarea{
+      width:100%;
+      padding:11px 12px;
+      border-radius:12px;
+      border:1px solid rgba(150,170,200,.18);
+      background:rgba(9,12,18,.78);
+      color:var(--text);
+      outline:none;
+      font-family:inherit;
+    }
+
+    textarea{
+      resize:vertical;
+      min-height:92px;
+    }
+
+    .row{
+      display:flex;
+      gap:8px;
+    }
+
+    .row > *{
+      flex:1;
+    }
+
+    .btn{
+      min-height:42px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--mintLine);
+      background:linear-gradient(135deg, #b8fff0 0%, #86efd8 100%);
+      color:#08221d;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .btn.ghost{
+      background:rgba(147,243,222,.06);
+      color:var(--text);
+      border:1px solid var(--mintLine);
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .module-slot{
+      position:absolute;
+      top:110px;
+      left:338px;
+      right:338px;
+      bottom:92px;
+      z-index:10;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding-top:26px;
+      pointer-events:none;
+    }
+
+    .module-card{
+      width:min(560px, 72%);
+      border-radius:26px;
+      padding:22px 24px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at top right, rgba(147,243,222,.08), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+        linear-gradient(180deg, rgba(7,14,24,.68), rgba(10,20,34,.70));
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(18px);
+      pointer-events:auto;
+    }
+
+    .module-card .eyebrow{
+      margin:0 0 10px;
+      color:var(--mint);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    .module-card h1{
+      margin:0;
+      font-family:"Noto Serif SC","Noto Serif",serif;
+      font-size:clamp(1.8rem,3vw,2.8rem);
+      line-height:1;
+      letter-spacing:-.03em;
+    }
+
+    .module-card p{
+      margin:12px 0 0;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:14px;
+    }
+
+    .module-actions{
+      display:flex;
+      gap:10px;
+      margin-top:16px;
+      flex-wrap:wrap;
+    }
+
+    .bottom-strip{
+      position:absolute;
+      left:18px;
+      right:18px;
+      bottom:14px;
+      min-height:62px;
+      border-radius:22px;
+      z-index:20;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 14px;
+      flex-wrap:wrap;
+    }
+
+    .bottom-group{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(150,170,200,.18);
+      background:rgba(9,12,18,.72);
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .chip strong{
+      color:var(--mint2);
+      font-weight:700;
+      margin-left:6px;
+    }
+
+    .log{
+      max-height:160px;
+      overflow:auto;
+      border:1px solid rgba(150,170,200,.14);
+      border-radius:12px;
+      background:rgba(9,12,18,.55);
+      padding:10px;
+      font-size:13px;
+    }
+
+    .preview{
+      margin-top:10px;
+      border:1px solid rgba(150,170,200,.14);
+      border-radius:12px;
+      background:rgba(9,12,18,.6);
+      min-height:120px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      color:var(--muted);
+    }
+
+    .preview img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+
+    @media (max-width:1320px){
+      .left-drawer,
+      .right-drawer{
+        width:270px;
+      }
+      .module-slot{
+        left:308px;
+        right:308px;
+      }
+    }
+
+    @media (max-width:1080px){
+      .left-drawer,
+      .right-drawer{
+        position:static;
+        width:auto;
+        height:auto;
+        min-height:unset;
+      }
+
+      .module-slot{
+        position:static;
+        padding:18px;
+        min-height:220px;
+      }
+
+      .topbar{
+        position:static;
+      }
+
+      .app{
+        overflow:auto;
+      }
+
+      .mobile-stack{
+        padding:104px 18px 90px;
+        display:grid;
+        gap:14px;
+      }
+
+      .bottom-strip{
+        position:sticky;
+      }
+    }
+
+    @media (min-width:1081px){
+      .mobile-stack{display:none}
+    }
+  </style>
+
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+</head>
+
+<body>
+  <div class="app">
+    <canvas id="spatialCanvas"></canvas>
+
+    <div class="topbar">
+      <div class="brand-wrap">
+        <img src="assets/images/logo.png" alt="5X logo" class="logo-img">
+        <div class="brand-copy">
+          <strong>Spatial System</strong>
+          <span>Powered by 5xLiving</span>
+          <small>Shared core for modules</small>
+        </div>
+      </div>
+
+      <div class="toolbar-wrap">
+        <button class="tool-btn active" id="toolOrbit" title="Orbit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 0 1 15.36-6.36"/><path d="M21 12a9 9 0 0 1-15.36 6.36"/><path d="M18 2v4h-4"/><path d="M6 22v-4h4"/></svg>
+          <span class="label">Orbit</span>
+        </button>
+        <button class="tool-btn" id="toolPan" title="Pan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11V5a1 1 0 1 1 2 0v4"/><path d="M11 9V4a1 1 0 1 1 2 0v5"/><path d="M13 9V5a1 1 0 1 1 2 0v4"/><path d="M15 10V7a1 1 0 1 1 2 0v7c0 4-2 7-5 7s-7-2-7-6v-4a1 1 0 1 1 2 0v2"/></svg>
+          <span class="label">Pan</span>
+        </button>
+        <button class="tool-btn" id="toolZoom" title="Zoom">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.2-4.2"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+          <span class="label">Zoom</span>
+        </button>
+        <button class="tool-btn" id="toolFit" title="Fit View">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H3v5"/><path d="M16 3h5v5"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/><path d="M8 8l-5-5"/><path d="M16 8l5-5"/><path d="M8 16l-5 5"/><path d="M16 16l5 5"/></svg>
+          <span class="label">Fit</span>
+        </button>
+        <button class="tool-btn" id="toolSelect" title="Select">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l12 8-5.5 1.5L14 20l-2.5 1-2.4-7.4L5 15V3z"/></svg>
+          <span class="label">Select</span>
+        </button>
+        <button class="tool-btn" id="toolMove" title="Move">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 3-3 3-3-3 3-3z"/><path d="M12 16l3 3-3 3-3-3 3-3z"/><path d="M2 12l3-3 3 3-3 3-3-3z"/><path d="M16 12l3-3 3 3-3 3-3-3z"/><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          <span class="label">Move</span>
+        </button>
+        <button class="tool-btn" id="toolRotate" title="Rotate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 4v7h-7"/></svg>
+          <span class="label">Rotate</span>
+        </button>
+        <button class="tool-btn" id="toolScale" title="Scale">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/><path d="M9 4L4 9"/><path d="M15 4l5 5"/><path d="M9 20l-5-5"/><path d="M15 20l5-5"/></svg>
+          <span class="label">Scale</span>
+        </button>
+      </div>
+
+      <div class="status-wrap">
+        <div class="status-line"><span class="k">Mounted Module</span><span class="v" id="mountedModule">3D Model Maker</span></div>
+        <div class="status-line"><span class="k">Core Status</span><span class="v" id="coreStatus">Spatial Online</span></div>
+        <div class="status-line"><span class="k">Mode</span><span class="v" id="toolMode">Orbit</span></div>
+      </div>
+    </div>
+
+    <div class="left-drawer">
+      <div class="drawer-head">
+        <strong>Module Mount</strong>
+        <span class="muted">Input</span>
+      </div>
+      <div class="drawer-body">
+        <div class="panel">
+          <h3>Reference Input</h3>
+          <p>Upload a source or prepare module input before handing it into the mounted workflow.</p>
+          <input id="uploadFile" type="file" accept="image/*">
+          <div id="uploadPreview" class="preview">No image uploaded yet</div>
+          <div class="row">
+            <button class="btn" id="btnAttach" disabled>Attach to View</button>
+            <button class="btn ghost" id="btnClearPreview">Clear</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Module Prompt</h3>
+          <textarea id="modulePrompt" placeholder="Describe what should be built or shown inside this spatial room"></textarea>
+          <div class="row">
+            <button class="btn" id="btnGenerate">Generate</button>
+            <button class="btn ghost" id="btnSaveState">Save State</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Mounted Module State</h3>
+          <p>Current shared room is prepared for module mounting. This layer is spatial-first and reusable.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-drawer">
+      <div class="drawer-head">
+        <strong>Spatial Plugins</strong>
+        <span class="muted">Tools</span>
+      </div>
+      <div class="drawer-body">
+        <div class="panel">
+          <h3>View Plugin</h3>
+          <div class="row">
+            <button class="btn ghost" id="viewOrbit">Orbit</button>
+            <button class="btn ghost" id="viewPan">Pan</button>
+          </div>
+          <div class="row">
+            <button class="btn ghost" id="viewZoom">Zoom</button>
+            <button class="btn ghost" id="viewFit">Fit View</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Transform Plugin</h3>
+          <div class="row">
+            <button class="btn ghost" id="tfSelect">Select</button>
+            <button class="btn ghost" id="tfMove">Move</button>
+          </div>
+          <div class="row">
+            <button class="btn ghost" id="tfRotate">Rotate</button>
+            <button class="btn ghost" id="tfScale">Scale</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Session Layer</h3>
+          <p>Reserved for later invite, walkthrough, presentation, and review flow.</p>
+          <div class="row">
+            <button class="btn ghost" id="btnSession">Session</button>
+            <button class="btn ghost" id="btnReview">Review</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Activity</h3>
+          <div id="log" class="log"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module-slot">
+      <div class="module-card">
+        <div class="eyebrow">Mounted Module</div>
+        <h1>3D Model Maker</h1>
+        <p>
+          This room is the shared spatial foundation. The active module mounts into this space and uses the same
+          viewport, camera, tool language, and future hidden XYZ core.
+        </p>
+        <div class="module-actions">
+          <button class="btn" id="btnOpenModule">Open Module</button>
+          <button class="btn ghost" id="btnModuleTools">Module Tools</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-strip">
+      <div class="bottom-group">
+        <div class="chip">Scene <strong id="sceneState">Ready</strong></div>
+        <div class="chip">Selection <strong id="selectionState">None</strong></div>
+        <div class="chip">Layer <strong id="layerState">Spatial Core</strong></div>
+      </div>
+      <div class="bottom-group">
+        <button class="tool-btn" id="btnShotMini" title="Screenshot">Shot</button>
+        <button class="tool-btn" id="btnRecordMini" title="Record">Rec</button>
+      </div>
+    </div>
+
+    <div class="mobile-stack"></div>
+  </div>
+
+  <script>
+    const el = (id) => document.getElementById(id);
+
+    const log = (msg) => {
+      const box = el("log");
+      const t = new Date().toLocaleTimeString();
+      box.innerHTML = `<div>[${t}] ${msg}</div>` + box.innerHTML;
+      console.log(msg);
+    };
+
+    const canvas = el("spatialCanvas");
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x08111f, 0.03);
+
+    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
+
+    const orbitTarget = new THREE.Vector3(0, 1, 0);
+    let orbitRadius = 5.8;
+    let orbitTheta = Math.PI / 4;
+    let orbitPhi = 1.05;
+
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambient);
+
+    const key = new THREE.DirectionalLight(0xffffff, 1.2);
+    key.position.set(4, 8, 5);
+    scene.add(key);
+
+    const rim = new THREE.DirectionalLight(0x8edcff, 0.65);
+    rim.position.set(-6, 4, -5);
+    scene.add(rim);
+
+    const grid = new THREE.GridHelper(40, 40, 0x36506c, 0x15202e);
+    grid.material.opacity = 0.4;
+    grid.material.transparent = true;
+    scene.add(grid);
+
+    const floorGeo = new THREE.CircleGeometry(6, 64);
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: 0x0e1b2e,
+      transparent: true,
+      opacity: 0.92
+    });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = 0.01;
+    scene.add(floor);
+
+    const stageGeo = new THREE.CylinderGeometry(1.6, 1.8, 0.25, 48);
+    const stageMat = new THREE.MeshStandardMaterial({
+      color: 0x17304a,
+      transparent: true,
+      opacity: 0.96
+    });
+    const stage = new THREE.Mesh(stageGeo, stageMat);
+    stage.position.set(0, 0.13, 0);
+    scene.add(stage);
+
+    const stageRingGeo = new THREE.TorusGeometry(1.65, 0.03, 10, 80);
+    const stageRingMat = new THREE.MeshBasicMaterial({ color: 0x93f3de, transparent:true, opacity:0.45 });
+    const stageRing = new THREE.Mesh(stageRingGeo, stageRingMat);
+    stageRing.rotation.x = Math.PI / 2;
+    stageRing.position.set(0, 0.145, 0);
+    scene.add(stageRing);
+
+    const previewGroup = new THREE.Group();
+    scene.add(previewGroup);
+
+    const proxyMat = new THREE.MeshStandardMaterial({
+      color: 0x93f3de,
+      roughness: 0.32,
+      metalness: 0.08,
+      transparent: true,
+      opacity: 0.92
+    });
+
+    const proxyGeo = new THREE.BoxGeometry(1.1, 1.1, 0.35);
+    const proxyMesh = new THREE.Mesh(proxyGeo, proxyMat);
+    proxyMesh.position.set(0, 0.8, 0);
+    previewGroup.add(proxyMesh);
+
+    const outlineGeo = new THREE.EdgesGeometry(proxyGeo);
+    const outlineMat = new THREE.LineBasicMaterial({ color: 0xcafff1, transparent:true, opacity:0.7 });
+    const proxyOutline = new THREE.LineSegments(outlineGeo, outlineMat);
+    proxyOutline.position.copy(proxyMesh.position);
+    previewGroup.add(proxyOutline);
+
+    const selectionRingGeo = new THREE.TorusGeometry(0.95, 0.02, 8, 64);
+    const selectionRingMat = new THREE.MeshBasicMaterial({ color: 0xcafff1, transparent:true, opacity:0.9 });
+    const selectionRing = new THREE.Mesh(selectionRingGeo, selectionRingMat);
+    selectionRing.rotation.x = Math.PI / 2;
+    selectionRing.position.set(0, 0.18, 0);
+    selectionRing.visible = false;
+    previewGroup.add(selectionRing);
+
+    let imagePlane = null;
+    let currentTool = "Orbit";
+    let isRecording = false;
+    let selectedObject = null;
+    let hoveredObject = null;
+    const MODULE_URL = "3d_model_maker.html";
+    const SPATIAL_STATE_KEY = "spatial_system_state_v1";
+
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+
+    const interaction = {
+      dragging: false,
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      startTheta: 0,
+      startPhi: 0,
+      startRadius: 0,
+      startTarget: new THREE.Vector3(),
+      dragObjectStart: new THREE.Vector3(),
+      dragRotateStart: 0,
+      dragScaleStart: new THREE.Vector3()
+    };
+
+    function clamp(v, min, max){
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function updateCamera(){
+      const sinPhi = Math.sin(orbitPhi);
+      camera.position.set(
+        orbitTarget.x + orbitRadius * sinPhi * Math.sin(orbitTheta),
+        orbitTarget.y + orbitRadius * Math.cos(orbitPhi),
+        orbitTarget.z + orbitRadius * sinPhi * Math.cos(orbitTheta)
+      );
+      camera.lookAt(orbitTarget);
+    }
+
+    function resize(){
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      updateCamera();
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    function setHovered(obj){
+      if(hoveredObject === obj) return;
+      hoveredObject = obj;
+      canvas.style.cursor = interaction.dragging ? "grabbing" : (obj ? "pointer" : "grab");
+    }
+
+    function setSelected(obj){
+      selectedObject = obj;
+      selectionRing.visible = !!obj;
+      el("selectionState").textContent = obj ? "Module Object" : "None";
+      proxyMat.emissive.setHex(obj ? 0x1f5b51 : 0x000000);
+      proxyMat.emissiveIntensity = obj ? 0.75 : 0;
+      log(obj ? "Object selected." : "Selection cleared.");
+    }
+
+    function getSelectableObjects(){
+      const arr = [proxyMesh];
+      if (imagePlane) arr.push(imagePlane);
+      return arr;
+    }
+
+    function syncProxyHelpers(){
+      proxyOutline.position.copy(proxyMesh.position);
+      proxyOutline.rotation.copy(proxyMesh.rotation);
+      proxyOutline.scale.copy(proxyMesh.scale);
+      selectionRing.position.set(proxyMesh.position.x, 0.18, proxyMesh.position.z);
+      if (imagePlane){
+        imagePlane.position.x = proxyMesh.position.x;
+        imagePlane.position.z = proxyMesh.position.z;
+        imagePlane.rotation.y = proxyMesh.rotation.y;
+        imagePlane.scale.set(proxyMesh.scale.x, proxyMesh.scale.y, 1);
+      }
+    }
+
+    function removeImagePlane(){
+      if(imagePlane){
+        previewGroup.remove(imagePlane);
+        if(imagePlane.material.map) imagePlane.material.map.dispose();
+        imagePlane.material.dispose();
+        imagePlane.geometry.dispose();
+        imagePlane = null;
+      }
+    }
+
+    function showImagePreview(url){
+      const loader = new THREE.TextureLoader();
+      loader.setCrossOrigin("anonymous");
+      loader.load(url, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        removeImagePlane();
+
+        const aspect = tex.image ? (tex.image.width / tex.image.height || 1) : 1;
+        const h = 2.1;
+        const w = h * aspect;
+
+        const geo = new THREE.PlaneGeometry(w, h);
+        const mat = new THREE.MeshStandardMaterial({
+          map: tex,
+          transparent: true,
+          side: THREE.DoubleSide
+        });
+
+        imagePlane = new THREE.Mesh(geo, mat);
+        imagePlane.position.set(proxyMesh.position.x, 1.15, proxyMesh.position.z);
+        imagePlane.rotation.y = proxyMesh.rotation.y;
+        previewGroup.add(imagePlane);
+        syncProxyHelpers();
+        log("Spatial preview loaded.");
+      }, undefined, () => {
+        log("Spatial preview failed to load.");
+      });
+    }
+
+    function screenToPointer(clientX, clientY){
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    }
+
+    function pickObject(clientX, clientY){
+      screenToPointer(clientX, clientY);
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects(getSelectableObjects(), false);
+      return hits.length ? hits[0].object : null;
+    }
+
+    function beginDrag(event){
+      interaction.dragging = true;
+      interaction.pointerId = event.pointerId;
+      interaction.startX = event.clientX;
+      interaction.startY = event.clientY;
+      interaction.startTheta = orbitTheta;
+      interaction.startPhi = orbitPhi;
+      interaction.startRadius = orbitRadius;
+      interaction.startTarget.copy(orbitTarget);
+      interaction.dragObjectStart.copy(proxyMesh.position);
+      interaction.dragRotateStart = proxyMesh.rotation.y;
+      interaction.dragScaleStart.copy(proxyMesh.scale);
+      canvas.classList.add("dragging");
+      canvas.setPointerCapture(event.pointerId);
+    }
+
+    function endDrag(){
+      interaction.dragging = false;
+      interaction.pointerId = null;
+      canvas.classList.remove("dragging");
+      setHovered(hoveredObject);
+    }
+
+    function fitView(){
+      orbitTarget.set(proxyMesh.position.x, 0.95, proxyMesh.position.z);
+      orbitRadius = 4.8;
+      orbitTheta = Math.PI / 4;
+      orbitPhi = 1.05;
+      updateCamera();
+      log("View fit.");
+    }
+
+    function snapshotSpatialState(){
+      return {
+        tool: currentTool,
+        prompt: el("modulePrompt").value,
+        sceneState: el("sceneState").textContent,
+        selectionState: el("selectionState").textContent,
+        layerState: el("layerState").textContent,
+        proxy: {
+          position: proxyMesh.position.toArray(),
+          rotationY: proxyMesh.rotation.y,
+          scale: proxyMesh.scale.toArray()
+        },
+        camera: {
+          target: orbitTarget.toArray(),
+          radius: orbitRadius,
+          theta: orbitTheta,
+          phi: orbitPhi
+        }
+      };
+    }
+
+    function saveSpatialState(){
+      try{
+        localStorage.setItem(SPATIAL_STATE_KEY, JSON.stringify(snapshotSpatialState()));
+        log("Spatial state saved.");
+      }catch(_){
+        log("Spatial state could not be saved.");
+      }
+    }
+
+    function restoreSpatialState(){
+      try{
+        const raw = localStorage.getItem(SPATIAL_STATE_KEY);
+        if (!raw) return;
+
+        const state = JSON.parse(raw);
+        if (state.prompt) el("modulePrompt").value = state.prompt;
+        if (state.sceneState) el("sceneState").textContent = state.sceneState;
+        if (state.selectionState) el("selectionState").textContent = state.selectionState;
+        if (state.layerState) el("layerState").textContent = state.layerState;
+
+        if (state.proxy?.position?.length === 3) {
+          proxyMesh.position.fromArray(state.proxy.position);
+        }
+        if (typeof state.proxy?.rotationY === "number") {
+          proxyMesh.rotation.y = state.proxy.rotationY;
+        }
+        if (state.proxy?.scale?.length === 3) {
+          proxyMesh.scale.fromArray(state.proxy.scale);
+        }
+
+        if (state.camera?.target?.length === 3) {
+          orbitTarget.fromArray(state.camera.target);
+        }
+        if (typeof state.camera?.radius === "number") orbitRadius = state.camera.radius;
+        if (typeof state.camera?.theta === "number") orbitTheta = state.camera.theta;
+        if (typeof state.camera?.phi === "number") orbitPhi = state.camera.phi;
+
+        syncProxyHelpers();
+        updateCamera();
+
+        const toolToRestore = typeof state.tool === "string" ? state.tool : "Orbit";
+        const toolMap = {
+          Orbit: "toolOrbit",
+          Pan: "toolPan",
+          Zoom: "toolZoom",
+          Fit: "toolFit",
+          Select: "toolSelect",
+          Move: "toolMove",
+          Rotate: "toolRotate",
+          Scale: "toolScale"
+        };
+        if (toolMap[toolToRestore]) {
+          setTool(toolMap[toolToRestore], toolToRestore);
+        }
+
+        log("Spatial state restored.");
+      }catch(_){
+        log("Saved spatial state was invalid.");
+      }
+    }
+
+    canvas.addEventListener("pointerdown", (event) => {
+      const picked = pickObject(event.clientX, event.clientY);
+      if (currentTool === "Select") {
+        setSelected(picked || null);
+      } else if ((currentTool === "Move" || currentTool === "Rotate" || currentTool === "Scale") && picked) {
+        setSelected(proxyMesh);
+      }
+      beginDrag(event);
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      const picked = pickObject(event.clientX, event.clientY);
+      setHovered(picked);
+
+      if (!interaction.dragging || interaction.pointerId !== event.pointerId) return;
+
+      const dx = event.clientX - interaction.startX;
+      const dy = event.clientY - interaction.startY;
+
+      if (currentTool === "Orbit") {
+        orbitTheta = interaction.startTheta - dx * 0.01;
+        orbitPhi = clamp(interaction.startPhi + dy * 0.01, 0.15, Math.PI - 0.15);
+        updateCamera();
+      } else if (currentTool === "Pan") {
+        const panFactor = 0.006 * orbitRadius;
+        const forward = new THREE.Vector3();
+        camera.getWorldDirection(forward);
+        const right = new THREE.Vector3().crossVectors(forward, camera.up).normalize();
+        const up = camera.up.clone().normalize();
+        orbitTarget.copy(interaction.startTarget)
+          .addScaledVector(right, -dx * panFactor)
+          .addScaledVector(up, dy * panFactor);
+        updateCamera();
+      } else if (currentTool === "Zoom") {
+        orbitRadius = clamp(interaction.startRadius + dy * 0.03, 2.2, 18);
+        updateCamera();
+      } else if (currentTool === "Move" && selectedObject) {
+        proxyMesh.position.x = interaction.dragObjectStart.x + dx * 0.01;
+        proxyMesh.position.z = interaction.dragObjectStart.z + dy * 0.01;
+        syncProxyHelpers();
+      } else if (currentTool === "Rotate" && selectedObject) {
+        proxyMesh.rotation.y = interaction.dragRotateStart + dx * 0.01;
+        syncProxyHelpers();
+      } else if (currentTool === "Scale" && selectedObject) {
+        const s = clamp(interaction.dragScaleStart.x + dx * 0.005 - dy * 0.003, 0.35, 3.5);
+        proxyMesh.scale.set(s, s, s);
+        syncProxyHelpers();
+      }
+    });
+
+    canvas.addEventListener("pointerup", (event) => {
+      if (interaction.pointerId === event.pointerId) endDrag();
+    });
+
+    canvas.addEventListener("pointercancel", () => endDrag());
+
+    canvas.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      orbitRadius = clamp(orbitRadius + event.deltaY * 0.0035, 2.2, 18);
+      updateCamera();
+      if (currentTool !== "Zoom") {
+        el("toolMode").textContent = currentTool;
+      }
+    }, { passive:false });
+
+    function animate(){
+      if(currentTool === "Orbit" && !interaction.dragging && selectedObject !== proxyMesh){
+        previewGroup.rotation.y += 0.0025;
+      } else {
+        previewGroup.rotation.y *= 0.92;
+        if (Math.abs(previewGroup.rotation.y) < 0.0001) previewGroup.rotation.y = 0;
+      }
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    function setTool(id, label){
+      document.querySelectorAll(".tool-btn").forEach(btn => btn.classList.remove("active"));
+      if (el(id)) el(id).classList.add("active");
+      currentTool = label;
+      el("toolMode").textContent = label;
+      log(`Tool mode: ${label}`);
+      if (label === "Fit") fitView();
+      if (label === "Select") canvas.style.cursor = "pointer";
+      else canvas.style.cursor = "grab";
+    }
+
+    el("toolOrbit").onclick = () => setTool("toolOrbit", "Orbit");
+    el("toolPan").onclick = () => setTool("toolPan", "Pan");
+    el("toolZoom").onclick = () => setTool("toolZoom", "Zoom");
+    el("toolFit").onclick = () => setTool("toolFit", "Fit");
+    el("toolSelect").onclick = () => setTool("toolSelect", "Select");
+    el("toolMove").onclick = () => setTool("toolMove", "Move");
+    el("toolRotate").onclick = () => setTool("toolRotate", "Rotate");
+    el("toolScale").onclick = () => setTool("toolScale", "Scale");
+
+    el("viewOrbit").onclick = () => setTool("toolOrbit", "Orbit");
+    el("viewPan").onclick = () => setTool("toolPan", "Pan");
+    el("viewZoom").onclick = () => setTool("toolZoom", "Zoom");
+    el("viewFit").onclick = () => setTool("toolFit", "Fit");
+    el("tfSelect").onclick = () => setTool("toolSelect", "Select");
+    el("tfMove").onclick = () => setTool("toolMove", "Move");
+    el("tfRotate").onclick = () => setTool("toolRotate", "Rotate");
+    el("tfScale").onclick = () => setTool("toolScale", "Scale");
+
+    el("btnShotMini").onclick = takeShot;
+    el("btnRecordMini").onclick = toggleRecord;
+
+    function takeShot(){
+      try{
+        const url = renderer.domElement.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "5xliving-spatial-system.png";
+        a.click();
+        log("Spatial screenshot saved.");
+      }catch(_){
+        log("Screenshot blocked.");
+      }
+    }
+
+    function toggleRecord(){
+      isRecording = !isRecording;
+      el("btnRecordMini").textContent = isRecording ? "Stop" : "Rec";
+      log(isRecording ? "Spatial record placeholder started." : "Spatial record placeholder stopped.");
+    }
+
+    const uploadFile = el("uploadFile");
+    const uploadPreview = el("uploadPreview");
+    const btnAttach = el("btnAttach");
+
+    uploadFile.addEventListener("change", () => {
+      const f = uploadFile.files && uploadFile.files[0];
+      if (!f) return;
+
+      const localUrl = URL.createObjectURL(f);
+      uploadPreview.innerHTML = `<img src="${localUrl}" alt="preview">`;
+      btnAttach.disabled = false;
+      showImagePreview(localUrl);
+      setSelected(proxyMesh);
+      log(`Reference loaded: ${f.name}`);
+    });
+
+    btnAttach.onclick = () => {
+      el("sceneState").textContent = "Mounted";
+      el("selectionState").textContent = "Preview";
+      setSelected(proxyMesh);
+      fitView();
+      log("Reference attached to spatial room.");
+    };
+
+    el("btnClearPreview").onclick = () => {
+      uploadFile.value = "";
+      uploadPreview.innerHTML = "No image uploaded yet";
+      btnAttach.disabled = true;
+      removeImagePlane();
+      setSelected(null);
+      el("selectionState").textContent = "None";
+      log("Spatial preview cleared.");
+    };
+
+    el("btnGenerate").onclick = () => {
+      const text = el("modulePrompt").value.trim();
+      if (!text) {
+        log("No module prompt entered.");
+        return;
+      }
+      el("sceneState").textContent = "Requested";
+      log(`Module request: ${text}`);
+    };
+
+    el("btnSaveState").onclick = () => {
+      saveSpatialState();
+    };
+
+    el("btnOpenModule").onclick = () => {
+      saveSpatialState();
+      window.location.href = MODULE_URL;
+    };
+
+    el("btnModuleTools").onclick = () => {
+      setTool("toolSelect", "Select");
+      fitView();
+      el("modulePrompt").focus();
+      log("Module tools focused.");
+    };
+
+    el("btnSession").onclick = () => log("Session layer placeholder.");
+    el("btnReview").onclick = () => log("Review layer placeholder.");
+
+    restoreSpatialState();
+    updateCamera();
+    log("Spatial System initialized.");
+  </script>
+</body>
+</html>

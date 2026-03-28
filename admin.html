@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>5xLiving Dev Room Phase 1</title>
+  <style>
+    :root {
+      --bg: #020611;
+      --bg-2: #071120;
+      --bg-3: #050914;
+      --glass: rgba(7, 14, 24, 0.72);
+      --glass-strong: rgba(10, 19, 33, 0.88);
+      --panel: rgba(10, 18, 31, 0.86);
+      --panel-2: rgba(12, 21, 36, 0.78);
+      --line: rgba(255, 255, 255, 0.08);
+      --mint-2: #ccfff2;
+      --mint-line: rgba(148, 243, 222, 0.24);
+      --text: #f4f8ff;
+      --muted: #9db0c5;
+      --ok: #3ddc97;
+      --warn: #ffb84d;
+      --danger: #ff6b6b;
+      --shadow: 0 28px 68px rgba(0, 0, 0, 0.36);
+      --radius: 22px;
+      --radius-sm: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(92, 136, 255, 0.18), transparent 24%),
+        radial-gradient(circle at 84% 14%, rgba(62, 215, 193, 0.14), transparent 24%),
+        radial-gradient(circle at 50% 0%, rgba(125, 164, 255, 0.08), transparent 28%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 56%, var(--bg-3) 100%);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      min-height: 100%;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+      background-size: 120px 120px;
+      mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.84), transparent 88%);
+      opacity: 0.18;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 296px;
+      background:
+        radial-gradient(circle at top right, rgba(148, 243, 222, 0.08), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)),
+        linear-gradient(180deg, var(--glass-strong), var(--glass));
+      border-right: 1px solid var(--line);
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      backdrop-filter: blur(16px) saturate(140%);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #b8fff0 0%, #86efd8 100%);
+      color: #08221d;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-family: "Noto Serif SC", "Noto Serif", serif;
+      font-size: 21px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav-section {
+      margin-top: 24px;
+    }
+
+    .nav-title {
+      font-size: 11px;
+      color: var(--mint-2);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin: 0 0 10px;
+      padding-left: 10px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.04);
+      background: rgba(8, 14, 24, 0.44);
+      color: var(--text);
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 8px;
+      transition: 0.2s ease;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: linear-gradient(180deg, rgba(148, 243, 222, 0.12), rgba(148, 243, 222, 0.04));
+      border-color: var(--mint-line);
+      color: var(--mint-2);
+      box-shadow: 0 0 0 1px rgba(148, 243, 222, 0.08) inset;
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      bottom: 24px;
+      left: 18px;
+      right: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .main {
+      flex: 1;
+      padding: 26px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .topbar-left h2 {
+      margin: 0;
+      font-family: "Noto Serif SC", "Noto Serif", serif;
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .topbar-left p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .topbar-right {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(9, 15, 26, 0.72);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .scope-pill {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .grid-top {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .layout,
+    .two-up {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      background:
+        radial-gradient(circle at top right, rgba(148, 243, 222, 0.08), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)),
+        linear-gradient(180deg, var(--panel), rgba(12, 21, 36, 0.78));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      backdrop-filter: blur(16px) saturate(140%);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .stat-sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .panel-title {
+      margin: 0 0 14px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .panel-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin: -6px 0 14px;
+      line-height: 1.6;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .stack,
+    .form-stack,
+    .history-list,
+    .version-list,
+    .status-list { display: grid; gap: 12px; }
+
+    .row,
+    .row-3,
+    .meta-grid { display: grid; gap: 12px; }
+    .row { grid-template-columns: 1fr 1fr; }
+    .row-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    textarea,
+    input[type="password"],
+    select {
+      width: 100%;
+      background: rgba(8, 14, 24, 0.9);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: inherit;
+      outline: none;
+    }
+
+    textarea:focus,
+    input[type="password"]:focus,
+    select:focus {
+      border-color: rgba(148, 243, 222, 0.34);
+      box-shadow: 0 0 0 1px rgba(148, 243, 222, 0.16) inset;
+    }
+
+    textarea { min-height: 140px; resize: vertical; }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font: inherit;
+      transition: 0.2s ease;
+    }
+
+    .btn:disabled { cursor: not-allowed; opacity: 0.45; }
+    .btn-primary { background: linear-gradient(135deg, #b8fff0 0%, #86efd8 100%); color: #08221d; border-color: var(--mint-line); }
+    .btn-secondary { background: rgba(148,243,222,0.06); border: 1px solid var(--line); color: var(--text); }
+    .btn-danger { background: rgba(255, 107, 107, 0.12); border: 1px solid rgba(255, 107, 107, 0.28); color: #ffd2d2; }
+    .btn:hover:not(:disabled) { transform: translateY(-1px); }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      background: rgba(148,243,222,0.08);
+      color: var(--mint-2);
+      border: 1px solid rgba(148,243,222,0.14);
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 12px;
+    }
+
+    .item,
+    .history-entry,
+    .version-entry {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(11, 18, 31, 0.86), rgba(10, 16, 28, 0.72));
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+
+    .item h4,
+    .history-entry h4,
+    .version-entry h4 { margin: 0 0 6px; font-size: 15px; }
+    .item p,
+    .history-entry p,
+    .version-entry p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(8, 14, 24, 0.62);
+      margin-top: 10px;
+    }
+
+    .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; }
+    .ok { background: var(--ok); }
+    .warn { background: var(--warn); }
+    .danger { background: var(--danger); }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: rgba(7, 12, 22, 0.82);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 16px;
+      color: #e2ecfb;
+      font-size: 13px;
+      line-height: 1.55;
+      margin: 0;
+      max-height: 420px;
+      overflow: auto;
+    }
+
+    .json-viewer .json-key { color: #8bd3ff; }
+    .json-viewer .json-string { color: #ccfff2; }
+    .json-viewer .json-number { color: #e7ce8a; }
+    .json-viewer .json-boolean { color: #ffb84d; }
+    .json-viewer .json-null { color: #ff8c8c; }
+
+    .metric-line { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .metric-line strong { color: var(--mint-2); font-weight: 700; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 12, 0.84);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .gate {
+      width: 100%;
+      max-width: 460px;
+      background:
+        radial-gradient(circle at top right, rgba(148, 243, 222, 0.08), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)),
+        linear-gradient(180deg, rgba(10, 19, 33, 0.96), rgba(7, 14, 24, 0.94));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 26px;
+    }
+
+    .gate h3 {
+      margin: 0 0 8px;
+      font-family: "Noto Serif SC", "Noto Serif", serif;
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .gate p { margin: 0 0 16px; color: var(--muted); line-height: 1.5; }
+    .gate-note { margin-top: 12px; color: #ffbdbd; font-size: 13px; min-height: 18px; }
+    .locked { filter: blur(1px); pointer-events: none; user-select: none; }
+    .toggle-row { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+
+    @media (max-width: 1180px) {
+      .grid-top, .row-3, .layout, .two-up, .meta-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 860px) {
+      .page { display: block; }
+      .sidebar { width: 100%; height: auto; position: relative; }
+      .sidebar-footer { position: static; margin-top: 22px; }
+      .main { padding: 18px; }
+      .topbar { display: block; }
+      .topbar-right { margin-top: 14px; justify-content: flex-start; }
+      .row, .meta-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="passwordOverlay" class="overlay">
+    <div class="gate">
+      <div class="tag-row" style="margin-bottom: 14px;">
+        <span class="tag">5xLiving Internal</span>
+        <span class="tag">Dev Room</span>
+        <span class="tag">Phase 1</span>
+      </div>
+      <h3>Enter Dev Room</h3>
+      <p>This is the internal command center for request evaluation, codebooks, and audit history. Public users should not be here.</p>
+      <input type="password" id="passwordInput" placeholder="Enter admin password" />
+      <div class="btn-row">
+        <button class="btn btn-primary" id="unlockBtn">Unlock</button>
+      </div>
+      <div id="gateNote" class="gate-note"></div>
+    </div>
+  </div>
+
+  <div id="appShell" class="page locked">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">5X</div>
+        <div>
+          <h1>Dev Room</h1>
+          <p>Phase 1 internal command center</p>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-title">Panels</div>
+        <button class="nav-btn active" data-target="execution-plan">Execution Plan</button>
+        <button class="nav-btn" data-target="codebooks">Codebooks</button>
+        <button class="nav-btn" data-target="overview">Overview</button>
+        <button class="nav-btn" data-target="xyz-spatial">XYZ Spatial</button>
+        <button class="nav-btn" data-target="history">History / Audit</button>
+        <button class="nav-btn" data-target="health">Health</button>
+      </div>
+
+      <div class="sidebar-footer">
+        Dev Room Phase 1 only.<br />
+        No client-room automation.<br />
+        Runtime: <span id="apiBaseLabel">same origin</span><br />
+        Last request: <span id="lastRequestLabel">none</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h2>5xLiving Dev Room</h2>
+          <p>Internal evaluation, codebook control, approval routing, and durable audit history.</p>
+          <div class="scope-pill" id="scopeSummary"></div>
+        </div>
+        <div class="topbar-right">
+          <div class="pill" id="runtimePill">Runtime: detecting</div>
+          <div class="pill" id="healthPill">Health: checking</div>
+          <div class="pill" id="pingPill">Admin Ping: checking</div>
+          <button class="btn btn-danger" id="lockBtn">Lock</button>
+        </div>
+      </div>
+
+      <section id="execution-plan" class="section active">
+        <div class="layout">
+          <div class="card">
+            <h3 class="panel-title">Execution Plan</h3>
+            <p class="panel-sub">Start here. Set explicit scope, evaluate the request, then approve or queue based on the decision.</p>
+            <div class="form-stack">
+              <div class="row">
+                <div>
+                  <label for="scopeCompany">Company</label>
+                  <select id="scopeCompany"></select>
+                </div>
+                <div>
+                  <label for="scopeProject">Project</label>
+                  <select id="scopeProject"></select>
+                </div>
+              </div>
+              <div class="row-3">
+                <div>
+                  <label for="scopeModule">Module</label>
+                  <select id="scopeModule"></select>
+                </div>
+                <div>
+                  <label for="scopeRequestType">Request Type</label>
+                  <select id="scopeRequestType"></select>
+                </div>
+                <div>
+                  <label for="scopeRequestSource">Request Source</label>
+                  <select id="scopeRequestSource"></select>
+                </div>
+              </div>
+              <div class="row-3">
+                <div>
+                  <label for="scopeWorkspaceId">Workspace / Room</label>
+                  <select id="scopeWorkspaceId"></select>
+                </div>
+                <div>
+                  <label for="scopeObjectType">Object Type</label>
+                  <select id="scopeObjectType"></select>
+                </div>
+                <div>
+                  <label for="scopeOutputIntent">Output Intent</label>
+                  <select id="scopeOutputIntent"></select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="panel-title">Request Panel</h3>
+            <p class="panel-sub">Evaluate first, then approve or queue based on the decision object.</p>
+            <div class="form-stack">
+              <div>
+                <label for="requestPrompt">Prompt</label>
+                <textarea id="requestPrompt" placeholder="Describe the internal request here."></textarea>
+              </div>
+              <div>
+                <label for="requestNotes">Structured Notes</label>
+                <textarea id="requestNotes" placeholder="Optional notes, references, or structured context."></textarea>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary" id="evaluateBtn">Evaluate</button>
+                <button class="btn btn-secondary" id="queueBtn" disabled>Queue</button>
+                <button class="btn btn-secondary" id="approveBtn" disabled>Approve</button>
+                <button class="btn btn-danger" id="blockBtn" disabled>Block</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 18px;">
+          <h3 class="panel-title">Action Result</h3>
+          <p class="panel-sub">Pretty-printed structured output only.</p>
+          <div class="meta-grid">
+            <div class="item">
+              <h4>Current Request</h4>
+              <p id="requestIdValue">No request evaluated yet.</p>
+            </div>
+            <div class="item">
+              <h4>State</h4>
+              <p id="requestStateValue">Waiting</p>
+            </div>
+          </div>
+          <pre id="requestResultView">No action run yet.</pre>
+        </div>
+
+        <div class="layout" style="margin-top: 18px;">
+          <div class="card">
+            <h3 class="panel-title">Decision Output Panel</h3>
+            <p class="panel-sub">AI evaluation result, matched rules, escalation signal, and routing recommendation.</p>
+            <div class="stack">
+              <div class="item">
+                <h4>Decision Summary</h4>
+                <p id="decisionSummary">No decision available yet.</p>
+              </div>
+              <div class="item">
+                <h4>Reasons</h4>
+                <pre id="decisionReasonsView">[]</pre>
+              </div>
+              <div class="item">
+                <h4>Matched Rules</h4>
+                <pre id="matchedRulesView">[]</pre>
+              </div>
+              <div class="item">
+                <h4>Escalation Required</h4>
+                <p id="decisionEscalationValue">No decision yet.</p>
+              </div>
+              <div class="item">
+                <h4>Recommended Route</h4>
+                <p id="recommendedRouteValue">Not evaluated.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="panel-title">Recommended Payload</h3>
+            <pre id="recommendedPayloadView">{}</pre>
+            <div class="item" style="margin-top: 12px;">
+              <h4>Decision JSON</h4>
+              <pre id="decisionJsonView">{}</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="codebooks" class="section">
+        <div class="layout">
+          <div class="card">
+            <h3 class="panel-title">Internal Locked Codebook</h3>
+            <p class="panel-sub">Read-only by default. Protected edit mode is required for saves, and every save is audited.</p>
+            <div class="toggle-row">
+              <input type="checkbox" id="internalProtectedToggle" />
+              <label for="internalProtectedToggle" style="margin: 0; text-transform: none; letter-spacing: normal;">Enable protected edit mode</label>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-secondary" id="reloadInternalBtn">Reload</button>
+              <button class="btn btn-primary" id="saveInternalBtn" disabled>Save Internal Codebook</button>
+            </div>
+            <pre id="internalCodebookView">Loading internal codebook...</pre>
+            <textarea id="internalCodebookEditor" style="display: none;"></textarea>
+          </div>
+
+          <div class="card">
+            <h3 class="panel-title">Project Source-of-Truth Codebook</h3>
+            <p class="panel-sub">Scoped by company and project. Writes are versioned and logged.</p>
+            <div class="btn-row">
+              <button class="btn btn-secondary" id="reloadProjectBtn">Reload</button>
+              <button class="btn btn-primary" id="saveProjectBtn">Save Project Codebook</button>
+            </div>
+            <textarea id="projectCodebookEditor"></textarea>
+          </div>
+        </div>
+
+        <div class="layout" style="margin-top: 18px;">
+          <div class="card">
+            <h3 class="panel-title">Internal Codebook Versions</h3>
+            <div id="internalVersionList" class="version-list"></div>
+          </div>
+
+          <div class="card">
+            <h3 class="panel-title">Project Codebook Versions</h3>
+            <div id="projectVersionList" class="version-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="overview" class="section">
+        <div class="grid-top">
+          <div class="card">
+            <div class="stat-label">Internal Codebook</div>
+            <div class="stat-value" id="internalVersionValue">v0</div>
+            <div class="stat-sub">Locked rules and escalation baseline</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Project Codebook</div>
+            <div class="stat-value" id="projectVersionValue">v0</div>
+            <div class="stat-sub">Project-scoped source of truth</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Current Decision</div>
+            <div class="stat-value" id="decisionValue">Waiting</div>
+            <div class="stat-sub" id="decisionSub">Evaluate a request to populate the decision panel.</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Audit Entries</div>
+            <div class="stat-value" id="historyCountValue">0</div>
+            <div class="stat-sub">Combined request history and audit trail</div>
+          </div>
+        </div>
+
+        <div class="two-up">
+          <div class="card">
+            <h3 class="panel-title">Phase 1 Coverage</h3>
+            <p class="panel-sub">This screen is scoped to internal control only.</p>
+            <div class="tag-row">
+              <span class="tag">AI Evaluation Foundation</span>
+              <span class="tag">Internal Locked Codebook</span>
+              <span class="tag">Project Source of Truth</span>
+              <span class="tag">Approval Gate</span>
+              <span class="tag">Audit Trail</span>
+              <span class="tag">Core CTR Prep</span>
+            </div>
+            <div class="status"><span class="dot ok"></span> No client-room automation is enabled here.</div>
+            <div class="status"><span class="dot warn"></span> Internal locked codebook writes require protected edit mode.</div>
+            <div class="status"><span class="dot warn"></span> Approval-required requests must be approved before queueing.</div>
+          </div>
+
+          <div class="card">
+            <h3 class="panel-title">Current Scope Snapshot</h3>
+            <div class="status-list">
+              <div class="item">
+                <h4>Company / Project / Module</h4>
+                <p id="overviewScope">Waiting for bootstrap.</p>
+              </div>
+              <div class="item">
+                <h4>Request Type / Source</h4>
+                <p id="overviewRequestMode">Waiting for bootstrap.</p>
+              </div>
+              <div class="item">
+                <h4>Workspace / Object / Output</h4>
+                <p id="overviewSpatialMode">Waiting for bootstrap.</p>
+              </div>
+              <div class="item">
+                <h4>Recommended Route</h4>
+                <p id="overviewRoute">No request evaluated yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="xyz-spatial" class="section">
+        <div class="layout">
+          <div class="card">
+            <h3 class="panel-title">XYZ Spatial Composer</h3>
+            <p class="panel-sub">WorkStation-only structured planning flow for hologram preview and generation packages.</p>
+            <div class="form-stack">
+              <div>
+                <label for="xyzPrompt">Spatial Prompt</label>
+                <textarea id="xyzPrompt" placeholder="Describe the room goal, object arrangement, and spatial intent."></textarea>
+              </div>
+              <div>
+                <label for="xyzNotes">Spatial Notes</label>
+                <textarea id="xyzNotes" placeholder="Optional planning notes, references, and constraints."></textarea>
+              </div>
+              <div class="row-3">
+                <div>
+                  <label for="xyzRoomWidth">Room Width (X)</label>
+                  <input id="xyzRoomWidth" type="number" step="0.1" value="6" />
+                </div>
+                <div>
+                  <label for="xyzRoomHeight">Room Height (Y)</label>
+                  <input id="xyzRoomHeight" type="number" step="0.1" value="3.2" />
+                </div>
+                <div>
+                  <label for="xyzRoomDepth">Room Depth (Z)</label>
+                  <input id="xyzRoomDepth" type="number" step="0.1" value="6" />
+                </div>
+              </div>
+              <div class="row-3">
+                <div>
+                  <label for="xyzObjectCount">Object Count</label>
+                  <input id="xyzObjectCount" type="number" min="1" max="24" step="1" value="1" />
+                </div>
+                <div>
+                  <label for="xyzDimX">Object X</label>
+                  <input id="xyzDimX" type="number" step="0.1" value="1.8" />
+                </div>
+                <div>
+                  <label for="xyzDimY">Object Y</label>
+                  <input id="xyzDimY" type="number" step="0.1" value="1.2" />
+                </div>
+              </div>
+              <div class="row">
+                <div>
+                  <label for="xyzDimZ">Object Z</label>
+                  <input id="xyzDimZ" type="number" step="0.1" value="1.0" />
+                </div>
+                <div>
+                  <label for="xyzZoneName">Zone Label</label>
+                  <input id="xyzZoneName" type="text" value="primary display zone" />
+                </div>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary" id="xyzPlanBtn">Create Spatial Plan</button>
+                <button class="btn btn-secondary" id="xyzPreviewBtn" disabled>Build Hologram Preview</button>
+                <button class="btn btn-secondary" id="xyzJobBtn" disabled>Prepare Generation Package</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="panel-title">XYZ Run State</h3>
+            <div class="stack">
+              <div class="item">
+                <h4>Current Plan</h4>
+                <p id="xyzPlanIdValue">No plan created yet.</p>
+              </div>
+              <div class="item">
+                <h4>Current Preview</h4>
+                <p id="xyzPreviewIdValue">No preview package yet.</p>
+              </div>
+              <div class="item">
+                <h4>Current Job</h4>
+                <p id="xyzJobIdValue">No generation package yet.</p>
+              </div>
+              <div class="item">
+                <h4>XYZ Summary</h4>
+                <pre id="xyzSummaryView">No XYZ pipeline activity yet.</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="layout" style="margin-top: 18px;">
+          <div class="card">
+            <h3 class="panel-title">Spatial Plan Panel</h3>
+            <pre id="xyzPlanView">No plan yet.</pre>
+          </div>
+
+          <div class="card">
+            <h3 class="panel-title">Hologram Preview Panel</h3>
+            <pre id="xyzPreviewView">No preview package yet.</pre>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 18px;">
+          <h3 class="panel-title">Generation Package Panel</h3>
+          <pre id="xyzJobView">No generation package yet.</pre>
+        </div>
+
+        <div class="card" style="margin-top: 18px;">
+          <h3 class="panel-title">XYZ History Panel</h3>
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="xyzRefreshHistoryBtn">Refresh XYZ History</button>
+          </div>
+          <div id="xyzHistoryList" class="history-list"></div>
+        </div>
+      </section>
+
+      <section id="history" class="section">
+        <div class="card">
+          <h3 class="panel-title">History / Audit Panel</h3>
+          <p class="panel-sub">Scoped to the selected company, project, and module so project activity stays separated.</p>
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="refreshHistoryBtn">Refresh History</button>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </section>
+
+      <section id="health" class="section">
+        <div class="layout">
+          <div class="card">
+            <h3 class="panel-title">System Health</h3>
+            <div class="stack">
+              <div class="item">
+                <h4>/health</h4>
+                <pre id="healthText">Checking...</pre>
+              </div>
+              <div class="item">
+                <h4>/admin/ping</h4>
+                <pre id="pingText">Checking...</pre>
+              </div>
+              <div class="item">
+                <h4>/admin/devroom/bootstrap</h4>
+                <pre id="bootstrapText">Loading...</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="panel-title">Scope Metrics</h3>
+            <div class="stack">
+              <div class="item">
+                <div class="metric-line"><span>Company</span><strong id="metricCompany">5xLiving</strong></div>
+                <div class="metric-line"><span>Project</span><strong id="metricProject">WorkStation</strong></div>
+                <div class="metric-line"><span>Module</span><strong id="metricModule">Admin Shell</strong></div>
+                <div class="metric-line"><span>Request Type</span><strong id="metricRequestType">generate</strong></div>
+                <div class="metric-line"><span>Request Source</span><strong id="metricRequestSource">devroom_manual</strong></div>
+                <div class="metric-line"><span>Workspace</span><strong id="metricWorkspaceId">devroom-main</strong></div>
+                <div class="metric-line"><span>Object Type</span><strong id="metricObjectType">assembly</strong></div>
+                <div class="metric-line"><span>Output Intent</span><strong id="metricOutputIntent">scene_layout</strong></div>
+              </div>
+              <div class="item">
+                <h4>Last Queue Result</h4>
+                <pre id="queueResultView">No queue result yet.</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const DEVROOM_PASSWORD = "Newgem168#";
+    let API_BASE = location.origin;
+    let devroomState = {
+      bootstrap: null,
+      xyzBootstrap: null,
+      internalCodebook: null,
+      projectCodebook: null,
+      currentRequest: null,
+      currentDecision: null,
+      history: [],
+      queueResult: null,
+      xyzPlan: null,
+      xyzPreview: null,
+      xyzJob: null,
+      xyzHistory: [],
+    };
+
+    function el(id) { return document.getElementById(id); }
+    function setText(id, value) { const node = el(id); if (node) node.textContent = value; }
+    function prettyJson(value) { try { return typeof value === "string" ? value : JSON.stringify(value, null, 2); } catch (_) { return String(value); } }
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function highlightJson(value) {
+      const json = escapeHtml(prettyJson(value));
+      return json.replace(/("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"\s*:)|("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*")|\b(true|false)\b|\bnull\b|-?\d+(?:\.\d+)?(?:[eE][+\-]?\d+)?/g, (match) => {
+        if (match.endsWith(":")) {
+          return `<span class="json-key">${match}</span>`;
+        }
+        if (match.startsWith('"')) {
+          return `<span class="json-string">${match}</span>`;
+        }
+        if (match === "true" || match === "false") {
+          return `<span class="json-boolean">${match}</span>`;
+        }
+        if (match === "null") {
+          return `<span class="json-null">${match}</span>`;
+        }
+        return `<span class="json-number">${match}</span>`;
+      });
+    }
+
+    function currentScope() {
+      return {
+        company: el("scopeCompany").value,
+        project: el("scopeProject").value,
+        module: el("scopeModule").value,
+        requestType: el("scopeRequestType").value,
+        requestSource: el("scopeRequestSource").value,
+        workspaceId: el("scopeWorkspaceId").value,
+        objectType: el("scopeObjectType").value,
+        outputIntent: el("scopeOutputIntent").value,
+      };
+    }
+
+    async function fetchJson(path, options = {}) {
+      const target = /^https?:\/\//i.test(path) ? path : `${API_BASE}${path}`;
+      const response = await fetch(target, options);
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload.ok === false) {
+        const message = payload?.error?.message || payload?.error || `Request failed with ${response.status}`;
+        throw new Error(message);
+      }
+      return payload;
+    }
+
+    function updateScopeSummary() {
+      const scope = currentScope();
+      el("scopeSummary").innerHTML = `
+        <span class="tag">${scope.company}</span>
+        <span class="tag">${scope.project}</span>
+        <span class="tag">${scope.module}</span>
+        <span class="tag">${scope.requestType}</span>
+        <span class="tag">${scope.requestSource}</span>
+        <span class="tag">${scope.workspaceId}</span>
+        <span class="tag">${scope.objectType}</span>
+        <span class="tag">${scope.outputIntent}</span>
+      `;
+      setText("overviewScope", `${scope.company} / ${scope.project} / ${scope.module}`);
+      setText("overviewRequestMode", `${scope.requestType} from ${scope.requestSource}`);
+      setText("overviewSpatialMode", `${scope.workspaceId} / ${scope.objectType} / ${scope.outputIntent}`);
+      setText("metricCompany", scope.company);
+      setText("metricProject", scope.project);
+      setText("metricModule", scope.module);
+      setText("metricRequestType", scope.requestType);
+      setText("metricRequestSource", scope.requestSource);
+      setText("metricWorkspaceId", scope.workspaceId);
+      setText("metricObjectType", scope.objectType);
+      setText("metricOutputIntent", scope.outputIntent);
+    }
+
+    function syncRequestTypeOptions() {
+      if (!devroomState.bootstrap) return;
+      const scopeModule = el("scopeModule").value;
+      const moduleMap = devroomState.bootstrap.moduleRequestTypeMap || {};
+      const options = moduleMap[scopeModule] && moduleMap[scopeModule].length
+        ? moduleMap[scopeModule]
+        : (devroomState.bootstrap.requestTypeOptions || []);
+      const selected = options.includes(el("scopeRequestType").value) ? el("scopeRequestType").value : (options[0] || "");
+      populateSelect(el("scopeRequestType"), options, selected);
+      syncOutputIntent();
+    }
+
+    function syncOutputIntent() {
+      const scope = currentScope();
+      const map = devroomState.bootstrap?.requestTypeOutputIntentMap || {};
+      if (scope.module === "XYZ Spatial") {
+        const suggested = map[scope.requestType] || "scene_layout";
+        if ((devroomState.bootstrap?.outputIntentOptions || []).includes(suggested)) {
+          el("scopeOutputIntent").value = suggested;
+        }
+      }
+      updateScopeSummary();
+    }
+
+    function syncXyzScope(requestType) {
+      if (el("scopeModule").value !== "XYZ Spatial") {
+        el("scopeModule").value = "XYZ Spatial";
+        syncRequestTypeOptions();
+      }
+      if (requestType) {
+        const options = Array.from(el("scopeRequestType").options).map((option) => option.value);
+        if (options.includes(requestType)) {
+          el("scopeRequestType").value = requestType;
+        }
+      }
+      syncOutputIntent();
+    }
+
+    function setButtonState() {
+      const request = devroomState.currentRequest;
+      const decision = devroomState.currentDecision;
+      const state = request?.state || "";
+      const decisionName = decision?.decision || "";
+      el("queueBtn").disabled = !(request && ((decisionName === "allowed" && (state === "evaluated" || state === "approved")) || state === "approved"));
+      el("approveBtn").disabled = !(request && state === "approval_required");
+      el("blockBtn").disabled = !(request && !["blocked", "completed", "failed"].includes(state));
+    }
+
+    function renderVersions(targetId, versions) {
+      const container = el(targetId);
+      container.innerHTML = "";
+      if (!versions || versions.length === 0) {
+        container.innerHTML = `<div class="version-entry"><p>No versions recorded yet.</p></div>`;
+        return;
+      }
+      versions.forEach((version) => {
+        const node = document.createElement("div");
+        node.className = "version-entry";
+        node.innerHTML = `<h4>${version.file || "version"}</h4><p>Version: ${version.version || "n/a"}</p><p>Updated: ${version.updatedAt || "n/a"}</p><p>Actor: ${version.updatedBy || "n/a"}</p>`;
+        container.appendChild(node);
+      });
+    }
+
+    function renderHistory(entries) {
+      const container = el("historyList");
+      container.innerHTML = "";
+      if (!entries || entries.length === 0) {
+        container.innerHTML = `<div class="history-entry"><p>No history recorded yet.</p></div>`;
+        return;
+      }
+      entries.forEach((entry) => {
+        const node = document.createElement("div");
+        node.className = "history-entry";
+        const scope = entry.scope || {};
+        node.innerHTML = `<h4>${entry.actionType || entry.action || entry.source || "event"}</h4><p>${entry.timestamp || "n/a"}</p><p>Actor: ${entry.actor || "devroom_admin"}</p><p>Scope: ${scope.company || "-"} / ${scope.project || "-"} / ${scope.module || "-"}</p><p>Decision: ${entry.decision || "-"}</p><p>Job ID: ${entry.jobId || "-"}</p><p>Codebook changed: ${entry.codebookChanged ? "yes" : "no"}</p><p>Codebook version: ${entry.codebookVersion || "-"}</p><p>Prompt: ${entry.requestPrompt || entry.prompt || "-"}</p>`;
+        container.appendChild(node);
+      });
+      setText("historyCountValue", String(entries.length));
+    }
+
+    function renderXyzHistory(entries) {
+      const container = el("xyzHistoryList");
+      container.innerHTML = "";
+      if (!entries || entries.length === 0) {
+        container.innerHTML = `<div class="history-entry"><p>No XYZ history recorded yet.</p></div>`;
+        return;
+      }
+      entries.forEach((entry) => {
+        const scope = entry.scope || {};
+        const node = document.createElement("div");
+        node.className = "history-entry";
+        node.innerHTML = `<h4>${entry.action || "xyz_event"}</h4><p>${entry.timestamp || "n/a"}</p><p>Actor: ${entry.actor || "devroom_admin"}</p><p>Workspace: ${entry.workspaceId || scope.workspaceId || "-"}</p><p>Scope: ${scope.company || "-"} / ${scope.project || "-"} / ${scope.module || "-"}</p><p>Plan: ${entry.planId || "-"}</p><p>Preview: ${entry.previewId || "-"}</p><p>Job: ${entry.jobId || "-"}</p><p>Objects: ${entry.objectCount || "-"}</p><p>State: ${entry.state || "-"}</p><p>Summary: ${entry.summary || "-"}</p>`;
+        container.appendChild(node);
+      });
+    }
+
+    function setXyzButtonState() {
+      el("xyzPreviewBtn").disabled = !devroomState.xyzPlan;
+      el("xyzJobBtn").disabled = !devroomState.xyzPlan;
+    }
+
+    function renderXyzPlan(plan) {
+      devroomState.xyzPlan = plan || null;
+      el("xyzPlanView").textContent = prettyJson(plan || "No plan yet.");
+      setText("xyzPlanIdValue", plan?.planId || "No plan created yet.");
+      el("xyzSummaryView").textContent = prettyJson(plan?.spatialSummary || "No XYZ pipeline activity yet.");
+      setXyzButtonState();
+    }
+
+    function renderXyzPreview(preview) {
+      devroomState.xyzPreview = preview || null;
+      el("xyzPreviewView").textContent = prettyJson(preview || "No preview package yet.");
+      setText("xyzPreviewIdValue", preview?.previewId || "No preview package yet.");
+    }
+
+    function renderXyzJob(job) {
+      devroomState.xyzJob = job || null;
+      el("xyzJobView").textContent = prettyJson(job || "No generation package yet.");
+      setText("xyzJobIdValue", job?.jobId || "No generation package yet.");
+    }
+
+    function renderDecision(decision, request) {
+      devroomState.currentDecision = decision;
+      devroomState.currentRequest = request;
+      if (!decision) {
+        setText("decisionSummary", "No decision available yet.");
+        el("decisionReasonsView").textContent = "[]";
+        el("matchedRulesView").textContent = "[]";
+        setText("decisionEscalationValue", "No decision yet.");
+        setText("recommendedRouteValue", "Not evaluated.");
+        el("recommendedPayloadView").textContent = "{}";
+        el("decisionJsonView").textContent = "{}";
+        setText("decisionValue", "Waiting");
+        setText("decisionSub", "Evaluate a request to populate the decision panel.");
+        setButtonState();
+        return;
+      }
+      setText("decisionSummary", decision.summary || "Decision returned.");
+      el("decisionReasonsView").textContent = prettyJson(decision.reasons || []);
+      el("matchedRulesView").textContent = prettyJson(decision.matchedRules || []);
+      setText("decisionEscalationValue", decision.escalationRequired ? "Yes" : "No");
+      setText("recommendedRouteValue", decision.recommendedRoute || "n/a");
+      el("recommendedPayloadView").textContent = prettyJson(decision.recommendedPayload || {});
+      el("decisionJsonView").textContent = prettyJson(decision);
+      setText("decisionValue", decision.decision || "evaluated");
+      setText("decisionSub", decision.escalationRequired ? "Escalation required" : "Can proceed without escalation");
+      setText("overviewRoute", decision.recommendedRoute || "No route available.");
+      setText("requestIdValue", request?.requestId || "No request evaluated yet.");
+      setText("requestStateValue", request?.state || "evaluated");
+      setText("lastRequestLabel", request?.requestId || "none");
+      setButtonState();
+    }
+
+    async function loadRuntimeConfig() {
+      const data = await fetchJson(`${location.origin}/api/runtime-config`);
+      API_BASE = data.apiBase || location.origin;
+      setText("apiBaseLabel", API_BASE);
+      setText("runtimePill", `Runtime: ${API_BASE}`);
+    }
+
+    async function checkHealth() {
+      try {
+        const data = await fetchJson("/health");
+        el("healthText").textContent = prettyJson(data);
+        setText("healthPill", "Health: healthy");
+      } catch (error) {
+        el("healthText").textContent = String(error.message || error);
+        setText("healthPill", "Health: unavailable");
+      }
+    }
+
+    async function checkAdminPing() {
+      try {
+        const data = await fetchJson("/admin/ping");
+        el("pingText").textContent = prettyJson(data);
+        setText("pingPill", "Admin Ping: reachable");
+      } catch (error) {
+        el("pingText").textContent = String(error.message || error);
+        setText("pingPill", "Admin Ping: unavailable");
+      }
+    }
+
+    function populateSelect(node, options, selected) {
+      node.innerHTML = "";
+      options.forEach((option) => {
+        const element = document.createElement("option");
+        element.value = option;
+        element.textContent = option;
+        element.selected = option === selected;
+        node.appendChild(element);
+      });
+    }
+
+    async function loadBootstrap() {
+      const data = await fetchJson("/admin/devroom/bootstrap");
+      devroomState.bootstrap = data;
+      el("bootstrapText").textContent = prettyJson(data);
+      populateSelect(el("scopeCompany"), data.companyOptions || [], data.defaults?.company || "5xLiving");
+      populateSelect(el("scopeProject"), (data.projects || []).map((item) => item.project), data.defaults?.project || "WorkStation");
+      populateSelect(el("scopeModule"), data.moduleOptions || [], data.defaults?.module || "Admin Shell");
+      populateSelect(el("scopeRequestType"), data.requestTypeOptions || [], data.defaults?.requestType || "review");
+      populateSelect(el("scopeRequestSource"), data.requestSourceOptions || [], data.defaults?.requestSource || "devroom_manual");
+      populateSelect(el("scopeWorkspaceId"), data.workspaceOptions || [], data.defaults?.workspaceId || "devroom-main");
+      populateSelect(el("scopeObjectType"), data.objectTypeOptions || [], data.defaults?.objectType || "assembly");
+      populateSelect(el("scopeOutputIntent"), data.outputIntentOptions || [], data.defaults?.outputIntent || "scene_layout");
+      syncRequestTypeOptions();
+      updateScopeSummary();
+      renderHistory(data.history || []);
+    }
+
+    async function loadXyzBootstrap() {
+      const data = await fetchJson("/admin/devroom/xyz/bootstrap");
+      devroomState.xyzBootstrap = data;
+      renderXyzHistory(data.history || []);
+      setXyzButtonState();
+    }
+
+    async function loadInternalCodebook() {
+      const data = await fetchJson("/admin/devroom/internal-codebook");
+      devroomState.internalCodebook = data;
+      el("internalCodebookView").classList.add("json-viewer");
+      el("internalCodebookView").innerHTML = highlightJson(data.codebook || {});
+      el("internalCodebookEditor").value = prettyJson(data.codebook || {});
+      renderVersions("internalVersionList", data.versions || []);
+      setText("internalVersionValue", `v${data.codebook?.version || 0}`);
+    }
+
+    async function loadProjectCodebook() {
+      const scope = currentScope();
+      const params = new URLSearchParams({ company: scope.company, project: scope.project });
+      const data = await fetchJson(`/admin/devroom/project-codebook?${params.toString()}`);
+      devroomState.projectCodebook = data;
+      el("projectCodebookEditor").value = prettyJson(data.codebook || {});
+      renderVersions("projectVersionList", data.versions || []);
+      setText("projectVersionValue", `v${data.codebook?.version || 0}`);
+    }
+
+    async function loadHistory() {
+      const scope = currentScope();
+      const params = new URLSearchParams({ limit: "120", company: scope.company, project: scope.project, module: scope.module });
+      const data = await fetchJson(`/admin/devroom/history?${params.toString()}`);
+      devroomState.history = data.history || [];
+      renderHistory(devroomState.history);
+    }
+
+    async function loadXyzHistory() {
+      const params = new URLSearchParams({ limit: "80", workspaceId: currentScope().workspaceId || "" });
+      const data = await fetchJson(`/admin/devroom/xyz/history?${params.toString()}`);
+      devroomState.xyzHistory = data.history || [];
+      renderXyzHistory(devroomState.xyzHistory);
+    }
+
+    function xyzPayload(requestType) {
+      return {
+        scope: {
+          ...currentScope(),
+          module: "XYZ Spatial",
+          requestType,
+        },
+        prompt: el("xyzPrompt").value.trim() || el("requestPrompt").value.trim(),
+        notes: el("xyzNotes").value.trim() || el("requestNotes").value.trim(),
+        workspace: {
+          width: Number(el("xyzRoomWidth").value || 6),
+          height: Number(el("xyzRoomHeight").value || 3.2),
+          depth: Number(el("xyzRoomDepth").value || 6),
+          zoneName: el("xyzZoneName").value.trim() || "primary display zone",
+        },
+        objectCount: Number(el("xyzObjectCount").value || 1),
+        dimensions: {
+          x: Number(el("xyzDimX").value || 1.8),
+          y: Number(el("xyzDimY").value || 1.2),
+          z: Number(el("xyzDimZ").value || 1.0),
+        },
+      };
+    }
+
+    async function createXyzPlan() {
+      const requestType = ["layout_only", "proportion_adjust", "object_place", "zone_edit"].includes(el("scopeRequestType").value)
+        ? el("scopeRequestType").value
+        : "xyz_plan";
+      syncXyzScope(requestType);
+      const data = await fetchJson("/admin/devroom/xyz/plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(xyzPayload(requestType)),
+      });
+      renderXyzPlan(data.plan);
+      renderXyzPreview(null);
+      renderXyzJob(null);
+      el("requestResultView").textContent = prettyJson(data);
+      await loadXyzHistory();
+    }
+
+    async function createXyzPreview() {
+      if (!devroomState.xyzPlan) return;
+      syncXyzScope("hologram_preview");
+      const data = await fetchJson("/admin/devroom/xyz/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...xyzPayload("hologram_preview"), planId: devroomState.xyzPlan.planId }),
+      });
+      renderXyzPlan(data.plan);
+      renderXyzPreview(data.preview);
+      el("requestResultView").textContent = prettyJson(data);
+      await loadXyzHistory();
+    }
+
+    async function createXyzGenerationPackage() {
+      if (!devroomState.xyzPlan) return;
+      const requestType = el("scopeRequestType").value === "batch_model_generate" ? "batch_model_generate" : "model_generate";
+      syncXyzScope(requestType);
+      const data = await fetchJson("/admin/devroom/xyz/generation-package", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...xyzPayload(requestType), planId: devroomState.xyzPlan.planId }),
+      });
+      renderXyzPlan(data.plan);
+      renderXyzJob(data.job);
+      el("requestResultView").textContent = prettyJson(data);
+      await loadXyzHistory();
+    }
+
+    async function evaluateRequest() {
+      const payload = { scope: currentScope(), prompt: el("requestPrompt").value.trim(), notes: el("requestNotes").value.trim() };
+      const data = await fetchJson("/admin/devroom/evaluate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      el("requestResultView").textContent = prettyJson(data);
+      renderDecision(data.decision, data.request);
+      await loadHistory();
+    }
+
+    async function approveRequest() {
+      if (!devroomState.currentRequest) return;
+      const data = await fetchJson(`/admin/devroom/requests/${devroomState.currentRequest.requestId}/approve`, { method: "POST", headers: { "Content-Type": "application/json" } });
+      el("requestResultView").textContent = prettyJson(data);
+      renderDecision(data.decision, data.request);
+      await loadHistory();
+    }
+
+    async function queueRequest() {
+      if (!devroomState.currentRequest) return;
+      const data = await fetchJson(`/admin/devroom/requests/${devroomState.currentRequest.requestId}/queue`, { method: "POST", headers: { "Content-Type": "application/json" } });
+      devroomState.queueResult = data.queueResult || null;
+      el("queueResultView").textContent = prettyJson(data.queueResult || {});
+      el("requestResultView").textContent = prettyJson(data);
+      renderDecision(data.decision, data.request);
+      await loadHistory();
+    }
+
+    async function blockRequest() {
+      if (!devroomState.currentRequest) return;
+      const data = await fetchJson(`/admin/devroom/requests/${devroomState.currentRequest.requestId}/block`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: "Blocked from Dev Room UI" }) });
+      el("requestResultView").textContent = prettyJson(data);
+      renderDecision(data.decision, data.request);
+      await loadHistory();
+    }
+
+    async function saveInternalCodebook() {
+      const payload = JSON.parse(el("internalCodebookEditor").value);
+      const data = await fetchJson("/admin/devroom/internal-codebook", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scope: currentScope(), protectedEdit: true, codebook: payload }) });
+      el("requestResultView").textContent = prettyJson(data);
+      await loadInternalCodebook();
+      await loadHistory();
+    }
+
+    async function saveProjectCodebook() {
+      const payload = JSON.parse(el("projectCodebookEditor").value);
+      const scope = currentScope();
+      const data = await fetchJson("/admin/devroom/project-codebook", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scope, company: scope.company, project: scope.project, codebook: payload }) });
+      el("requestResultView").textContent = prettyJson(data);
+      await loadProjectCodebook();
+      await loadHistory();
+    }
+
+    function toggleInternalEditor() {
+      const editing = el("internalProtectedToggle").checked;
+      el("internalCodebookView").style.display = editing ? "none" : "block";
+      el("internalCodebookEditor").style.display = editing ? "block" : "none";
+      el("saveInternalBtn").disabled = !editing;
+    }
+
+    function unlockDevRoom() {
+      const input = el("passwordInput").value;
+      if (input === DEVROOM_PASSWORD) {
+        el("passwordOverlay").style.display = "none";
+        el("appShell").classList.remove("locked");
+        sessionStorage.setItem("devroom_unlocked", "1");
+      } else {
+        el("gateNote").textContent = "Wrong password.";
+      }
+    }
+
+    function lockDevRoom() {
+      sessionStorage.removeItem("devroom_unlocked");
+      window.location.reload();
+    }
+
+    function bindNavigation() {
+      document.querySelectorAll(".nav-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".nav-btn").forEach((node) => node.classList.remove("active"));
+          document.querySelectorAll(".section").forEach((node) => node.classList.remove("active"));
+          button.classList.add("active");
+          el(button.getAttribute("data-target")).classList.add("active");
+        });
+      });
+    }
+
+    function bindScopeControls() {
+      ["scopeCompany", "scopeProject", "scopeModule", "scopeRequestType", "scopeRequestSource", "scopeWorkspaceId", "scopeObjectType", "scopeOutputIntent"].forEach((id) => {
+        el(id).addEventListener("change", async () => {
+          if (id === "scopeModule") {
+            syncRequestTypeOptions();
+          }
+          if (id === "scopeRequestType") {
+            syncOutputIntent();
+          }
+          updateScopeSummary();
+          if (id === "scopeProject" || id === "scopeCompany") {
+            await loadProjectCodebook();
+          }
+          await loadHistory();
+          await loadXyzHistory();
+        });
+      });
+    }
+
+    function handleError(error) {
+      const message = error && error.message ? error.message : String(error);
+      el("requestResultView").textContent = message;
+      setText("decisionSummary", message);
+    }
+
+    async function init() {
+      bindNavigation();
+      bindScopeControls();
+      el("unlockBtn").addEventListener("click", unlockDevRoom);
+      el("passwordInput").addEventListener("keydown", (event) => { if (event.key === "Enter") unlockDevRoom(); });
+      el("lockBtn").addEventListener("click", lockDevRoom);
+      el("evaluateBtn").addEventListener("click", () => evaluateRequest().catch(handleError));
+      el("approveBtn").addEventListener("click", () => approveRequest().catch(handleError));
+      el("queueBtn").addEventListener("click", () => queueRequest().catch(handleError));
+      el("blockBtn").addEventListener("click", () => blockRequest().catch(handleError));
+      el("reloadInternalBtn").addEventListener("click", () => loadInternalCodebook().catch(handleError));
+      el("saveInternalBtn").addEventListener("click", () => saveInternalCodebook().catch(handleError));
+      el("reloadProjectBtn").addEventListener("click", () => loadProjectCodebook().catch(handleError));
+      el("saveProjectBtn").addEventListener("click", () => saveProjectCodebook().catch(handleError));
+      el("refreshHistoryBtn").addEventListener("click", () => loadHistory().catch(handleError));
+      el("xyzPlanBtn").addEventListener("click", () => createXyzPlan().catch(handleError));
+      el("xyzPreviewBtn").addEventListener("click", () => createXyzPreview().catch(handleError));
+      el("xyzJobBtn").addEventListener("click", () => createXyzGenerationPackage().catch(handleError));
+      el("xyzRefreshHistoryBtn").addEventListener("click", () => loadXyzHistory().catch(handleError));
+      el("internalProtectedToggle").addEventListener("change", toggleInternalEditor);
+
+      if (sessionStorage.getItem("devroom_unlocked") === "1") {
+        el("passwordOverlay").style.display = "none";
+        el("appShell").classList.remove("locked");
+      }
+
+      try {
+        await loadRuntimeConfig();
+        await Promise.all([checkHealth(), checkAdminPing(), loadBootstrap(), loadXyzBootstrap()]);
+        await Promise.all([loadInternalCodebook(), loadProjectCodebook(), loadHistory()]);
+        renderDecision(null, null);
+        renderXyzPlan(null);
+        renderXyzPreview(null);
+        renderXyzJob(null);
+        toggleInternalEditor();
+      } catch (error) {
+        handleError(error);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
