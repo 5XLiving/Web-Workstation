@@ -1,3 +1,5 @@
+
+from __future__ import annotations
 import sys
 sys.path.append(str(BASE_DIR))
 from xyz_routes import xyz_bp
@@ -22,7 +24,6 @@ def api_modular_pointer_commit():
         "result": {"summary": "Pointer commit accepted (mock)."},
         "payload": payload
     }), 200
-from __future__ import annotations
 
 import json
 import os
