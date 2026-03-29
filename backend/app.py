@@ -1,6 +1,8 @@
 
 from __future__ import annotations
 import sys
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(BASE_DIR))
 from xyz_routes import xyz_bp
 app.register_blueprint(xyz_bp)
