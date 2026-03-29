@@ -8,7 +8,6 @@ REPO_ROOT = BASE_DIR.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 from xyz_routes import xyz_bp
-app.register_blueprint(xyz_bp)
 @app.post("/api/core_ctr/action")
 def api_core_ctr_action():
     payload = request.get_json(silent=True) or {}
@@ -62,6 +61,7 @@ FALLBACK_MINI_AI_TIMEOUT_SECONDS = int(
 )
 
 app = Flask(__name__, static_folder="static")
+app.register_blueprint(xyz_bp)
 @app.route("/3d_model_maker")
 def serve_3d_model_maker():
     return send_from_directory("../", "3d_model_maker.html")
