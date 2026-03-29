@@ -1,3 +1,28 @@
+from __future__ import annotations
+import sys
+from pathlib import Path
+
+# Ensure BASE_DIR and repo root are set for import
+BASE_DIR = Path(__file__).resolve().parent
+REPO_ROOT = BASE_DIR.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+# Import and register blueprint after sys.path is set and app is created
+from xyz_routes import xyz_bp
+app.register_blueprint(xyz_bp)
+
+@app.route("/health")
+def health():
+    return jsonify({"ok": True, "message": "Workstation backend healthy"}), 200
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 from __future__ import annotations
 import sys
