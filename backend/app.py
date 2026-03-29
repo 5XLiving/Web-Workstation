@@ -3,7 +3,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
-sys.path.append(str(BASE_DIR))
+# Add repo root to sys.path for xyz_routes import
+REPO_ROOT = BASE_DIR.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 from xyz_routes import xyz_bp
 app.register_blueprint(xyz_bp)
 @app.post("/api/core_ctr/action")
