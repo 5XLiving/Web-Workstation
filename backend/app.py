@@ -8,26 +8,6 @@ REPO_ROOT = BASE_DIR.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 from xyz_routes import xyz_bp
-@app.post("/api/core_ctr/action")
-def api_core_ctr_action():
-    payload = request.get_json(silent=True) or {}
-    # Placeholder: Accepts any action and returns a mock response
-    return jsonify({
-        "ok": True,
-        "action": payload.get("action", "unknown"),
-        "result": {"summary": "CoreCtr action accepted (mock)."},
-        "payload": payload
-    }), 200
-
-@app.post("/api/modular/pointer_commit")
-def api_modular_pointer_commit():
-    payload = request.get_json(silent=True) or {}
-    # Placeholder: Accepts any pointer commit and returns a mock response
-    return jsonify({
-        "ok": True,
-        "result": {"summary": "Pointer commit accepted (mock)."},
-        "payload": payload
-    }), 200
 
 import json
 import os
@@ -62,6 +42,27 @@ FALLBACK_MINI_AI_TIMEOUT_SECONDS = int(
 
 app = Flask(__name__, static_folder="static")
 app.register_blueprint(xyz_bp)
+
+@app.post("/api/core_ctr/action")
+def api_core_ctr_action():
+    payload = request.get_json(silent=True) or {}
+    # Placeholder: Accepts any action and returns a mock response
+    return jsonify({
+        "ok": True,
+        "action": payload.get("action", "unknown"),
+        "result": {"summary": "CoreCtr action accepted (mock)."},
+        "payload": payload
+    }), 200
+
+@app.post("/api/modular/pointer_commit")
+def api_modular_pointer_commit():
+    payload = request.get_json(silent=True) or {}
+    # Placeholder: Accepts any pointer commit and returns a mock response
+    return jsonify({
+        "ok": True,
+        "result": {"summary": "Pointer commit accepted (mock)."},
+        "payload": payload
+    }), 200
 @app.route("/3d_model_maker")
 def serve_3d_model_maker():
     return send_from_directory("../", "3d_model_maker.html")
