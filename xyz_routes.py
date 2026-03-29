@@ -1,11 +1,22 @@
+
 from flask import Blueprint, request, jsonify
-from devroom.xyz_service import XYZSpatialService
+try:
+    from devroom.xyz_service import XYZSpatialService
+except ImportError:
+    XYZSpatialService = None
 from pathlib import Path
+
 
 xyz_bp = Blueprint("xyz_bp", __name__, url_prefix="/admin/devroom/xyz")
 
+
 # Initialize the service (adjust base_dir as needed)
-xyz_service = XYZSpatialService(base_dir=Path("."))
+xyz_service = XYZSpatialService(base_dir=Path(".")) if XYZSpatialService else None
+
+# Health/test endpoint
+@xyz_bp.route("/health", methods=["GET"])
+def xyz_health():
+    return jsonify({"ok": True, "message": "XYZ backend active"}), 200
 
 @xyz_bp.route("/plans", methods=["POST"])
 def create_plan():

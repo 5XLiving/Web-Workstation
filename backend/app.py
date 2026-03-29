@@ -1,3 +1,27 @@
+import sys
+sys.path.append(str(BASE_DIR))
+from xyz_routes import xyz_bp
+app.register_blueprint(xyz_bp)
+@app.post("/api/core_ctr/action")
+def api_core_ctr_action():
+    payload = request.get_json(silent=True) or {}
+    # Placeholder: Accepts any action and returns a mock response
+    return jsonify({
+        "ok": True,
+        "action": payload.get("action", "unknown"),
+        "result": {"summary": "CoreCtr action accepted (mock)."},
+        "payload": payload
+    }), 200
+
+@app.post("/api/modular/pointer_commit")
+def api_modular_pointer_commit():
+    payload = request.get_json(silent=True) or {}
+    # Placeholder: Accepts any pointer commit and returns a mock response
+    return jsonify({
+        "ok": True,
+        "result": {"summary": "Pointer commit accepted (mock)."},
+        "payload": payload
+    }), 200
 from __future__ import annotations
 
 import json
@@ -7,7 +31,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -31,7 +55,18 @@ FALLBACK_MINI_AI_TIMEOUT_SECONDS = int(
     os.environ.get("FIVEXLIVING_FALLBACK_MINI_AI_TIMEOUT_SECONDS", "20")
 )
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
+@app.route("/3d_model_maker")
+def serve_3d_model_maker():
+    return send_from_directory("../", "3d_model_maker.html")
+
+@app.route("/xyz_spatial")
+def serve_xyz_spatial():
+    return send_from_directory("archive", "3d_model_maker_plugin_host.html")
+
+@app.route("/static/images/<path:filename>")
+def serve_static_images(filename):
+    return send_from_directory("static/images", filename)
 CORS(app)
 
 EXPORT_TYPE_DIRECTORIES = {
