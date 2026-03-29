@@ -1,23 +1,53 @@
+
+# --- Startup Imports and Path Setup ---
 import sys
 from pathlib import Path
+import json
+import os
+import re
+from datetime import datetime, timezone
+import requests
+from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
 
-# Ensure BASE_DIR and repo root are set for import
 BASE_DIR = Path(__file__).resolve().parent
 REPO_ROOT = BASE_DIR.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from flask import Flask, jsonify
+# --- App Creation ---
+app = Flask(__name__, static_folder="static")
 
-app = Flask(__name__)
-
-# Import and register blueprint after sys.path is set and app is created
+# --- Blueprint Registration ---
 from xyz_routes import xyz_bp
 app.register_blueprint(xyz_bp)
+
+# --- Core Routes ---
+@app.route("/")
+def root():
+    return jsonify({"ok": True, "message": "Workstation backend root"}), 200
 
 @app.route("/health")
 def health():
     return jsonify({"ok": True, "message": "Workstation backend healthy"}), 200
+
+@app.route("/3d_model_maker")
+def serve_3d_model_maker():
+    return send_from_directory("../", "3d_model_maker.html")
+
+@app.route("/xyz_spatial")
+def serve_xyz_spatial():
+    return send_from_directory("archive", "3d_model_maker_plugin_host.html")
+
+@app.route("/static/images/<path:filename>")
+def serve_static_images(filename):
+    return send_from_directory("static/images", filename)
+
+CORS(app)
+
+# --- (Keep all other business logic, routes, and helpers as is, attached to this app object) ---
+
+# ...existing business logic, API routes, and helpers...
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
