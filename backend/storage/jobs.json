@@ -1,0 +1,41 @@
+{
+  "job_20260331133718154172": {
+    "company": "5xLiving",
+    "project": "Workstation",
+    "module": "3DModelMaker",
+    "action": "preview",
+    "input_data": {
+      "prompt": "",
+      "style": "premium product render",
+      "upload": {
+        "present": true,
+        "name": "WhatsApp Image 2026-02-09 at 12.10.42 AM (1).jpeg"
+      },
+      "object_settings": {
+        "scale": 1,
+        "thickness": 0.35,
+        "orientation": "front",
+        "width": 1.2,
+        "height": 1.05,
+        "depth": 0.35
+      },
+      "local_preview_kind": "upload"
+    },
+    "requested_by": "local-user",
+    "job_id": "job_20260331133718154172",
+    "version_id": "v2026.03.31.133718",
+    "timestamp": "2026-03-31T13:37:18Z",
+    "status": "draft",
+    "last_result": {
+      "ok": true,
+      "job_id": "job_20260331133718154172",
+      "module": "3DModelMaker",
+      "summary": "Mock result for preview in 3DModelMaker",
+      "preview": {
+        "placeholder": true
+      },
+      "logs_path": "/5xLiving/Workstation/logs/job_20260331133718154172.log",
+      "output_path": "/5xLiving/Workstation/output/job_20260331133718154172.json"
+    }
+  }
+}

@@ -6,1125 +6,690 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <title>5X WorkStation • Client WorkStation</title>
+  <title>5X WorkStation • 3D Model Maker</title>
 
   <style>
-    :root {
-      --bg: #020611;
-      --bg2: #071120;
-      --bg3: #050914;
-      --glass: rgba(7, 14, 24, 0.72);
-      --glass-strong: rgba(10, 19, 33, 0.88);
-      --panel: rgba(10, 18, 31, 0.86);
-      --panel-soft: rgba(12, 21, 36, 0.72);
-      --line: rgba(255, 255, 255, 0.08);
-      --line-strong: rgba(255, 255, 255, 0.12);
-      --text: #f4f8ff;
-      --muted: #9db0c5;
-      --mint: #94f3de;
-      --mint-2: #ccfff2;
-      --mint-line: rgba(148, 243, 222, 0.24);
-      --cyan: #8bd3ff;
-      --gold: #e7ce8a;
-      --shadow: 0 28px 68px rgba(0, 0, 0, 0.36);
-      --radius-xl: 28px;
-      --radius-lg: 22px;
-      --radius-md: 16px;
-      --radius-sm: 12px;
-      --topbar-h: 86px;
-      --shell-pad: 14px;
-      --shell-gap: 14px;
+    :root{
+      --bg:#020611;
+      --bg2:#071120;
+      --bg3:#050914;
+      --glass:rgba(7,14,24,.72);
+      --glass2:rgba(10,19,33,.88);
+      --panel:rgba(10,18,31,.86);
+      --line:rgba(255,255,255,.08);
+      --text:#f4f8ff;
+      --muted:#9db0c5;
+      --mint:#94f3de;
+      --mint2:#ccfff2;
+      --mintLine:rgba(148,243,222,.24);
+      --shadow:0 28px 68px rgba(0,0,0,.36);
+      --radiusXL:28px;
+      --radiusLG:22px;
+      --radiusMD:16px;
+      --topbarH:86px;
+      --shellPad:14px;
+      --shellGap:14px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-    }
-
-    body {
-      margin: 0;
-      color: var(--text);
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       background:
-        radial-gradient(circle at 12% 10%, rgba(92, 136, 255, 0.18), transparent 24%),
-        radial-gradient(circle at 84% 14%, rgba(62, 215, 193, 0.14), transparent 24%),
-        radial-gradient(circle at 50% 0%, rgba(125, 164, 255, 0.08), transparent 28%),
+        radial-gradient(circle at 12% 10%, rgba(92,136,255,.18), transparent 24%),
+        radial-gradient(circle at 84% 14%, rgba(62,215,193,.14), transparent 24%),
+        radial-gradient(circle at 50% 0%, rgba(125,164,255,.08), transparent 28%),
         linear-gradient(180deg, var(--bg) 0%, var(--bg2) 56%, var(--bg3) 100%);
     }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
       background:
-        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-      background-size: 120px 120px;
-      mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.85), transparent 88%);
-      opacity: 0.18;
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size:120px 120px;
+      mask-image:radial-gradient(circle at center, rgba(0,0,0,.85), transparent 88%);
+      opacity:.18;
     }
 
-    .shell {
-      min-height: 100vh;
-      padding: var(--shell-pad);
-      display: grid;
-      grid-template-rows: auto 1fr;
-      gap: var(--shell-gap);
+    .shell{
+      min-height:100vh;
+      padding:var(--shellPad);
+      display:grid;
+      grid-template-rows:auto 1fr;
+      gap:var(--shellGap);
     }
 
-    .glass {
-      border: 1px solid var(--line);
+    .glass{
+      border:1px solid var(--line);
       background:
-        radial-gradient(circle at top right, rgba(148, 243, 222, 0.08), transparent 26%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
-        linear-gradient(180deg, var(--glass-strong), var(--glass));
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px) saturate(140%);
+        radial-gradient(circle at top right, rgba(148,243,222,.08), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+        linear-gradient(180deg, var(--glass2), var(--glass));
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(16px) saturate(140%);
     }
 
-    .topbar {
-      min-height: var(--topbar-h);
-      border-radius: 24px;
-      padding: 14px 18px;
-      display: grid;
-      grid-template-columns: minmax(260px, 1.3fr) minmax(320px, 1fr) auto;
-      align-items: center;
-      gap: 16px;
+    .topbar{
+      min-height:var(--topbarH);
+      border-radius:24px;
+      padding:14px 18px;
+      display:grid;
+      grid-template-columns:minmax(260px,1.2fr) auto;
+      align-items:center;
+      gap:16px;
     }
 
-    .brand-block {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
     }
 
-    .logo {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
-      object-fit: contain;
-      filter: drop-shadow(0 0 16px rgba(148, 243, 222, 0.18));
-      flex: none;
+    .logo{
+      width:58px;
+      height:58px;
+      border-radius:16px;
+      object-fit:contain;
+      flex:none;
+      filter:drop-shadow(0 0 16px rgba(148,243,222,.18));
     }
 
-    .brand-copy {
-      min-width: 0;
+    .brand-copy strong{
+      display:block;
+      font-family:"Noto Serif SC","Noto Serif",serif;
+      font-size:30px;
+      font-weight:600;
+      line-height:.98;
+      letter-spacing:-.03em;
     }
 
-    .brand-copy strong {
-      display: block;
-      font-family: "Noto Serif SC", "Noto Serif", serif;
-      font-size: 30px;
-      font-weight: 600;
-      line-height: 0.98;
-      letter-spacing: -0.03em;
+    .brand-copy span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      margin-top:5px;
     }
 
-    .brand-copy span {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      margin-top: 5px;
+    .account{
+      display:grid;
+      gap:6px;
+      justify-items:end;
+      text-align:right;
     }
 
-    .brand-copy small {
-      display: block;
-      color: var(--mint-2);
-      font-size: 13px;
-      margin-top: 5px;
+    .account strong{
+      font-size:14px;
+      color:var(--mint2);
     }
 
-    .top-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      justify-content: center;
+    .account span{
+      color:var(--muted);
+      font-size:12px;
     }
 
-    .pill {
-      border-radius: 999px;
-      padding: 10px 14px;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border: 1px solid var(--line);
-      background: rgba(9, 15, 26, 0.72);
-      white-space: nowrap;
+    .layout{
+      min-height:0;
+      display:grid;
+      grid-template-columns:340px minmax(0,1fr) 310px;
+      gap:14px;
+      align-items:stretch;
     }
 
-    .pill strong {
-      color: var(--mint-2);
-      margin-left: 8px;
-      font-weight: 700;
-      letter-spacing: normal;
-      text-transform: none;
+    .panel{
+      min-height:0;
+      border-radius:26px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
     }
 
-    .account-block {
-      display: grid;
-      gap: 6px;
-      justify-items: end;
-      text-align: right;
+    .panel-head{
+      padding:16px 18px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
     }
 
-    .account-block strong {
-      font-size: 14px;
-      color: var(--mint-2);
+    .panel-head strong{
+      font-size:15px;
+      color:var(--mint2);
+      letter-spacing:.03em;
     }
 
-    .account-block span {
-      color: var(--muted);
-      font-size: 12px;
+    .panel-head span{
+      color:var(--muted);
+      font-size:12px;
     }
 
-    .layout {
-      min-height: 0;
-      display: grid;
-      grid-template-columns: 340px minmax(0, 1fr) 300px;
-      gap: 14px;
-      align-items: stretch;
+    .panel-body{
+      min-height:0;
+      overflow:auto;
+      padding:16px;
+      display:grid;
+      gap:14px;
     }
 
-    .panel {
-      min-height: 0;
-      border-radius: 26px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+    .card{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(180deg, rgba(11,18,31,.86), rgba(10,16,28,.72));
+      padding:14px;
+      display:grid;
+      gap:10px;
     }
 
-    .panel-head {
-      padding: 16px 18px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
+    .card h3{
+      margin:0;
+      font-size:14px;
+      color:var(--mint2);
+      letter-spacing:.02em;
     }
 
-    .panel-head strong {
-      font-size: 15px;
-      color: var(--mint-2);
-      letter-spacing: 0.03em;
+    .card p,.muted{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
     }
 
-    .panel-head span {
-      color: var(--muted);
-      font-size: 12px;
+    label{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin-bottom:6px;
     }
 
-    .panel-body {
-      min-height: 0;
-      overflow: auto;
-      padding: 16px;
-      display: grid;
-      gap: 14px;
+    input,select,textarea{
+      width:100%;
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:12px;
+      background:rgba(8,14,24,.9);
+      color:var(--text);
+      padding:11px 12px;
+      font:inherit;
+      outline:none;
     }
 
-    .stack-card {
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: linear-gradient(180deg, rgba(11, 18, 31, 0.86), rgba(10, 16, 28, 0.72));
-      padding: 14px;
-      display: grid;
-      gap: 10px;
+    textarea{
+      min-height:110px;
+      resize:vertical;
     }
 
-    .stack-card h3 {
-      margin: 0;
-      font-size: 14px;
-      color: var(--mint-2);
-      letter-spacing: 0.02em;
+    input[type="range"]{
+      padding:0;
+      accent-color:#a6f6e4;
     }
 
-    .stack-card p,
-    .muted {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    label {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      background: rgba(8, 14, 24, 0.9);
-      color: var(--text);
-      padding: 11px 12px;
-      font: inherit;
-      outline: none;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: rgba(148, 243, 222, 0.34);
-      box-shadow: 0 0 0 1px rgba(148, 243, 222, 0.16) inset;
-    }
-
-    textarea {
-      min-height: 110px;
-      resize: vertical;
-    }
-
-    input[type="range"] {
-      padding: 0;
-      accent-color: #a6f6e4;
-    }
-
-    .preview-box {
-      min-height: 146px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    .preview-box{
+      min-height:146px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
       background:
-        radial-gradient(circle at top right, rgba(148, 243, 222, 0.06), transparent 28%),
-        rgba(7, 12, 22, 0.82);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      color: var(--muted);
-      font-size: 13px;
-      text-align: center;
+        radial-gradient(circle at top right, rgba(148,243,222,.06), transparent 28%),
+        rgba(7,12,22,.82);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
     }
 
-    .preview-box img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
+    .preview-box img{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
     }
 
-    .row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+    .row{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
     }
 
-    .row-3 {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
+    .btn{
+      min-height:44px;
+      border-radius:12px;
+      border:1px solid var(--mintLine);
+      cursor:pointer;
+      padding:11px 14px;
+      font:inherit;
+      font-weight:800;
+      transition:transform .18s ease,border-color .18s ease,background .18s ease,opacity .18s ease;
     }
 
-    .btn {
-      min-height: 44px;
-      border-radius: 12px;
-      border: 1px solid var(--mint-line);
-      cursor: pointer;
-      padding: 11px 14px;
-      font: inherit;
-      font-weight: 800;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.55; cursor:not-allowed; transform:none}
+    .btn-primary{color:#08221d; background:linear-gradient(135deg,#b8fff0 0%, #86efd8 100%)}
+    .btn-secondary{color:var(--text); background:rgba(148,243,222,.06)}
+    .btn-quiet{color:var(--muted); background:rgba(255,255,255,.03); border-color:rgba(255,255,255,.08)}
 
-    .btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      color: #08221d;
-      background: linear-gradient(135deg, #b8fff0 0%, #86efd8 100%);
-    }
-
-    .btn-secondary {
-      color: var(--text);
-      background: rgba(148, 243, 222, 0.06);
-    }
-
-    .btn-quiet {
-      color: var(--muted);
-      background: rgba(255, 255, 255, 0.03);
-      border-color: rgba(255, 255, 255, 0.08);
-    }
-
-    .setting-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .slider-note {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .viewport-shell {
-      min-height: 0;
-      height: 100%;
-      max-height: 100%;
-      border-radius: 28px;
-      overflow: hidden;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
+    .viewport-shell{
+      min-height:0;
+      height:100%;
+      border-radius:28px;
+      overflow:hidden;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
       background:
-        radial-gradient(circle at 16% 0%, rgba(112, 146, 255, 0.14), transparent 22%),
-        radial-gradient(circle at 88% 12%, rgba(148, 243, 222, 0.1), transparent 24%),
-        linear-gradient(180deg, rgba(9, 16, 28, 0.82), rgba(8, 13, 24, 0.92));
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: var(--shadow);
-      position: relative;
-    }
-
-    .viewport-top {
-      position: relative;
-      z-index: 10;
-      padding: 16px 16px 0;
-      display: grid;
-      gap: 12px;
-    }
-
-    .module-badge {
-      width: fit-content;
-      border-radius: 999px;
-      padding: 10px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(7, 14, 24, 0.72);
-      color: var(--mint-2);
-      font-size: 12px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-
-    .tool-rail {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      padding: 10px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(6, 12, 22, 0.7);
-      width: fit-content;
-      max-width: 100%;
-    }
-
-    .tool-btn {
-      position: relative;
-      min-width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(10, 17, 29, 0.88);
-      color: var(--text);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      padding: 0 12px;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-    }
-
-    .tool-btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(148, 243, 222, 0.28);
-    }
-
-    .tool-btn.active {
-      color: var(--mint-2);
-      background: rgba(148, 243, 222, 0.08);
-      border-color: var(--mint-line);
-      box-shadow: 0 0 0 1px rgba(148, 243, 222, 0.08) inset;
-    }
-
-    .tool-btn svg {
-      width: 17px;
-      height: 17px;
-      flex: none;
-    }
-
-    .tool-btn .txt {
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .tool-btn[data-tip]:hover::after,
-    .tool-btn[data-tip]:focus-visible::after {
-      content: attr(data-tip);
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 7px 10px;
-      border-radius: 10px;
-      background: rgba(7, 12, 22, 0.96);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: var(--text);
-      font-size: 11px;
-      line-height: 1.35;
-      white-space: nowrap;
-      pointer-events: none;
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
-      z-index: 30;
-    }
-
-    .mode-switch {
-      display: inline-flex;
-      gap: 6px;
-      padding: 4px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(7, 14, 24, 0.66);
-    }
-
-    .mode-btn {
-      min-height: 34px;
-      border-radius: 999px;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      padding: 0 12px;
-      font: inherit;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: background 0.18s ease, color 0.18s ease;
-    }
-
-    .mode-btn.active {
-      color: #08221d;
-      background: linear-gradient(135deg, #b8fff0 0%, #86efd8 100%);
-    }
-
-    .construction-rail {
-      display: grid;
-      gap: 10px;
-      width: min(100%, 820px);
-      padding: 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(6, 12, 22, 0.74);
-    }
-
-    .construction-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .construction-pill {
-      min-height: 38px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(10, 17, 29, 0.88);
-      color: var(--text);
-      padding: 8px 12px;
-      font: inherit;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-    }
-
-    .construction-pill:hover {
-      transform: translateY(-1px);
-      border-color: rgba(148, 243, 222, 0.28);
-    }
-
-    .construction-pill.active {
-      color: var(--mint-2);
-      background: rgba(148, 243, 222, 0.08);
-      border-color: var(--mint-line);
-    }
-
-    .construction-note {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.55;
-    }
-
-    .workspace-modebar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(6, 12, 22, 0.74);
-    }
-
-    .mode-tabs {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .mode-chip {
-      border-radius: 999px;
-      padding: 8px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(10, 17, 29, 0.82);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .mode-chip.active {
-      color: var(--mint-2);
-      border-color: var(--mint-line);
-      background: rgba(148, 243, 222, 0.08);
-    }
-
-    .mode-chip[data-ready="false"] {
-      opacity: 0.72;
-    }
-
-    .mode-chip[data-ready="false"]::after {
-      content: "Soon";
-      margin-left: 8px;
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .send-status {
-      display: grid;
-      gap: 8px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(9, 14, 24, 0.76);
-    }
-
-    .send-status-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(10, 17, 29, 0.88);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .status-badge::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: currentColor;
-      opacity: 0.9;
-    }
-
-    .status-badge.is-idle {
-      color: #9aa6bb;
-    }
-
-    .status-badge.is-loading {
-      color: #ffd37a;
-    }
-
-    .status-badge.is-success {
-      color: #8ef3d0;
-    }
-
-    .status-badge.is-fail {
-      color: #ff9d9d;
-    }
-
-    .status-badge.is-offline {
-      color: #ffb36f;
-    }
-
-    .status-copy {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.55;
-    }
-
-    .visibility-client,
-    .visibility-expert,
-    .visibility-dev {
-      display: none;
-    }
-
-    body.mode-client .visibility-client {
-      display: initial;
-    }
-
-    body.mode-expert .visibility-client,
-    body.mode-expert .visibility-expert {
-      display: initial;
-    }
-
-    body.mode-client .visibility-client.grid,
-    body.mode-expert .visibility-client.grid,
-    body.mode-expert .visibility-expert.grid {
-      display: grid;
-    }
-
-    body.mode-client .visibility-client.flex,
-    body.mode-expert .visibility-client.flex,
-    body.mode-expert .visibility-expert.flex {
-      display: flex;
-    }
-
-    body.mode-client .visibility-client.inline-flex,
-    body.mode-expert .visibility-client.inline-flex,
-    body.mode-expert .visibility-expert.inline-flex {
-      display: inline-flex;
-    }
-
-    .gizmo-hint {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .dimension-strip {
-      display: inline-flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    .dimension-pill {
-      min-width: 108px;
-      border-radius: 14px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(8, 14, 24, 0.7);
-      display: grid;
-      gap: 4px;
-    }
-
-    .dimension-pill span {
-      color: var(--muted);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .dimension-pill strong {
-      color: var(--mint-2);
-      font-size: 14px;
-      letter-spacing: -0.02em;
-    }
-
-    .viewport-dimension-banner {
-      position: absolute;
-      left: 18px;
-      right: 18px;
-      bottom: 18px;
-      z-index: 12;
-      pointer-events: none;
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-end;
-    }
-
-    .selection-callout {
-      max-width: 280px;
-      border-radius: 18px;
-      padding: 12px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: linear-gradient(180deg, rgba(9, 16, 28, 0.82), rgba(8, 14, 24, 0.72));
-      box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24);
-      display: grid;
-      gap: 4px;
-    }
-
-    .selection-callout strong {
-      color: var(--mint-2);
-      font-size: 13px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .selection-callout span {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .construction-readout {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    .pointer-readout {
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(8, 14, 24, 0.72);
-      padding: 10px 12px;
-      display: grid;
-      gap: 4px;
-    }
-
-    .pointer-readout strong {
-      color: var(--mint-2);
-      font-size: 12px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .pointer-readout span {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .viewport-main {
-      position: relative;
-      min-height: 420px;
-      overflow: hidden;
-    }
-
-    #viewportCanvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      display: block;
-      cursor: grab;
-      touch-action: none;
-    }
-
-    #viewportCanvas.dragging {
-      cursor: grabbing;
-    }
-
-    .viewport-bottom {
-      position: relative;
-      z-index: 10;
-      padding: 0 16px 16px;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .chip {
-      border-radius: 12px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(8, 14, 24, 0.72);
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .chip strong {
-      color: var(--mint-2);
-      margin-left: 6px;
-      font-size: 13px;
-    }
-
-    .side-metric {
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(9, 14, 24, 0.76);
-      padding: 12px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .metric-line {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 13px;
-    }
-
-    .metric-line .k {
-      color: var(--muted);
-    }
-
-    .metric-line .v {
-      color: var(--mint-2);
-      font-weight: 700;
-      text-align: right;
-    }
-
-    .activity-log {
-      min-height: 180px;
-      max-height: 320px;
-      overflow: auto;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(7, 12, 22, 0.82);
-      padding: 10px;
-      display: grid;
-      gap: 8px;
-      align-content: start;
-    }
-
-    .log-entry {
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      background: rgba(255, 255, 255, 0.02);
-      padding: 10px 11px;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
-    .log-entry strong {
-      color: var(--text);
-      font-weight: 700;
-    }
-
-    .note-strip {
-      border-radius: 16px;
-      padding: 12px;
-      border: 1px dashed rgba(148, 243, 222, 0.22);
-      background: rgba(148, 243, 222, 0.04);
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-
-    .top-meta-hidden {
-      display: none !important;
-    }
-
-    .mounted-controls {
-      display: grid;
-      gap: 14px;
-      margin-top: 4px;
-    }
-
-    .mounted-subcard {
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(8, 14, 24, 0.62);
-      padding: 12px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .mounted-subcard h4 {
-      margin: 0;
-      color: var(--mint-2);
-      font-size: 13px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .slider-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 88px;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .slider-row input[type="number"] {
-      text-align: right;
-    }
-
-    .xyz-grid {
-      display: grid;
-      gap: 10px;
-    }
-
-    .output-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 140px;
-      gap: 10px;
-    }
-
-    @media (max-width: 720px) {
-      .slider-row,
-      .output-row {
-        grid-template-columns: 1fr;
+        radial-gradient(circle at 16% 0%, rgba(112,146,255,.14), transparent 22%),
+        radial-gradient(circle at 88% 12%, rgba(148,243,222,.1), transparent 24%),
+        linear-gradient(180deg, rgba(9,16,28,.82), rgba(8,13,24,.92));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      position:relative;
+    }
+
+    .viewport-top{
+      position:relative;
+      z-index:10;
+      padding:16px 16px 0;
+      display:grid;
+      gap:12px;
+    }
+
+    .module-badge{
+      width:fit-content;
+      border-radius:999px;
+      padding:10px 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(7,14,24,.72);
+      color:var(--mint2);
+      font-size:12px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    .tool-rail{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      padding:10px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(6,12,22,.7);
+      width:fit-content;
+      max-width:100%;
+    }
+
+    .tool-btn{
+      min-width:42px;
+      height:42px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(10,17,29,.88);
+      color:var(--text);
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      padding:0 12px;
+      transition:transform .18s ease,border-color .18s ease,background .18s ease;
+    }
+
+    .tool-btn:hover{transform:translateY(-1px); border-color:rgba(148,243,222,.28)}
+    .tool-btn.active{
+      color:var(--mint2);
+      background:rgba(148,243,222,.08);
+      border-color:var(--mintLine);
+      box-shadow:0 0 0 1px rgba(148,243,222,.08) inset;
+    }
+
+    .tool-btn .txt{font-size:12px; font-weight:700; white-space:nowrap}
+
+    .workspace-note{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 12px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(6,12,22,.74);
+    }
+
+    .workspace-note .mode-chip{
+      border-radius:999px;
+      padding:8px 12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(10,17,29,.82);
+      color:var(--mint2);
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .workspace-note .hint{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .viewport-main{
+      position:relative;
+      min-height:420px;
+      overflow:hidden;
+    }
+
+    #viewportCanvas{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      cursor:grab;
+      touch-action:none;
+    }
+
+    #viewportCanvas.dragging{cursor:grabbing}
+
+    .viewport-banner{
+      position:absolute;
+      left:18px;
+      right:18px;
+      bottom:18px;
+      z-index:12;
+      pointer-events:none;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-end;
+    }
+
+    .selection-callout{
+      max-width:280px;
+      border-radius:18px;
+      padding:12px 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(180deg, rgba(9,16,28,.82), rgba(8,14,24,.72));
+      box-shadow:0 18px 34px rgba(0,0,0,.24);
+      display:grid;
+      gap:4px;
+    }
+
+    .selection-callout strong{
+      color:var(--mint2);
+      font-size:13px;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+
+    .selection-callout span{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .dimension-strip{
+      display:inline-flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .dimension-pill{
+      min-width:108px;
+      border-radius:14px;
+      padding:10px 12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(8,14,24,.7);
+      display:grid;
+      gap:4px;
+    }
+
+    .dimension-pill span{
+      color:var(--muted);
+      font-size:11px;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+    }
+
+    .dimension-pill strong{
+      color:var(--mint2);
+      font-size:14px;
+      letter-spacing:-.02em;
+    }
+
+    .viewport-bottom{
+      position:relative;
+      z-index:10;
+      padding:0 16px 16px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .chip-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .chip{
+      border-radius:12px;
+      padding:10px 12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(8,14,24,.72);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .chip strong{
+      color:var(--mint2);
+      margin-left:6px;
+      font-size:13px;
+    }
+
+    .side-metric{
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(9,14,24,.76);
+      padding:12px;
+      display:grid;
+      gap:8px;
+    }
+
+    .metric-line{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:13px;
+    }
+
+    .metric-line .k{color:var(--muted)}
+    .metric-line .v{color:var(--mint2); font-weight:700; text-align:right}
+
+    .activity-log{
+      min-height:180px;
+      max-height:320px;
+      overflow:auto;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(7,12,22,.82);
+      padding:10px;
+      display:grid;
+      gap:8px;
+      align-content:start;
+    }
+
+    .log-entry{
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.02);
+      padding:10px 11px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .log-entry strong{color:var(--text)}
+
+    .mounted-controls{
+      display:grid;
+      gap:14px;
+      margin-top:4px;
+    }
+
+    .mounted-subcard{
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(8,14,24,.62);
+      padding:12px;
+      display:grid;
+      gap:10px;
+    }
+
+    .mounted-subcard h4{
+      margin:0;
+      color:var(--mint2);
+      font-size:13px;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+
+    .slider-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 88px;
+      gap:10px;
+      align-items:center;
+    }
+
+    .slider-row input[type="number"]{text-align:right}
+    .object-grid{display:grid; gap:10px}
+    .output-row{display:grid; grid-template-columns:minmax(0,1fr) 140px; gap:10px}
+
+    .send-status{
+      display:grid;
+      gap:8px;
+      padding:12px 14px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(9,14,24,.76);
+    }
+
+    .send-status-head{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 11px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(10,17,29,.88);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .status-badge::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:currentColor;
+      opacity:.9;
+    }
+
+    .is-idle{color:#9aa6bb}
+    .is-loading{color:#ffd37a}
+    .is-success{color:#8ef3d0}
+    .is-fail{color:#ff9d9d}
+    .is-offline{color:#ffb36f}
+
+    .status-copy{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    @media (max-width:1280px){
+      .layout{grid-template-columns:320px minmax(0,1fr) 280px}
+      .topbar{grid-template-columns:1fr}
+      .account{justify-items:start; text-align:left}
+    }
+
+    @media (min-width:1081px){
+      .shell{height:100dvh; overflow:hidden}
+      .layout{height:100%}
+      .panel,.viewport-shell{height:100%; max-height:100%}
+      .viewport-shell{
+        height:calc(100dvh - (var(--shellPad) * 2) - var(--shellGap) - var(--topbarH));
+        max-height:calc(100dvh - (var(--shellPad) * 2) - var(--shellGap) - var(--topbarH));
       }
+      .viewport-main{min-height:0}
     }
 
-    @media (max-width: 1280px) {
-      .layout {
-        grid-template-columns: 320px minmax(0, 1fr) 280px;
-      }
-
-      .topbar {
-        grid-template-columns: 1fr;
-        justify-items: start;
-      }
-
-      .account-block {
-        justify-items: start;
-        text-align: left;
-      }
+    @media (max-width:1080px){
+      body{overflow:auto}
+      .layout{grid-template-columns:1fr}
+      .viewport-main{min-height:460px}
     }
 
-    @media (min-width: 1081px) {
-      .shell {
-        height: 100dvh;
-        overflow: hidden;
-      }
-
-      .layout {
-        height: 100%;
-      }
-
-      .panel,
-      .viewport-shell {
-        height: 100%;
-        max-height: 100%;
-      }
-
-      .viewport-shell {
-        height: calc(100dvh - (var(--shell-pad) * 2) - var(--shell-gap) - var(--topbar-h));
-        max-height: calc(100dvh - (var(--shell-pad) * 2) - var(--shell-gap) - var(--topbar-h));
-      }
-
-      .viewport-main {
-        min-height: 0;
-      }
-    }
-
-    @media (max-width: 1080px) {
-      body {
-        overflow: auto;
-      }
-
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .panel,
-      .viewport-shell {
-        min-height: auto;
-      }
-
-      .viewport-main {
-        min-height: 460px;
-      }
-
-      .construction-readout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 720px) {
-      .shell {
-        padding: 10px;
-      }
-
-      .topbar {
-        padding: 14px;
-      }
-
-      .brand-copy strong {
-        font-size: 26px;
-      }
-
-      .row,
-      .row-3 {
-        grid-template-columns: 1fr;
-      }
-
-      .tool-btn .txt {
-        display: none;
-      }
-
-      .viewport-main {
-        min-height: 380px;
-      }
+    @media (max-width:720px){
+      .shell{padding:10px}
+      .topbar{padding:14px}
+      .brand-copy strong{font-size:26px}
+      .row,.output-row,.slider-row{grid-template-columns:1fr}
+      .tool-btn .txt{display:none}
+      .viewport-main{min-height:380px}
     }
   </style>
 
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 </head>
-<body class="mode-client">
+<body>
   <div class="shell">
     <header class="topbar glass">
-      <div class="brand-block">
+      <div class="brand">
         <img src="assets/images/logo.png" alt="5xLiving logo" class="logo" />
         <div class="brand-copy">
-          <strong>Client WorkStation</strong>
-          <span>5xLiving / WorkStation</span>
-          <small>Premium client-facing creation shell for mounted modules</small>
+          <strong>3D Model Maker</strong>
+          <span>5xLiving / Workstation</span>
         </div>
       </div>
 
-      <div class="top-meta top-meta-hidden" aria-hidden="true">
-        <span id="workspaceLabel">Project Workspace A</span>
-        <span id="modeLabel">Client Mode</span>
-        <span id="saveStatus">Unsaved local changes</span>
-        <button class="mode-btn" id="modeClient" type="button" tabindex="-1">Client</button>
-        <button class="mode-btn" id="modeExpert" type="button" tabindex="-1">Expert</button>
-      </div>
-
-      <div class="account-block">
-        <strong id="clientLabel">5xLiving Client Route</strong>
-        <span id="sessionLabel">WorkStation / Maker through Core CTR</span>
+      <div class="account">
+        <strong>Client Preview Route</strong>
+        <span>Input UI → Core CTR → Preview result</span>
       </div>
     </header>
 
     <main class="layout">
       <aside class="panel glass">
         <div class="panel-head">
-          <strong>Client Controls</strong>
-          <span>Input and creation flow</span>
+          <strong>Input Controls</strong>
+          <span>Upload or prompt</span>
         </div>
 
         <div class="panel-body">
-          <section class="stack-card">
+          <section class="card">
             <h3>Upload</h3>
-            <p>Bring in a client reference image and mount it into the active 3D Model Maker view.</p>
+            <p>Bring in a reference image and mount it into the preview room.</p>
             <div>
               <label for="uploadFile">Reference Image</label>
               <input id="uploadFile" type="file" accept="image/*" />
@@ -1136,12 +701,12 @@
             </div>
           </section>
 
-          <section class="stack-card">
-            <h3>AI Prompt</h3>
-            <p>Stage a client-safe concept prompt here, then send the request through Core CTR.</p>
+          <section class="card">
+            <h3>Prompt</h3>
+            <p>Stage a prompt for preview through Core CTR.</p>
             <div>
               <label for="aiPrompt">Prompt</label>
-              <textarea id="aiPrompt" placeholder="Describe the object, mood, style, and silhouette for the maker room."></textarea>
+              <textarea id="aiPrompt" placeholder="Describe the object, mood, style, and silhouette."></textarea>
             </div>
             <div>
               <label for="aiStyle">Style</label>
@@ -1152,117 +717,51 @@
                 <option value="architectural white model">Architectural White Model</option>
               </select>
             </div>
-            <button id="btnAiGenerate" class="btn btn-secondary">Stage Prompt Preview</button>
+            <div class="row">
+              <button id="btnPreviewPrompt" class="btn btn-secondary">Preview Prompt</button>
+              <button id="btnCreateDraft" class="btn btn-quiet">Create Draft</button>
+            </div>
           </section>
 
-          <section class="stack-card">
+          <section class="card">
             <h3>Generate</h3>
-            <p>Create the mounted preview from your current upload or prompt. Output routing is handled in the Mounted Result card.</p>
-            <button id="btnGenerate" class="btn btn-primary">Generate</button>
-          </section>
-
-          <section class="note-strip visibility-dev">
-            This page stays client-facing. It is structured for future Core CTR routing, without exposing backend logic or internal control paths in the frontend.
+            <p>Send the current upload or prompt to Core CTR as a preview job.</p>
+            <button id="btnGenerate" class="btn btn-primary">Generate Preview</button>
           </section>
         </div>
       </aside>
 
-      <section class="viewport-shell" aria-label="Client workstation viewer">
+      <section class="viewport-shell" aria-label="3D preview room">
         <div class="viewport-top">
           <div class="module-badge">Mounted Module / 3D Model Maker</div>
 
-          <div class="workspace-modebar visibility-client flex visibility-expert visibility-dev">
-            <div class="mode-tabs">
-              <span class="mode-chip active" id="workModeObject" data-mode="object" data-ready="true">Object Mode</span>
-              <span class="mode-chip visibility-expert" id="workModePerimeter" data-mode="perimeter" data-ready="false">Perimeter / Zone</span>
-              <span class="mode-chip visibility-dev" id="workModeDetail" data-mode="detail" data-ready="false">Detail Mode</span>
-            </div>
-            <div class="gizmo-hint" id="modeGuidance">Use Move, Rotate, or Scale, then drag the colored XYZ gizmo handles on the selected object.</div>
+          <div class="workspace-note">
+            <span class="mode-chip">Object Mode</span>
+            <div class="hint" id="modeGuidance">Use Move, Rotate, Scale, Orbit, Pan, and Fit to inspect the preview object.</div>
           </div>
 
           <div class="tool-rail" id="toolRail">
-            <button class="tool-btn active" id="toolSelect" data-tool="Select" data-tip="Select and inspect the mounted object.">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l12 8-5.5 1.5L14 20l-2.5 1-2.4-7.4L5 15V3z"/></svg>
-              <span class="txt">Select</span>
-            </button>
-            <button class="tool-btn" id="toolMove" data-tool="Move" data-tip="Move the mounted object through the floating construction space.">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 3-3 3-3-3 3-3z"/><path d="M12 16l3 3-3 3-3-3 3-3z"/><path d="M2 12l3-3 3 3-3 3-3-3z"/><path d="M16 12l3-3 3 3-3 3-3-3z"/><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-              <span class="txt">Move</span>
-            </button>
-            <button class="tool-btn" id="toolRotate" data-tool="Rotate" data-tip="Rotate the mounted object in the viewing room.">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 4v7h-7"/></svg>
-              <span class="txt">Rotate</span>
-            </button>
-            <button class="tool-btn" id="toolScale" data-tool="Scale" data-tip="Scale the object without leaving the client workstation.">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/><path d="M9 4L4 9"/><path d="M15 4l5 5"/><path d="M9 20l-5-5"/><path d="M15 20l5-5"/></svg>
-              <span class="txt">Scale</span>
-            </button>
-            <button class="tool-btn" id="toolOrbit" data-tool="Orbit" data-tip="Orbit around the mounted maker output.">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 0 1 15.36-6.36"/><path d="M21 12a9 9 0 0 1-15.36 6.36"/><path d="M18 2v4h-4"/><path d="M6 22v-4h4"/></svg>
-              <span class="txt">Orbit</span>
-            </button>
-            <button class="tool-btn" id="toolPan" data-tool="Pan" data-tip="Pan the view while keeping the maker room centered.">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11V5a1 1 0 1 1 2 0v4"/><path d="M11 9V4a1 1 0 1 1 2 0v5"/><path d="M13 9V5a1 1 0 1 1 2 0v4"/><path d="M15 10V7a1 1 0 1 1 2 0v7c0 4-2 7-5 7s-7-2-7-6v-4a1 1 0 1 1 2 0v2"/></svg>
-              <span class="txt">Pan</span>
-            </button>
-            <button class="tool-btn" id="toolZoom" data-tool="Zoom" data-tip="Zoom in and out of the active maker result.">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.2-4.2"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
-              <span class="txt">Zoom</span>
-            </button>
-            <button class="tool-btn" id="toolFit" data-tool="Fit View" data-tip="Frame the mounted output cleanly inside the viewport.">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H3v5"/><path d="M16 3h5v5"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/><path d="M8 8l-5-5"/><path d="M16 8l5-5"/><path d="M8 16l-5 5"/><path d="M16 16l5 5"/></svg>
-              <span class="txt">Fit</span>
-            </button>
-            <button class="tool-btn" id="toolPushPull" data-tool="Push/Pull" data-tip="Adjust object depth in a SketchUp-style way.">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18"/><path d="M8 7l4-4 4 4"/><path d="M8 17l4 4 4-4"/><rect x="5" y="8" width="14" height="8" rx="1.5"/></svg>
-              <span class="txt">Push/Pull</span>
-            </button>
-            <button class="tool-btn" id="toolMeasure" data-tool="Measure" data-tip="Measurement is a prepared placeholder for later precision tooling.">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l14-14 4 4-14 14H3v-4z"/><path d="M8 6l2 2"/><path d="M11 3l2 2"/><path d="M5 9l2 2"/></svg>
-              <span class="txt">Measure</span>
-            </button>
-            <button class="tool-btn" id="toolScreenshot" data-tool="Screenshot" data-tip="Capture a local screenshot of the workstation view.">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h4l1.5-2h5L16 7h4v11H4z"/><circle cx="12" cy="13" r="4"/></svg>
-              <span class="txt">Shot</span>
-            </button>
-            <button class="tool-btn" id="toolRecord" data-tool="Record" data-tip="Recording is a local placeholder until the later capture flow is defined.">
-              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg>
-              <span class="txt">Rec</span>
-            </button>
-          </div>
-
-          <div class="construction-rail visibility-dev grid" aria-label="Three pointer construction controls">
-            <div class="construction-row">
-              <button class="construction-pill active" id="constructionPointerA">Pointer A / Anchor</button>
-              <button class="construction-pill" id="constructionPointerB">Pointer B / Width</button>
-              <button class="construction-pill" id="constructionPointerC">Pointer C / Volume</button>
-              <button class="construction-pill" id="constructionCommit">Commit Construction</button>
-            </div>
-            <div class="construction-note">Select a pointer here, keep the main rail for object adjustment, and drag in the viewer while Select mode is active to place the live XYZ construction frame.</div>
-            <div class="construction-readout">
-              <div class="pointer-readout">
-                <strong>A Anchor</strong>
-                <span id="pointerReadoutA">0.00, 0.82, 0.00</span>
-              </div>
-              <div class="pointer-readout">
-                <strong>B Width</strong>
-                <span id="pointerReadoutB">1.20, 0.82, 0.00</span>
-              </div>
-              <div class="pointer-readout">
-                <strong>C Volume</strong>
-                <span id="pointerReadoutC">0.00, 1.84, 0.35</span>
-              </div>
-            </div>
+            <button class="tool-btn active" id="toolSelect" data-tool="Select"><span class="txt">Select</span></button>
+            <button class="tool-btn" id="toolMove" data-tool="Move"><span class="txt">Move</span></button>
+            <button class="tool-btn" id="toolRotate" data-tool="Rotate"><span class="txt">Rotate</span></button>
+            <button class="tool-btn" id="toolScale" data-tool="Scale"><span class="txt">Scale</span></button>
+            <button class="tool-btn" id="toolOrbit" data-tool="Orbit"><span class="txt">Orbit</span></button>
+            <button class="tool-btn" id="toolPan" data-tool="Pan"><span class="txt">Pan</span></button>
+            <button class="tool-btn" id="toolZoom" data-tool="Zoom"><span class="txt">Zoom</span></button>
+            <button class="tool-btn" id="toolFit" data-tool="Fit"><span class="txt">Fit</span></button>
+            <button class="tool-btn" id="toolShot" data-tool="Shot"><span class="txt">Shot</span></button>
           </div>
         </div>
 
         <div class="viewport-main">
           <canvas id="viewportCanvas"></canvas>
-          <div class="viewport-dimension-banner visibility-client flex visibility-expert visibility-dev">
+
+          <div class="viewport-banner">
             <div class="selection-callout">
               <strong id="selectionTitle">Object Focus</strong>
-              <span id="selectionMessage">Select the object frame and drag the XYZ handles to adjust width, height, and depth.</span>
+              <span id="selectionMessage">Preview host only. Core CTR controls job submission and result flow.</span>
             </div>
+
             <div class="dimension-strip" aria-label="Object dimensions">
               <div class="dimension-pill">
                 <span>Width</span>
@@ -1284,7 +783,7 @@
           <div class="chip-row">
             <div class="chip">Preview<strong id="previewState">Idle</strong></div>
             <div class="chip">Object<strong id="objectState">Ready</strong></div>
-            <div class="chip">Output<strong id="outputState">Waiting for input</strong></div>
+            <div class="chip">Job<strong id="jobState">None</strong></div>
           </div>
 
           <div class="chip-row">
@@ -1295,32 +794,26 @@
 
       <aside class="panel glass">
         <div class="panel-head">
-          <strong id="sidePanelTitle">Workstation Status</strong>
-          <span id="sidePanelSubtitle">Client-facing session summary</span>
+          <strong>Result & Status</strong>
+          <span>Core CTR response</span>
         </div>
 
         <div class="panel-body">
-          <section class="side-metric visibility-expert grid visibility-dev">
-            <div class="metric-line"><span class="k">Current Module</span><span class="v" id="rightModule">3D Model Maker</span></div>
+          <section class="side-metric">
+            <div class="metric-line"><span class="k">Current Module</span><span class="v">3D Model Maker</span></div>
             <div class="metric-line"><span class="k">Active Tool</span><span class="v" id="activeToolState">Select</span></div>
-            <div class="metric-line visibility-dev"><span class="k">Active Pointer</span><span class="v" id="activePointerState">A / Anchor</span></div>
-            <div class="metric-line"><span class="k">Project Info</span><span class="v" id="projectInfo">5xLiving / WorkStation / Maker</span></div>
-            <div class="metric-line"><span class="k">Output Status</span><span class="v" id="outputStatusText">Awaiting Core CTR request</span></div>
-            <div class="metric-line visibility-dev"><span class="k">Modular Handoff</span><span class="v" id="handoffStatus">Not sent</span></div>
+            <div class="metric-line"><span class="k">Project</span><span class="v">5xLiving / Workstation / 3DModelMaker</span></div>
+            <div class="metric-line"><span class="k">Connection</span><span class="v" id="connectionState">Unknown</span></div>
+            <div class="metric-line"><span class="k">Latest Job</span><span class="v" id="latestJobId">None</span></div>
           </section>
 
-          <section class="stack-card visibility-dev grid">
-            <h3>Latest Actions</h3>
-            <div id="activityLog" class="activity-log"></div>
-          </section>
-
-          <section class="stack-card">
+          <section class="card">
             <h3>Mounted Result</h3>
-            <p id="resultSummary">No Maker request sent yet. Upload a reference or stage a prompt preview, then send it through Core CTR.</p>
+            <p id="resultSummary">No request sent yet.</p>
 
             <div class="mounted-controls">
               <div class="mounted-subcard">
-                <h4>Mounted Model Settings</h4>
+                <h4>Object Settings</h4>
 
                 <div>
                   <div class="slider-note"><span>Thickness</span><strong id="thicknessValue">0.35</strong></div>
@@ -1350,8 +843,8 @@
               </div>
 
               <div class="mounted-subcard">
-                <h4>XYZ Precise Adjustment</h4>
-                <div class="xyz-grid">
+                <h4>Object Adjustment</h4>
+                <div class="object-grid">
                   <div>
                     <div class="slider-note"><span>X Width</span><strong id="xValue">1.20</strong></div>
                     <div class="slider-row">
@@ -1377,34 +870,26 @@
               </div>
 
               <div class="mounted-subcard">
-                <h4>Output Routing</h4>
-                <div class="output-row">
-                  <select id="outputTarget">
-                    <option value="modular">Send to Modular</option>
-                    <option value="review_room">Send to Review Room</option>
-                    <option value="xyz_package">Send to XYZ Package</option>
-                  </select>
-                  <button id="btnSendOutput" class="btn btn-quiet">Send Output</button>
-                </div>
-
+                <h4>Output Status</h4>
                 <div class="send-status">
                   <div class="send-status-head">
-                    <strong>Output Status</strong>
-                    <span id="modularSendBadge" class="status-badge is-idle">Idle</span>
+                    <strong>Core CTR</strong>
+                    <span id="statusBadge" class="status-badge is-idle">Idle</span>
                   </div>
-                  <div id="modularSendMessage" class="status-copy">Ready to send when the backend is connected.</div>
+                  <div id="statusMessage" class="status-copy">Ready to create or preview a job.</div>
+                </div>
+
+                <div class="output-row">
+                  <button id="btnRefreshJob" class="btn btn-quiet">Refresh Job</button>
+                  <button id="btnHealth" class="btn btn-secondary">Health Check</button>
                 </div>
               </div>
             </div>
           </section>
 
-          <section class="stack-card visibility-expert grid visibility-dev">
-            <h3>Connection</h3>
-            <p id="connectionSummary">Backend connection status has not been checked yet.</p>
-          </section>
-
-          <section class="note-strip visibility-dev">
-            The visible tool system lives here now so the modular page can stay focused on downstream flow while client actions route through Core CTR.
+          <section class="card">
+            <h3>Activity</h3>
+            <div id="activityLog" class="activity-log"></div>
           </section>
         </div>
       </aside>
@@ -1414,84 +899,32 @@
   <script>
     const el = (id) => document.getElementById(id);
 
-    // Client Page talks only to Core CTR.
-    // Core CTR routes to Maker / Modular later.
-    // Send to Modular passes through Core CTR, never direct-to-worker.
-    // Runtime config supports localhost and live internal testing without changing protected routing.
-    // Do not hardcode sensitive business logic into this frontend shell.
-    // For local development, use localhost backend
     const API_BASE =
       window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
         ? "http://127.0.0.1:5000"
         : window.location.origin;
 
-    const CORE_CTR_BASE = `${API_BASE}/core-ctr/v1`;
-    const CLIENT_SCOPE = {
-      company: "5xLiving",
-      project: "WorkStation",
-      module: "Maker"
-    };
-    const MODULAR_SCOPE = {
-      company: "5xLiving",
-      project: "WorkStation",
-      module: "modular"
-    };
-    const FUTURE_CORE_CTR_HOOKS = {
-      generate: `${CORE_CTR_BASE}/client/jobs`,
-      saveDraft: `${CORE_CTR_BASE}/client/jobs`,
-      sendToModular: `${CORE_CTR_BASE}/client/jobs`,
-      hydrateSession: `${CORE_CTR_BASE}/client/jobs`,
-      mountMakerResult: `${CORE_CTR_BASE}/client/jobs`
-    };
+    const CORE_CTR_BASE = `${API_BASE}/api/core-ctr/v1`;
 
-    const LOCAL_DRAFT_KEY = "client_workstation_draft_v1";
 
-    const clientState = {
-      uiMode: "client",
+
+    const state = {
       currentTool: "Select",
-      previewMode: "idle",
       uploadUrl: "",
       uploadName: "",
-      aiPrompt: "",
-      aiStyle: "premium product render",
-      outputSummary: "No Maker request sent yet.",
-      draftSavedAt: "",
-      isRecording: false,
+      latestJobId: "",
+      latestJob: null,
       backendConnected: false,
-      connectionSummary: "Backend connection status has not been checked yet.",
-      modularSendState: "idle",
-      modularSendMessage: "Ready to send through Core CTR once the backend is connected.",
-      handoffStatus: "Not sent",
-      interactionMode: "object",
-      currentSourceJobId: "",
-      currentObjectId: ""
+      localPromptPreview: false,
+      scale: 1.0,
+      thickness: 0.35,
+      width: 1.20,
+      height: 1.05,
+      depth: 0.35,
+      orientation: "front"
     };
 
-    const INTERACTION_MODES = {
-      object: {
-        label: "Object Mode",
-        guidance: "Use Move, Rotate, or Scale, then drag the colored XYZ gizmo handles on the selected object.",
-        selectionTitle: "Object Focus",
-        selectionMessage: "Select the object frame and drag the XYZ handles to adjust width, height, and depth.",
-        ready: true
-      },
-      perimeter: {
-        label: "Perimeter / Zone Mode",
-        guidance: "Perimeter and zone editing hooks are prepared for a later pass.",
-        selectionTitle: "Perimeter Hook",
-        selectionMessage: "The workstation is ready for perimeter and zone overlays without exposing construction internals.",
-        ready: false
-      },
-      detail: {
-        label: "Detail Mode",
-        guidance: "Detail editing hooks are prepared for future sub-object refinement.",
-        selectionTitle: "Detail Hook",
-        selectionMessage: "The runtime can separate local detail tools later while keeping object-state handoff stable.",
-        ready: false
-      }
-    };
-
-    function addLog(message, accent) {
+    function addLog(message, accent = "") {
       const logNode = el("activityLog");
       const entry = document.createElement("div");
       entry.className = "log-entry";
@@ -1499,171 +932,28 @@
       const prefix = accent ? `<strong>${accent}</strong><br>` : "";
       entry.innerHTML = `${prefix}[${stamp}] ${message}`;
       logNode.prepend(entry);
-      console.log(message);
     }
 
-    function setSaveStatus(text) {
-      el("saveStatus").textContent = text;
-    }
-
-    function setConnectionSummary(text, connected) {
-      clientState.connectionSummary = text;
-      clientState.backendConnected = Boolean(connected);
-      el("connectionSummary").textContent = text;
-    }
-
-    function setModularSendState(state, message) {
-      const badge = el("modularSendBadge");
-      const messageNode = el("modularSendMessage");
-      clientState.modularSendState = state;
-      clientState.modularSendMessage = message;
-      badge.className = `status-badge is-${state}`;
-      badge.textContent = state === "offline"
-        ? "Backend not connected"
-        : state.charAt(0).toUpperCase() + state.slice(1);
-      messageNode.textContent = message;
-    }
-
-    function normalizeUiMode(mode) {
-      return mode === "expert" ? "expert" : "client";
-    }
-
-    function setUiMode(mode) {
-      clientState.uiMode = normalizeUiMode(mode);
-      document.body.classList.remove("mode-client", "mode-expert", "mode-dev");
-      document.body.classList.add(`mode-${clientState.uiMode}`);
-      const modeName = clientState.uiMode === "client" ? "Client Mode" : "Expert Mode";
-      el("modeLabel").textContent = modeName;
-      el("sidePanelTitle").textContent = clientState.uiMode === "client" ? "Workstation Status" : "Expert Controls";
-      el("sidePanelSubtitle").textContent = clientState.uiMode === "client"
-        ? "Client-facing session summary"
-        : "Advanced editing controls";
-      [["modeClient", "client"], ["modeExpert", "expert"]].forEach(([id, value]) => {
-        el(id).classList.toggle("active", clientState.uiMode === value);
-      });
-      syncInteractionModeUi();
-      updateWorkstationPresentation();
-    }
-
-    function setInteractionMode(mode) {
-      if (!INTERACTION_MODES[mode]) {
-        return;
-      }
-      clientState.interactionMode = mode;
-      syncInteractionModeUi();
-    }
-
-    function syncInteractionModeUi() {
-      Object.entries(INTERACTION_MODES).forEach(([mode, config]) => {
-        const chipId = mode === "object" ? "workModeObject" : mode === "perimeter" ? "workModePerimeter" : "workModeDetail";
-        const chip = el(chipId);
-        if (!chip) {
-          return;
-        }
-        chip.classList.toggle("active", clientState.interactionMode === mode);
-        chip.dataset.ready = config.ready ? "true" : "false";
-      });
-      const current = INTERACTION_MODES[clientState.interactionMode] || INTERACTION_MODES.object;
-      el("modeGuidance").textContent = current.guidance;
-      if (!selectedObject) {
-        el("selectionTitle").textContent = current.selectionTitle;
-        el("selectionMessage").textContent = current.selectionMessage;
-      }
-    }
-
-    function setOutputStatus(text) {
-      el("outputStatusText").textContent = text;
-      el("outputState").textContent = text;
-    }
-
-    function setResultSummary(text) {
-      clientState.outputSummary = text;
-      el("resultSummary").textContent = text;
-    }
-
-    function setHandoffStatus(text) {
-      clientState.handoffStatus = text;
-      if (el("handoffStatus")) {
-        el("handoffStatus").textContent = text;
-      }
-    }
-
-    function resolveJobEnvelope(data) {
-      const safeResult = data?.safe_result || data?.result || {};
-      return {
-        jobId: data?.job_id || data?.job?.jobId || data?.job?.job_id || "",
-        state: data?.state || data?.job?.state || safeResult?.nextState || "",
-        summary: data?.summary || safeResult?.summary || data?.job?.summary || "",
-        safeResult
+    function setStatus(stateName, message) {
+      const badge = el("statusBadge");
+      const map = {
+        idle: "is-idle",
+        loading: "is-loading",
+        success: "is-success",
+        fail: "is-fail",
+        offline: "is-offline"
       };
+      badge.className = `status-badge ${map[stateName] || "is-idle"}`;
+      badge.textContent = stateName === "offline"
+        ? "Offline"
+        : stateName.charAt(0).toUpperCase() + stateName.slice(1);
+      el("statusMessage").textContent = message;
     }
 
-    function applyMakerResponse(action, data) {
-      const envelope = resolveJobEnvelope(data);
-      const prompt = el("aiPrompt").value.trim();
-      const style = el("aiStyle").value;
-      const preview = envelope.safeResult.preview || {};
-
-      if (envelope.jobId) {
-        clientState.currentSourceJobId = envelope.jobId;
-      }
-
-      if (action === "generate") {
-        if (clientState.uploadUrl && (preview.kind === "upload" || preview.uploadPresent)) {
-          mountImagePreview(clientState.uploadUrl, false);
-          addLog("Mounted uploaded reference after Core CTR accepted the Maker request.", "Action");
-        } else if (prompt && (preview.kind === "prompt" || preview.promptPresent)) {
-          mountPromptConcept(prompt, style);
-          addLog("Mounted prompt concept after Core CTR accepted the Maker request.", "Action");
-        }
-        fitView();
-        setOutputStatus(envelope.summary || "Maker request accepted by Core CTR.");
-        setResultSummary(envelope.summary || "Maker request accepted by Core CTR.");
-      }
-
-      if (action === "save_draft") {
-        setResultSummary(envelope.summary || "Maker draft stored in Core CTR.");
-        setSaveStatus(`Draft saved locally and via Core CTR (${envelope.state || "draft"})`);
-      } else if (action === "send_to_modular") {
-        const handoffState = envelope.safeResult.handoff?.handoffState || envelope.safeResult.nextState || envelope.state || "prepared";
-        setHandoffStatus(handoffState);
-        setResultSummary(envelope.summary || "Maker handoff prepared through Core CTR.");
-        setSaveStatus(`Handoff prepared via Core CTR (${envelope.state || "approved"})`);
-      } else {
-        setSaveStatus(`Core CTR ${envelope.state || "completed"}`);
-      }
-
-      addLog(`${envelope.summary || `Core CTR accepted ${action}.`} Job ${envelope.jobId || "unknown"} is ${envelope.state || "unknown"}.`, "Core CTR");
-      return envelope;
-    }
-
-    async function verifyBackendConnection() {
-      try {
-        const health = await fetchJson(`${CORE_CTR_BASE}/health`);
-        const summary = health.summary || health.status || "Core CTR health check passed.";
-        setConnectionSummary(`Backend connected via ${CORE_CTR_BASE}. ${summary}`, true);
-        if (clientState.modularSendState !== "success") {
-          setModularSendState("idle", "Ready to send through Core CTR.");
-        }
-        addLog(`Core CTR health check passed via ${CORE_CTR_BASE}.`, "Runtime");
-        return true;
-      } catch (error) {
-        setConnectionSummary(`Backend unavailable at ${CORE_CTR_BASE}.`, false);
-        setModularSendState("offline", "Core CTR health check failed.");
-        addLog(`Core CTR health check failed: ${String(error.message || error)}`, "Runtime");
-        return false;
-      }
-    }
-
-    async function loadRuntimeConfig() {
-      // Local mode: skip runtime config, always use forced local API_BASE and CORE_CTR_BASE
-      setConnectionSummary(`Core CTR route configured at ${CORE_CTR_BASE}. Checking health...`, false);
-      addLog(`Runtime config forced to local backend at ${API_BASE}.`, "Runtime");
-      return {
-        apiBase: API_BASE,
-        coreCtrBase: CORE_CTR_BASE,
-        mode: "local-forced"
-      };
+    function setConnection(connected, text) {
+      state.backendConnected = connected;
+      el("connectionState").textContent = connected ? "Connected" : "Offline";
+      if (text) addLog(text, "Runtime");
     }
 
     async function fetchJson(path, options = {}) {
@@ -1675,896 +965,430 @@
         throw new Error(`Expected JSON response from ${path}`);
       }
       if (!response.ok || payload.ok === false) {
-        const message = payload?.error?.message || `Core CTR request failed with ${response.status}`;
+        const message = payload?.error?.message || `Request failed with ${response.status}`;
         throw new Error(message);
       }
       return payload;
     }
 
-    function buildCoreCtrRequest(action) {
-      const prompt = el("aiPrompt").value.trim();
-      const previewKind = clientState.uploadUrl ? "upload" : (prompt ? "prompt" : "none");
-
-      return {
-        scope: CLIENT_SCOPE,
-        action,
-        payload: {
-          prompt,
-          style: el("aiStyle").value,
-          settings: {
-            thickness: Number(el("thicknessRange").value),
-            scale: Number(el("scaleRange").value),
-            orientation: el("orientationSelect").value
-          },
-          upload: {
-            present: Boolean(clientState.uploadUrl),
-            name: clientState.uploadName || ""
-          },
-          localPreview: {
-            kind: previewKind
-          }
-        }
-      };
+    async function healthCheck() {
+      setStatus("loading", "Checking Core CTR health...");
+      try {
+        const data = await fetchJson(`${CORE_CTR_BASE}/health`);
+        setConnection(true, "Core CTR health check passed.");
+        setStatus("success", data.status || "Core CTR healthy.");
+        return data;
+      } catch (error) {
+        setConnection(false, "Core CTR health check failed.");
+        setStatus("offline", error.message || "Core CTR unavailable.");
+        throw error;
+      }
     }
 
-    function resolveCurrentObjectId(sourceJobId = clientState.currentSourceJobId) {
-      if (clientState.currentObjectId) {
-        return clientState.currentObjectId;
-      }
-      if (sourceJobId) {
-        return `modobj_${sourceJobId}`;
-      }
-      return "";
-    }
-
-    function buildCurrentObjectState(overrides = {}) {
-      const state = deriveConstructionState();
-      const rotationMatrix = new THREE.Matrix4().makeBasis(state.primaryAxis, state.secondaryAxis, state.planeNormal);
-      const euler = new THREE.Euler().setFromRotationMatrix(rotationMatrix, "XYZ");
-      const selectionTarget = overrides.selectionTarget || selectedObject || imagePlane || objectFrameHelper.interactionSurface;
+    // Phase 1: Build input_data for XYZ construct
+    function buildInputData() {
       return {
-        object_id: overrides.objectId || resolveCurrentObjectId(overrides.sourceJobId || clientState.currentSourceJobId),
-        editing_mode: overrides.editingMode || (clientState.uiMode === "expert" ? "expert_object" : "client_object"),
-        selection: {
-          selected: overrides.selected ?? Boolean(selectionTarget)
-        },
+        build_mode: "xyz_construct",
+        template: "box_block",
         dimensions: {
-          width: Number(state.width.toFixed(4)),
-          height: Number(state.height.toFixed(4)),
-          depth: Number(state.depth.toFixed(4))
+          width: state.width || 1.2,
+          height: state.height || 1.05,
+          depth: state.depth || 0.35
         },
-        transform: {
-          position: vec3ToObject(state.anchor),
-          rotation: {
-            x: Number(THREE.MathUtils.radToDeg(euler.x).toFixed(4)),
-            y: Number(THREE.MathUtils.radToDeg(euler.y).toFixed(4)),
-            z: Number(THREE.MathUtils.radToDeg(euler.z).toFixed(4))
-          },
-          scale: {
-            x: Number(el("scaleRange").value || 1),
-            y: 1,
-            z: 1
-          }
-        }
+        material: "default_shell",
+        layer_height: 0.05,
+        path_strategy: "layer_fill",
+        origin: { x: 0.0, y: 0.0, z: 0.0 }
       };
     }
 
-    function buildModularPointerRequest(action, overrides = {}) {
-      const sourceJobId = overrides.sourceJobId || clientState.currentSourceJobId || "";
-      return {
-        scope: MODULAR_SCOPE,
-        action,
-        payload: {
-          object_id: overrides.objectId || resolveCurrentObjectId(sourceJobId),
-          object_state: overrides.objectState || buildCurrentObjectState({
-            objectId: overrides.objectId,
-            sourceJobId,
-            editingMode: overrides.editingMode,
-            selected: overrides.selected
-          }),
-          construction_session_id: overrides.constructionSessionId || constructionSessionId,
-          active_pointer_id: overrides.activePointerId || activeConstructionPointerId,
-          source_job_id: sourceJobId,
-          source_module: overrides.sourceModule || "Maker",
-          viewer_context: {
-            product: "client_workstation",
-            tool: clientState.currentTool,
-            uiMode: clientState.uiMode,
-            backendConnected: clientState.backendConnected,
-            settings: {
-              thickness: Number(el("thicknessRange").value),
-              scale: Number(el("scaleRange").value),
-              orientation: el("orientationSelect").value
-            }
-          }
-        }
+    async function createJob(input_data) {
+      const payload = {
+        company: "5xLiving",
+        project: "Workstation",
+        module: "3DModelMaker",
+        action: "create",
+        input_data,
+        requested_by: "local-user"
       };
+      return fetchJson(`${CORE_CTR_BASE}/jobs/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
     }
 
-    async function submitCoreCtrAction(action) {
-      const requestPayload = buildCoreCtrRequest(action);
-      setSaveStatus("Sending to Core CTR");
+    async function previewJob(input_data) {
+      const payload = {
+        company: "5xLiving",
+        project: "Workstation",
+        module: "3DModelMaker",
+        action: "preview",
+        input_data,
+        requested_by: "local-user"
+      };
+      return fetchJson(`${CORE_CTR_BASE}/jobs/preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
 
-      let data;
+    async function getJob(jobId) {
+      return fetchJson(`${CORE_CTR_BASE}/jobs/${jobId}`);
+    }
+
+    // Phase 1: Render geometry_state.preview_object if present
+    function applyJobResult(data, modeLabel) {
+      const job = data?.job || null;
+      const result = data?.result || {};
+      state.latestJob = job;
+      state.latestJobId = job?.job_id || "";
+      el("latestJobId").textContent = state.latestJobId || "None";
+      el("jobState").textContent = job?.status || "None";
+      el("previewState").textContent = modeLabel;
+      el("resultSummary").textContent = result?.summary || job?.status || `${modeLabel} completed.`;
+      setStatus("success", result?.summary || `${modeLabel} completed.`);
+      addLog(result?.summary || `${modeLabel} completed.`, "Core CTR");
+
+      // Phase 1: If geometry_state.preview_object exists, render it
+      if (result.geometry_state && result.geometry_state.preview_object) {
+        renderPreviewObject(result.geometry_state.preview_object);
+      }
+    }
+
+    // Updated: Render preview_object supporting box_proxy with size/position
+    function renderPreviewObject(obj) {
+      if (!obj || obj.kind !== "box_proxy" || !obj.size) return;
+
+      state.width = Number(obj.size.x || 1.2);
+      state.depth = Number(obj.size.y || 0.35);
+      state.height = Number(obj.size.z || 1.05);
+
+      createPreviewMesh();
+      updateMetricText();
+
+      if (obj.position) {
+        previewGroup.position.set(
+          Number(obj.position.x || 0),
+          0,
+          Number(obj.position.y || 0)
+        );
+      }
+
+      renderOnce();
+    }
+
+    function updateMetricText() {
+      el("dimensionWidth").textContent = state.width.toFixed(2);
+      el("dimensionHeight").textContent = state.height.toFixed(2);
+      el("dimensionDepth").textContent = state.depth.toFixed(2);
+      el("xValue").textContent = state.width.toFixed(2);
+      el("yValue").textContent = state.height.toFixed(2);
+      el("zValue").textContent = state.depth.toFixed(2);
+      el("scaleValue").textContent = state.scale.toFixed(2);
+      el("thicknessValue").textContent = state.thickness.toFixed(2);
+    }
+
+    function syncNumberAndRange(rangeId, inputId, key, min, max) {
+      const range = el(rangeId);
+      const input = el(inputId);
+
+      const apply = (value) => {
+        const num = Math.min(max, Math.max(min, Number(value) || min));
+        state[key] = num;
+        range.value = String(num);
+        input.value = String(num);
+        updateMetricText();
+        updatePreviewObject();
+      };
+
+      range.addEventListener("input", () => apply(range.value));
+      input.addEventListener("change", () => apply(input.value));
+    }
+
+    const uploadFile = el("uploadFile");
+    const uploadPreview = el("uploadPreview");
+
+    uploadFile.addEventListener("change", () => {
+      const file = uploadFile.files && uploadFile.files[0];
+      if (!file) return;
+
+      state.uploadName = file.name;
+      state.uploadUrl = URL.createObjectURL(file);
+      uploadPreview.innerHTML = `<img src="${state.uploadUrl}" alt="upload preview">`;
+      el("btnAttach").disabled = false;
+      addLog(`Loaded upload: ${file.name}`, "Input");
+    });
+
+    el("btnClearUpload").addEventListener("click", () => {
+      if (state.uploadUrl) URL.revokeObjectURL(state.uploadUrl);
+      state.uploadUrl = "";
+      state.uploadName = "";
+      uploadFile.value = "";
+      uploadPreview.textContent = "No image uploaded yet";
+      el("btnAttach").disabled = true;
+      removeImagePlane();
+      addLog("Upload cleared.", "Input");
+    });
+
+    el("btnAttach").addEventListener("click", () => {
+      if (!state.uploadUrl) return;
+      mountImagePreview(state.uploadUrl);
+      el("objectState").textContent = "Mounted";
+      el("mountedState").textContent = state.uploadName || "3D Model Maker";
+      addLog("Upload mounted into preview room.", "Preview");
+    });
+
+    el("btnPreviewPrompt").addEventListener("click", () => {
+      const prompt = el("aiPrompt").value.trim();
+      const style = el("aiStyle").value;
+      if (!prompt) {
+        setStatus("fail", "Prompt is empty.");
+        return;
+      }
+      mountPromptConcept(prompt, style);
+      el("previewState").textContent = "Local Prompt";
+      el("resultSummary").textContent = `Local prompt preview staged: ${prompt}`;
+      addLog("Prompt preview staged locally.", "Preview");
+    });
+
+    el("btnCreateDraft").addEventListener("click", async () => {
+      setStatus("loading", "Creating draft job...");
       try {
-        const created = await fetchJson(`${CORE_CTR_BASE}/client/jobs`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(requestPayload)
-        });
-
-        const createdJobId = created.job?.jobId;
-        data = createdJobId
-          ? await fetchJson(`${CORE_CTR_BASE}/client/jobs/${createdJobId}`)
-          : created;
-        setConnectionSummary(`Backend connected via ${CORE_CTR_BASE}.`, true);
+        const data = await createJob(buildInputData());
+        applyJobResult(data, "Draft");
       } catch (error) {
-        const message = String(error.message || error).toLowerCase();
-        if (message.includes("fetch") || message.includes("expected json response")) {
-          setConnectionSummary("Backend not connected", false);
-        }
-        throw error;
+        setStatus("fail", error.message || "Create job failed.");
+        addLog(error.message || "Create job failed.", "Error");
       }
+    });
 
-      const envelope = resolveJobEnvelope(data);
-      if (envelope.jobId) {
-        clientState.currentSourceJobId = envelope.jobId;
-      }
-      return data;
-    }
-
-    function applyModularSafeState(data) {
-      const result = data?.result || data?.safe_result || {};
-      if (result.object_id) {
-        clientState.currentObjectId = result.object_id;
-      }
-      if (result.source?.job_id) {
-        clientState.currentSourceJobId = result.source.job_id;
-      }
-      if (result.construction_session_id) {
-        constructionSessionId = result.construction_session_id;
-      }
-      if (result.pointer_system?.pointers) {
-        pointerState = clonePointers(result.pointer_system.pointers);
-      }
-      if (result.pointer_system?.active_pointer_id) {
-        activeConstructionPointerId = result.pointer_system.active_pointer_id;
-      }
-      // Update the 3D viewer with Modular results
-      if (result.object_state) {
-        setViewerLogicalState(result.object_state, {
-          source: "modular",
-          reason: result.status || "modular-safe-state",
-          diagramState: result.diagram_state,
-          pointerSystem: result.pointer_system
-        });
-      } else if (result.diagram_state) {
-        applyDiagramState(result.diagram_state);
-      } else {
-        syncObjectHelpers("modular-safe-state-no-object");
-      }
-      updatePointerControls();
-      return result;
-    }
-
-    async function submitModularPointerAction(action, overrides = {}) {
-      if (!clientState.currentSourceJobId && !clientState.currentObjectId) {
-        return null;
-      }
-
-      let data;
+    el("btnGenerate").addEventListener("click", async () => {
+      setStatus("loading", "Generating preview through Core CTR...");
       try {
-        const created = await fetchJson(`${CORE_CTR_BASE}/client/jobs`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(buildModularPointerRequest(action, overrides))
-        });
-
-        const createdJobId = created.job?.jobId;
-        data = createdJobId
-          ? await fetchJson(`${CORE_CTR_BASE}/client/jobs/${createdJobId}`)
-          : created;
-        setConnectionSummary(`Backend connected via ${CORE_CTR_BASE}.`, true);
+        const data = await previewJob(buildInputData());
+        applyJobResult(data, "Preview");
       } catch (error) {
-        const message = String(error.message || error).toLowerCase();
-        if (message.includes("fetch") || message.includes("expected json response")) {
-          setConnectionSummary("Backend not connected", false);
-        }
-        throw error;
+        setStatus("fail", error.message || "Preview failed.");
+        addLog(error.message || "Preview failed.", "Error");
       }
+    });
 
-      applyModularSafeState(data);
-      addLog(`${(data.result || {}).summary || `Core CTR accepted ${action}.`} Job ${(data.job || {}).jobId || "unknown"} is ${(data.job || {}).state || "unknown"}.`, "Modular");
-      return data;
-    }
-
-    function snapshotDraft() {
-      return {
-        prompt: el("aiPrompt").value,
-        style: el("aiStyle").value,
-        thickness: el("thicknessRange").value,
-        scale: el("scaleRange").value,
-        orientation: el("orientationSelect").value,
-        previewMode: clientState.previewMode,
-        outputSummary: clientState.outputSummary,
-        uploadName: clientState.uploadName,
-        uploadUrl: clientState.uploadUrl,
-        uiMode: clientState.uiMode,
-        handoffStatus: clientState.handoffStatus,
-        currentTool: clientState.currentTool,
-        sourceJobId: clientState.currentSourceJobId,
-        objectId: clientState.currentObjectId,
-        draftSavedAt: new Date().toISOString(),
-        construction: {
-          sessionId: constructionSessionId,
-          activePointerId: activeConstructionPointerId,
-          thickness: Number(el("thicknessRange").value),
-          scale: Number(el("scaleRange").value),
-          objectState: buildCurrentObjectState(),
-          pointers: clonePointers(pointerState)
-        },
-        camera: {
-          target: orbitTarget.toArray(),
-          radius: orbitRadius,
-          theta: orbitTheta,
-          phi: orbitPhi
-        }
-      };
-    }
-
-    function persistDraft() {
+    el("btnRefreshJob").addEventListener("click", async () => {
+      if (!state.latestJobId) {
+        setStatus("idle", "No job to refresh yet.");
+        return;
+      }
+      setStatus("loading", "Refreshing job...");
       try {
-        const draft = snapshotDraft();
-        localStorage.setItem(LOCAL_DRAFT_KEY, JSON.stringify(draft));
-        clientState.draftSavedAt = draft.draftSavedAt;
-        setSaveStatus("Draft saved locally");
-      } catch (_) {
-        setSaveStatus("Draft save unavailable");
+        const data = await getJob(state.latestJobId);
+        applyJobResult(data, "Refreshed");
+      } catch (error) {
+        setStatus("fail", error.message || "Refresh failed.");
+        addLog(error.message || "Refresh failed.", "Error");
       }
-    }
+    });
 
-    function restoreDraft() {
+    el("btnHealth").addEventListener("click", async () => {
       try {
-        const raw = localStorage.getItem(LOCAL_DRAFT_KEY);
-        if (!raw) {
-          return;
-        }
+        await healthCheck();
+      } catch (_) {}
+    });
 
-        const draft = JSON.parse(raw);
-        if (typeof draft.prompt === "string") {
-          el("aiPrompt").value = draft.prompt;
-          clientState.aiPrompt = draft.prompt;
-        }
-        if (typeof draft.style === "string") {
-          el("aiStyle").value = draft.style;
-          clientState.aiStyle = draft.style;
-        }
-        if (typeof draft.thickness === "string") {
-          el("thicknessRange").value = draft.thickness;
-        }
-        if (typeof draft.scale === "string") {
-          el("scaleRange").value = draft.scale;
-        }
-        if (typeof draft.orientation === "string") {
-          el("orientationSelect").value = draft.orientation;
-        }
-        if (typeof draft.outputSummary === "string") {
-          setResultSummary(draft.outputSummary);
-        }
-        if (typeof draft.uiMode === "string") {
-          clientState.uiMode = normalizeUiMode(draft.uiMode);
-        }
-        if (typeof draft.handoffStatus === "string") {
-          setHandoffStatus(draft.handoffStatus);
-        }
-        if (typeof draft.previewMode === "string") {
-          clientState.previewMode = draft.previewMode;
-          el("previewState").textContent = clientState.previewMode;
-        }
-        if (typeof draft.uploadName === "string") {
-          clientState.uploadName = draft.uploadName;
-        }
-        if (typeof draft.uploadUrl === "string") {
-          clientState.uploadUrl = draft.uploadUrl;
-          if (clientState.uploadUrl) {
-            el("uploadPreview").innerHTML = `<img src="${clientState.uploadUrl}" alt="Restored preview">`;
-            el("btnAttach").disabled = false;
-            mountImagePreview(clientState.uploadUrl, false);
-          }
-        }
-        if (draft.construction?.sessionId) {
-          constructionSessionId = draft.construction.sessionId;
-        }
-        if (draft.construction?.objectState) {
-          applyObjectState(draft.construction.objectState);
-        } else if (draft.construction?.pointers) {
-          pointerState = clonePointers(draft.construction.pointers);
-        }
-        if (typeof draft.construction?.activePointerId === "string") {
-          activeConstructionPointerId = draft.construction.activePointerId;
-        }
-        if (draft.camera?.target?.length === 3) {
-          orbitTarget.fromArray(draft.camera.target);
-        }
-        if (typeof draft.camera?.radius === "number") {
-          orbitRadius = draft.camera.radius;
-        }
-        if (typeof draft.camera?.theta === "number") {
-          orbitTheta = draft.camera.theta;
-        }
-        if (typeof draft.camera?.phi === "number") {
-          orbitPhi = draft.camera.phi;
-        }
-        if (typeof draft.currentTool === "string") {
-          setTool(draft.currentTool, true);
-        }
-        if (typeof draft.sourceJobId === "string") {
-          clientState.currentSourceJobId = draft.sourceJobId;
-        }
-        if (typeof draft.objectId === "string") {
-          clientState.currentObjectId = draft.objectId;
-        }
+    el("orientationSelect").addEventListener("change", () => {
+      state.orientation = el("orientationSelect").value;
+      updatePreviewObject();
+    });
 
-        syncObjectHelpers();
-        el("scaleRange").dataset.lastScale = el("scaleRange").value;
-        updatePointerControls();
-        updateSettingsReadout();
-        updateCamera();
-        setSaveStatus("Restored local draft");
-        addLog("Local workstation draft restored.", "Draft");
-      } catch (_) {
-        setSaveStatus("Draft restore skipped");
-      }
-    }
+    syncNumberAndRange("thicknessRange", "thicknessInput", "thickness", 0.08, 1.2);
+    syncNumberAndRange("scaleRange", "scaleInput", "scale", 0.5, 2.8);
+    syncNumberAndRange("xRange", "xInput", "width", 0.38, 6.0);
+    syncNumberAndRange("yRange", "yInput", "height", 0.38, 6.0);
+    syncNumberAndRange("zRange", "zInput", "depth", 0.08, 3.0);
+
+    document.querySelectorAll(".tool-btn[data-tool]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".tool-btn[data-tool]").forEach((node) => node.classList.remove("active"));
+        button.classList.add("active");
+        state.currentTool = button.dataset.tool;
+        el("activeToolState").textContent = state.currentTool;
+        addLog(`Tool changed to ${state.currentTool}.`, "UI");
+      });
+    });
+
+    el("toolFit").addEventListener("click", fitView);
+    el("toolShot").addEventListener("click", takeShot);
+
+    /* ---------- THREE.JS PREVIEW ROOM ---------- */
 
     const canvas = el("viewportCanvas");
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x08111f, 0.03);
 
-    const camera = new THREE.PerspectiveCamera(54, 1, 0.1, 200);
+    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
+
     const orbitTarget = new THREE.Vector3(0, 1, 0);
-    let orbitRadius = 6.4;
+    let orbitRadius = 5.8;
     let orbitTheta = Math.PI / 4;
-    let orbitPhi = 1.08;
+    let orbitPhi = 1.05;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+    const ambient = new THREE.AmbientLight(0xffffff, 0.62);
+    scene.add(ambient);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.28);
-    keyLight.position.set(4, 8, 6);
-    scene.add(keyLight);
+    const key = new THREE.DirectionalLight(0xffffff, 1.2);
+    key.position.set(4, 8, 5);
+    scene.add(key);
 
-    const rimLight = new THREE.DirectionalLight(0x8edcff, 0.72);
-    rimLight.position.set(-6, 4, -5);
-    scene.add(rimLight);
+    const rim = new THREE.DirectionalLight(0x8edcff, 0.65);
+    rim.position.set(-6, 4, -5);
+    scene.add(rim);
 
-    const grid = new THREE.GridHelper(48, 48, 0x36506c, 0x162231);
-    grid.material.opacity = 0.16;
+    const grid = new THREE.GridHelper(40, 40, 0x36506c, 0x15202e);
+    grid.material.opacity = 0.4;
     grid.material.transparent = true;
     scene.add(grid);
 
-    const makerGroup = new THREE.Group();
-    scene.add(makerGroup);
+    const floorGeo = new THREE.CircleGeometry(6, 64);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x0e1b2e, transparent: true, opacity: 0.92 });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = 0.01;
+    scene.add(floor);
 
-    let constructionDepth = Number(el("thicknessRange").value);
-    const objectFrameHelper = createObjectFrameHelper();
-    makerGroup.add(objectFrameHelper.group);
+    const stageGeo = new THREE.CylinderGeometry(1.6, 1.8, 0.25, 48);
+    const stageMat = new THREE.MeshStandardMaterial({ color: 0x17304a, transparent: true, opacity: 0.96 });
+    const stage = new THREE.Mesh(stageGeo, stageMat);
+    stage.position.set(0, 0.13, 0);
+    scene.add(stage);
 
-    const selectionRing = new THREE.Mesh(
-      new THREE.TorusGeometry(0.94, 0.025, 12, 88),
-      new THREE.MeshBasicMaterial({ color: 0xcafff1, transparent: true, opacity: 0.9 })
-    );
-    selectionRing.rotation.y = Math.PI / 2;
-    selectionRing.visible = false;
-    makerGroup.add(selectionRing);
+    const stageRingGeo = new THREE.TorusGeometry(1.65, 0.03, 10, 80);
+    const stageRingMat = new THREE.MeshBasicMaterial({ color: 0x93f3de, transparent: true, opacity: 0.45 });
+    const stageRing = new THREE.Mesh(stageRingGeo, stageRingMat);
+    stageRing.rotation.x = Math.PI / 2;
+    stageRing.position.set(0, 0.145, 0);
+    scene.add(stageRing);
 
-    const gizmoGroup = new THREE.Group();
-    scene.add(gizmoGroup);
-    const gizmoPickables = [];
-    const GIZMO_AXIS_CONFIG = {
-      X: { color: 0xff8d8d, vector: new THREE.Vector3(1, 0, 0) },
-      Y: { color: 0x8ef3d0, vector: new THREE.Vector3(0, 1, 0) },
-      Z: { color: 0x8edcff, vector: new THREE.Vector3(0, 0, 1) }
-    };
+    const previewGroup = new THREE.Group();
+    scene.add(previewGroup);
 
-    function alignToAxis(mesh, axisVector) {
-      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), axisVector.clone().normalize());
-    }
-
-    Object.entries(GIZMO_AXIS_CONFIG).forEach(([axis, config]) => {
-      const moveLine = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.012, 0.012, 0.7, 10),
-        new THREE.MeshBasicMaterial({ color: config.color, transparent: true, opacity: 0.95 })
-      );
-      alignToAxis(moveLine, config.vector);
-      moveLine.position.copy(config.vector.clone().multiplyScalar(0.42));
-      moveLine.userData = { gizmo: true, kind: "move", axis, selectTarget: objectFrameHelper.interactionSurface };
-      gizmoGroup.add(moveLine);
-      gizmoPickables.push(moveLine);
-
-      const moveHead = new THREE.Mesh(
-        new THREE.ConeGeometry(0.04, 0.12, 14),
-        new THREE.MeshBasicMaterial({ color: config.color, transparent: true, opacity: 0.98 })
-      );
-      moveHead.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), config.vector.clone().normalize());
-      moveHead.position.copy(config.vector.clone().multiplyScalar(0.82));
-      moveHead.userData = { gizmo: true, kind: "move", axis, selectTarget: objectFrameHelper.interactionSurface };
-      gizmoGroup.add(moveHead);
-      gizmoPickables.push(moveHead);
-
-      const scaleStem = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.009, 0.009, 0.58, 10),
-        new THREE.MeshBasicMaterial({ color: config.color, transparent: true, opacity: 0.58 })
-      );
-      alignToAxis(scaleStem, config.vector);
-      scaleStem.position.copy(config.vector.clone().multiplyScalar(0.3));
-      scaleStem.userData = { gizmo: true, kind: "scale", axis, selectTarget: objectFrameHelper.interactionSurface };
-      gizmoGroup.add(scaleStem);
-      gizmoPickables.push(scaleStem);
-
-      const scaleHead = new THREE.Mesh(
-        new THREE.OctahedronGeometry(0.065, 0),
-        new THREE.MeshBasicMaterial({ color: config.color, transparent: true, opacity: 0.98 })
-      );
-      scaleHead.position.copy(config.vector.clone().multiplyScalar(0.7));
-      scaleHead.userData = { gizmo: true, kind: "scale", axis, selectTarget: objectFrameHelper.interactionSurface };
-      gizmoGroup.add(scaleHead);
-      gizmoPickables.push(scaleHead);
-
-      const rotateRing = new THREE.Mesh(
-        new THREE.TorusGeometry(0.88, 0.014, 12, 96),
-        new THREE.MeshBasicMaterial({ color: config.color, transparent: true, opacity: 0.76 })
-      );
-      if (axis === "X") {
-        rotateRing.rotation.y = Math.PI / 2;
-      } else if (axis === "Y") {
-        rotateRing.rotation.x = Math.PI / 2;
-      }
-      rotateRing.userData = { gizmo: true, kind: "rotate", axis, selectTarget: objectFrameHelper.interactionSurface };
-      gizmoGroup.add(rotateRing);
-      gizmoPickables.push(rotateRing);
-    });
-
+    let previewMesh = null;
+    let previewOutline = null;
     let imagePlane = null;
-    let selectedObject = null;
-    let hoveredObject = null;
 
-    const POINTER_IDS = ["A", "B", "C"];
-    const POINTER_LABELS = {
-      A: "Anchor",
-      B: "Width",
-      C: "Volume"
-    };
-    const POINTER_COLORS = {
-      A: 0xffcf85,
-      B: 0x93f3de,
-      C: 0x8edcff
-    };
-    let activeConstructionPointerId = "A";
-    let constructionSessionId = `construct_${Date.now().toString(36)}`;
-
-    function vec3ToObject(vector) {
-      return {
-        x: Number(vector.x.toFixed(4)),
-        y: Number(vector.y.toFixed(4)),
-        z: Number(vector.z.toFixed(4))
-      };
-    }
-
-    function objectToVec3(payload, fallback = new THREE.Vector3()) {
-      if (!payload || typeof payload !== "object") {
-        return fallback.clone();
+    function createPreviewMesh() {
+      if (previewMesh) {
+        previewGroup.remove(previewMesh);
+        previewMesh.geometry.dispose();
+        previewMesh.material.dispose();
       }
-      return new THREE.Vector3(Number(payload.x || 0), Number(payload.y || 0), Number(payload.z || 0));
-    }
-
-    function clonePointers(pointers) {
-      return JSON.parse(JSON.stringify(pointers));
-    }
-
-    function quaternionFromDirection(direction) {
-      const safeDirection = direction.lengthSq() > 0 ? direction.clone().normalize() : new THREE.Vector3(0, 0, 1);
-      return new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), safeDirection);
-    }
-
-    function rotationFromQuaternion(quaternion) {
-      const euler = new THREE.Euler().setFromQuaternion(quaternion, "XYZ");
-      return {
-        x: Number(THREE.MathUtils.radToDeg(euler.x).toFixed(4)),
-        y: Number(THREE.MathUtils.radToDeg(euler.y).toFixed(4)),
-        z: Number(THREE.MathUtils.radToDeg(euler.z).toFixed(4))
-      };
-    }
-
-    function buildPointerPayload(pointerId, originVector, hitVector, directionVector) {
-      const quaternion = quaternionFromDirection(directionVector);
-      return {
-        pointer_id: pointerId,
-        role: POINTER_LABELS[pointerId].toLowerCase(),
-        mode: "construction",
-        active: activeConstructionPointerId === pointerId,
-        origin: vec3ToObject(originVector),
-        direction: vec3ToObject(directionVector),
-        rotation: rotationFromQuaternion(quaternion),
-        orientation: {
-          quaternion: {
-            x: Number(quaternion.x.toFixed(4)),
-            y: Number(quaternion.y.toFixed(4)),
-            z: Number(quaternion.z.toFixed(4)),
-            w: Number(quaternion.w.toFixed(4))
-          }
-        },
-        ray: {
-          origin: vec3ToObject(originVector),
-          direction: vec3ToObject(directionVector),
-          length: 8
-        },
-        hit_point: vec3ToObject(hitVector),
-        target_surface: {
-          object_id: "viewer_space_floating",
-          object_name: "Floating Construction Space",
-          surface_type: "floating_construction_plane",
-          surface_role: "free_construction",
-          face_index: 0,
-          normal: { x: 0, y: 0, z: 1 }
-        },
-        target_object: "floating_construction_preview"
-      };
-    }
-
-    function createDefaultPointerSystem() {
-      const anchor = new THREE.Vector3(0, 0.84, 0);
-      const widthPoint = new THREE.Vector3(1.25, 1.02, 0.28);
-      const volumePoint = new THREE.Vector3(-0.18, 1.86, 0.54);
-      return {
-        A: buildPointerPayload("A", anchor, anchor, new THREE.Vector3(0, 0, 1)),
-        B: buildPointerPayload("B", anchor, widthPoint, widthPoint.clone().sub(anchor).normalize()),
-        C: buildPointerPayload("C", anchor, volumePoint, volumePoint.clone().sub(anchor).normalize())
-      };
-    }
-
-    let pointerState = createDefaultPointerSystem();
-
-    function getPointerHit(pointerId) {
-      return objectToVec3(pointerState[pointerId]?.hit_point);
-    }
-
-    function setPointerHit(pointerId, vector) {
-      pointerState[pointerId].hit_point = vec3ToObject(vector);
-    }
-
-    function deriveConstructionState() {
-      const anchor = getPointerHit("A");
-      const widthPoint = getPointerHit("B");
-      const volumePoint = getPointerHit("C");
-      const primaryAxis = widthPoint.clone().sub(anchor);
-      if (primaryAxis.lengthSq() <= 0.0001) {
-        primaryAxis.set(1, 0, 0);
+      if (previewOutline) {
+        previewGroup.remove(previewOutline);
+        previewOutline.geometry.dispose();
+        previewOutline.material.dispose();
       }
-      primaryAxis.normalize();
 
-      const secondarySeed = volumePoint.clone().sub(anchor);
-      if (secondarySeed.lengthSq() <= 0.0001) {
-        secondarySeed.set(0, 1, 0.35);
-      }
-      let planeNormal = new THREE.Vector3().crossVectors(primaryAxis, secondarySeed).normalize();
-      if (planeNormal.lengthSq() <= 0.0001) {
-        planeNormal = new THREE.Vector3(0, 0, 1);
-      }
-      const secondaryAxis = new THREE.Vector3().crossVectors(planeNormal, primaryAxis).normalize();
-
-      const width = Math.max(anchor.distanceTo(widthPoint), 0.38);
-      const height = Math.max(Math.abs(volumePoint.clone().sub(anchor).dot(secondaryAxis)), 0.38);
-      const center = anchor.clone()
-        .addScaledVector(primaryAxis, width * 0.5)
-        .addScaledVector(secondaryAxis, height * 0.5)
-        .addScaledVector(planeNormal, constructionDepth * 0.5);
-
-      return {
-        anchor,
-        widthPoint,
-        volumePoint,
-        primaryAxis,
-        secondaryAxis,
-        planeNormal,
-        width,
-        height,
-        depth: constructionDepth,
-        center
-      };
-    }
-
-    function applyObjectState(objectState) {
-      if (!objectState || typeof objectState !== "object") {
-        return;
-      }
-      const transform = objectState.transform || {};
-      const position = objectToVec3(transform.position, new THREE.Vector3(0, 0.84, 0));
-      const rotation = transform.rotation || {};
-      const dimensions = objectState.dimensions || {};
-      const width = Math.max(Number(dimensions.width || 1.2), 0.38);
-      const height = Math.max(Number(dimensions.height || 1.0), 0.38);
-      const depth = Math.max(Number(dimensions.depth || 0.35), 0.08);
-      const yaw = THREE.MathUtils.degToRad(Number(rotation.y || 0));
-      const primaryAxis = new THREE.Vector3(Math.cos(yaw), 0, Math.sin(yaw)).normalize();
-      const secondaryAxis = new THREE.Vector3(0, 1, 0);
-      setPointerHit("A", position);
-      setPointerHit("B", position.clone().addScaledVector(primaryAxis, width));
-      setPointerHit("C", position.clone().addScaledVector(secondaryAxis, height));
-      constructionDepth = depth;
-      el("thicknessRange").value = depth.toFixed(2);
-      if (transform.scale && typeof transform.scale.x === "number") {
-        const scaleValue = Math.max(0.5, Math.min(2.8, Number(transform.scale.x || 1)));
-        el("scaleRange").value = scaleValue.toFixed(2);
-        el("scaleRange").dataset.lastScale = el("scaleRange").value;
-      }
-      syncObjectHelpers();
-      if (objectState.selection && typeof objectState.selection.selected === "boolean") {
-        setSelectedObject(objectState.selection.selected ? (imagePlane || objectFrameHelper.interactionSurface) : null);
-      }
-    }
-
-    function createObjectFrameHelper() {
-      const group = new THREE.Group();
-      const outlineMaterial = new THREE.LineBasicMaterial({ color: 0xcafff1, transparent: true, opacity: 0.9 });
-      const detailMaterial = new THREE.LineBasicMaterial({ color: 0x93f3de, transparent: true, opacity: 0.34 });
-      const interactionMaterial = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
+      const geo = new THREE.BoxGeometry(state.width, state.height, state.depth);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x93f3de,
+        roughness: 0.32,
+        metalness: 0.08,
         transparent: true,
-        opacity: 0.001,
-        side: THREE.DoubleSide,
-        depthWrite: false
+        opacity: 0.92
       });
 
-      const frontOutline = new THREE.LineLoop(new THREE.BufferGeometry(), outlineMaterial);
-      const depthSpine = new THREE.LineSegments(new THREE.BufferGeometry(), detailMaterial);
-      const centerCross = new THREE.LineSegments(new THREE.BufferGeometry(), detailMaterial);
-      const interactionSurface = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), interactionMaterial);
+      previewMesh = new THREE.Mesh(geo, mat);
+      previewMesh.position.set(0, state.height / 2 + 0.25, 0);
+      previewGroup.add(previewMesh);
 
-      group.add(frontOutline);
-      group.add(depthSpine);
-      group.add(centerCross);
-      group.add(interactionSurface);
+      const edges = new THREE.EdgesGeometry(geo);
+      const edgeMat = new THREE.LineBasicMaterial({ color: 0xcafff1, transparent: true, opacity: 0.7 });
+      previewOutline = new THREE.LineSegments(edges, edgeMat);
+      previewOutline.position.copy(previewMesh.position);
+      previewGroup.add(previewOutline);
 
-      function updateLineGeometry(line, points) {
-        const nextGeometry = new THREE.BufferGeometry().setFromPoints(points);
-        line.geometry.dispose();
-        line.geometry = nextGeometry;
+      updatePreviewObject();
+    }
+
+    function removeImagePlane() {
+      if (imagePlane) {
+        previewGroup.remove(imagePlane);
+        if (imagePlane.material.map) imagePlane.material.map.dispose();
+        imagePlane.material.dispose();
+        imagePlane.geometry.dispose();
+        imagePlane = null;
+      }
+    }
+
+    function mountImagePreview(url) {
+      const loader = new THREE.TextureLoader();
+      loader.setCrossOrigin("anonymous");
+      loader.load(url, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        removeImagePlane();
+
+        const aspect = tex.image ? (tex.image.width / tex.image.height || 1) : 1;
+        const h = Math.max(1.4, state.height * 1.3);
+        const w = h * aspect;
+
+        const geo = new THREE.PlaneGeometry(w, h);
+        const mat = new THREE.MeshStandardMaterial({
+          map: tex,
+          transparent: true,
+          side: THREE.DoubleSide
+        });
+
+        imagePlane = new THREE.Mesh(geo, mat);
+        imagePlane.position.set(0, Math.max(1.1, state.height * 0.65), state.depth / 2 + 0.04);
+        previewGroup.add(imagePlane);
+        addLog("Image preview mounted.", "Preview");
+      }, undefined, () => {
+        addLog("Image preview failed to load.", "Error");
+      });
+    }
+
+    function mountPromptConcept(prompt, style) {
+      removeImagePlane();
+      const hue = prompt.length % 360;
+      const color = new THREE.Color(`hsl(${hue}, 55%, 62%)`);
+      previewMesh.material.color.copy(color);
+      el("resultSummary").textContent = `Prompt staged locally: ${prompt} (${style})`;
+      addLog(`Local prompt concept updated with style "${style}".`, "Preview");
+    }
+
+    function updatePreviewObject() {
+      if (!previewMesh || !previewOutline) return;
+
+      previewMesh.scale.set(state.scale, 1, 1);
+      previewMesh.position.set(0, state.height / 2 + 0.25, 0);
+
+      previewOutline.scale.copy(previewMesh.scale);
+      previewOutline.position.copy(previewMesh.position);
+
+      if (state.orientation === "front") {
+        previewGroup.rotation.y = 0;
+      } else if (state.orientation === "quarter") {
+        previewGroup.rotation.y = Math.PI / 4;
+      } else if (state.orientation === "profile") {
+        previewGroup.rotation.y = Math.PI / 2;
+      } else if (state.orientation === "back") {
+        previewGroup.rotation.y = Math.PI;
       }
 
-      return {
-        group,
-        interactionSurface,
-        refresh(state) {
-          const halfWidth = state.width * 0.5;
-          const halfHeight = state.height * 0.5;
-          const frontOffset = state.depth * 0.5;
-          const backOffset = -state.depth * 0.18;
-          const frontCorners = [
-            new THREE.Vector3(-halfWidth, -halfHeight, frontOffset),
-            new THREE.Vector3(halfWidth, -halfHeight, frontOffset),
-            new THREE.Vector3(halfWidth, halfHeight, frontOffset),
-            new THREE.Vector3(-halfWidth, halfHeight, frontOffset)
-          ];
-
-          updateLineGeometry(frontOutline, frontCorners);
-          updateLineGeometry(depthSpine, [
-            new THREE.Vector3(0, 0, backOffset),
-            new THREE.Vector3(0, 0, frontOffset),
-            new THREE.Vector3(-halfWidth * 0.28, 0, frontOffset),
-            new THREE.Vector3(halfWidth * 0.28, 0, frontOffset),
-            new THREE.Vector3(0, -halfHeight * 0.28, frontOffset),
-            new THREE.Vector3(0, halfHeight * 0.28, frontOffset)
-          ]);
-          updateLineGeometry(centerCross, [
-            new THREE.Vector3(-halfWidth * 0.18, -halfHeight * 0.18, frontOffset),
-            new THREE.Vector3(halfWidth * 0.18, halfHeight * 0.18, frontOffset),
-            new THREE.Vector3(-halfWidth * 0.18, halfHeight * 0.18, frontOffset),
-            new THREE.Vector3(halfWidth * 0.18, -halfHeight * 0.18, frontOffset)
-          ]);
-
-          interactionSurface.position.set(0, 0, frontOffset - 0.01);
-          interactionSurface.scale.set(Math.max(state.width, 0.2), Math.max(state.height, 0.2), 1);
-          group.position.copy(state.center);
-          group.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(state.primaryAxis, state.secondaryAxis, state.planeNormal));
-        },
-        setHovered(active, uiMode) {
-          outlineMaterial.color.setHex(active ? 0xe7ce8a : 0xcafff1);
-          detailMaterial.color.setHex(active ? 0xe7ce8a : 0x93f3de);
-          if (uiMode === "client") {
-            outlineMaterial.opacity = active ? 0.98 : 0.9;
-            detailMaterial.opacity = active ? 0.28 : 0.14;
-          }
-        },
-        setSelected(active, uiMode) {
-          outlineMaterial.color.setHex(active ? 0xcafff1 : 0x93f3de);
-          outlineMaterial.opacity = uiMode === "client" ? (active ? 0.96 : 0.82) : active ? 0.92 : 0.74;
-          detailMaterial.opacity = uiMode === "client" ? 0.16 : active ? 0.4 : 0.28;
-        },
-        setPresentation(uiMode) {
-          outlineMaterial.opacity = uiMode === "client" ? 0.9 : uiMode === "expert" ? 0.84 : 0.78;
-          detailMaterial.opacity = uiMode === "client" ? 0.14 : uiMode === "expert" ? 0.24 : 0.36;
-        }
-      };
-    }
-
-    const pointerVisuals = {};
-    POINTER_IDS.forEach((pointerId) => {
-      const material = new THREE.MeshStandardMaterial({
-        color: POINTER_COLORS[pointerId],
-        emissive: POINTER_COLORS[pointerId],
-        emissiveIntensity: 0.22,
-        roughness: 0.26,
-        metalness: 0.12
-      });
-      const node = new THREE.Mesh(new THREE.SphereGeometry(0.06, 18, 18), material);
-      const arrow = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(), 1, POINTER_COLORS[pointerId], 0.16, 0.08);
-      scene.add(node);
-      scene.add(arrow);
-      pointerVisuals[pointerId] = { node, arrow };
-    });
-
-    function updatePointerMetadata() {
-      const state = deriveConstructionState();
-      pointerState.A = buildPointerPayload("A", state.anchor, state.anchor, state.planeNormal.clone());
-      pointerState.B = buildPointerPayload("B", state.anchor, state.widthPoint, state.widthPoint.clone().sub(state.anchor).normalize());
-      pointerState.C = buildPointerPayload("C", state.anchor, state.volumePoint, state.volumePoint.clone().sub(state.anchor).normalize());
-    }
-
-    function updatePointerControls() {
-      const pointerNames = {
-        A: "A / Anchor",
-        B: "B / Width",
-        C: "C / Volume"
-      };
-      el("activePointerState").textContent = pointerNames[activeConstructionPointerId];
-      ["A", "B", "C"].forEach((pointerId) => {
-        const button = el(`constructionPointer${pointerId}`);
-        if (button) {
-          button.classList.toggle("active", activeConstructionPointerId === pointerId);
-        }
-        const payload = pointerState[pointerId];
-        const point = payload?.hit_point || payload?.origin || { x: 0, y: 0, z: 0 };
-        const readout = el(`pointerReadout${pointerId}`);
-        if (readout) {
-          readout.textContent = `${Number(point.x).toFixed(2)}, ${Number(point.y).toFixed(2)}, ${Number(point.z).toFixed(2)}`;
-        }
-      });
-    }
-
-    function syncMountedPlane(state) {
-      if (!imagePlane) {
-        return;
+      if (imagePlane) {
+        imagePlane.position.set(0, Math.max(1.1, state.height * 0.65), state.depth / 2 + 0.04);
       }
-      const rotationMatrix = new THREE.Matrix4().makeBasis(state.primaryAxis, state.secondaryAxis, state.planeNormal);
-      imagePlane.position.copy(state.center).addScaledVector(state.planeNormal, state.depth * 0.52);
-      imagePlane.quaternion.setFromRotationMatrix(rotationMatrix);
-      imagePlane.scale.set(Math.max(state.width * 0.88, 0.55), Math.max(state.height * 0.88, 0.55), 1);
+
+      updateMetricText();
+      renderOnce();
     }
 
-    function syncObjectHelpers() {
-      updatePointerMetadata();
-      const state = deriveConstructionState();
-      objectFrameHelper.refresh(state);
-      selectionRing.position.copy(objectFrameHelper.group.position);
-      selectionRing.scale.setScalar(Math.max(state.width, state.height) * 0.72);
-      syncMountedPlane(state);
-      POINTER_IDS.forEach((pointerId) => {
-        const payload = pointerState[pointerId];
-        const origin = objectToVec3(payload.origin);
-        const hit = objectToVec3(payload.hit_point);
-        const direction = objectToVec3(payload.direction, new THREE.Vector3(0, 0, 1)).normalize();
-        const distance = Math.max(origin.distanceTo(hit), 0.22);
-        pointerVisuals[pointerId].node.position.copy(hit);
-        pointerVisuals[pointerId].arrow.position.copy(origin);
-        pointerVisuals[pointerId].arrow.setDirection(direction);
-        pointerVisuals[pointerId].arrow.setLength(distance, 0.16, 0.08);
-        pointerVisuals[pointerId].node.material.emissiveIntensity = activeConstructionPointerId === pointerId ? 0.5 : 0.2;
-      });
-      updatePointerControls();
-      updateSettingsReadout();
-      updateGizmoPresentation();
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
     }
-
-    function applyDiagramState(diagramState) {
-      if (!diagramState) {
-        return;
-      }
-      const anchor = objectToVec3(diagramState.anchor_point, new THREE.Vector3(0, 0.84, 0));
-      const primaryAxis = objectToVec3(diagramState.primary_axis, new THREE.Vector3(1, 0, 0)).normalize();
-      const secondaryAxis = objectToVec3(diagramState.secondary_axis, new THREE.Vector3(0, 1, 0)).normalize();
-      const width = Math.max(Number(diagramState.extents?.width || 1.2), 0.38);
-      const height = Math.max(Number(diagramState.extents?.height_depth || 1), 0.38);
-      setPointerHit("A", anchor);
-      setPointerHit("B", anchor.clone().addScaledVector(primaryAxis, width));
-      setPointerHit("C", anchor.clone().addScaledVector(secondaryAxis, height));
-      syncObjectHelpers();
-    }
-
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-    const drag = {
-      active: false,
-      mode: "idle",
-      gizmoAxis: "",
-      gizmoKind: "",
-      pointerId: null,
-      startX: 0,
-      startY: 0,
-      startTheta: 0,
-      startPhi: 0,
-      startRadius: 0,
-      startTarget: new THREE.Vector3(),
-      startPosition: new THREE.Vector3(),
-      startRotationY: 0,
-      startScale: new THREE.Vector3(),
-      startDepth: 0.35,
-      startPointers: null
-    };
-
-    function axisVectorForLabel(axis) {
-      return GIZMO_AXIS_CONFIG[axis]?.vector?.clone() || new THREE.Vector3(1, 0, 0);
-    }
-
-    function axisVectorInWorld(axis) {
-      return axisVectorForLabel(axis).applyQuaternion(objectFrameHelper.group.quaternion).normalize();
-    }
-
-    function axisDragAmount(axis, dx, dy) {
-      const rect = canvas.getBoundingClientRect();
-      const center = objectFrameHelper.group.position.clone();
-      const axisEnd = center.clone().add(axisVectorInWorld(axis));
-      const screenCenter = center.project(camera);
-      const screenEnd = axisEnd.project(camera);
-      const screenVector = new THREE.Vector2(
-        (screenEnd.x - screenCenter.x) * rect.width * 0.5,
-        -(screenEnd.y - screenCenter.y) * rect.height * 0.5
-      );
-      if (screenVector.lengthSq() <= 0.0001) {
-        return dx;
-      }
-      return screenVector.normalize().dot(new THREE.Vector2(dx, dy));
-    }
-
-    function updateWorkstationPresentation() {
-      objectFrameHelper.setPresentation(clientState.uiMode);
-      Object.values(pointerVisuals).forEach((visual) => {
-        visual.node.visible = false;
-        visual.arrow.visible = false;
-      });
-      updateGizmoPresentation();
-    }
-
-    function updateGizmoPresentation() {
-      const enabled = Boolean(selectedObject) && ["Move", "Rotate", "Scale"].includes(clientState.currentTool);
-      const state = deriveConstructionState();
-      gizmoGroup.visible = enabled;
-      gizmoGroup.position.copy(state.center);
-      gizmoGroup.quaternion.copy(objectFrameHelper.group.quaternion);
-      gizmoGroup.scale.setScalar(Math.max(Math.max(state.width, state.height, state.depth), 0.8) * 0.92);
-      gizmoPickables.forEach((mesh) => {
-        mesh.visible = enabled && mesh.userData.kind === clientState.currentTool.toLowerCase();
-      });
-    }
-
-    function resizeViewport() {
-      const rect = canvas.getBoundingClientRect();
-      const width = Math.max(rect.width, 1);
-      const height = Math.max(rect.height, 1);
-      renderer.setSize(width, height, false);
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      updateCamera();
-    }
-
-    window.addEventListener("resize", resizeViewport);
 
     function updateCamera() {
       const sinPhi = Math.sin(orbitPhi);
@@ -2576,887 +1400,129 @@
       camera.lookAt(orbitTarget);
     }
 
-    function fitView() {
-      const state = deriveConstructionState();
-      orbitTarget.copy(state.center);
-      orbitRadius = Math.max(4.6, Math.max(state.width, state.height) * 2.8);
-      orbitTheta = Math.PI / 4;
-      orbitPhi = 1.02;
+    function resize() {
+      const w = canvas.clientWidth || canvas.parentElement.clientWidth || 800;
+      const h = canvas.clientHeight || canvas.parentElement.clientHeight || 500;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
       updateCamera();
-      addLog("Viewport framed to active maker output.", "View");
+      renderOnce();
     }
 
-    function screenToPointer(clientX, clientY) {
-      const rect = canvas.getBoundingClientRect();
-      pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    function fitView() {
+      orbitTarget.set(0, Math.max(1, state.height * 0.5), 0);
+      orbitRadius = 5.8;
+      orbitTheta = Math.PI / 4;
+      orbitPhi = 1.05;
+      updateCamera();
+      renderOnce();
+      addLog("View fitted.", "View");
     }
 
-    function pickHit(clientX, clientY) {
-      screenToPointer(clientX, clientY);
-      raycaster.setFromCamera(pointer, camera);
-      const hits = raycaster.intersectObjects(getSelectableObjects(), false);
-      return hits.length ? hits[0] : null;
+    function renderOnce() {
+      renderer.render(scene, camera);
     }
 
-    function pickObject(clientX, clientY) {
-      const hit = pickHit(clientX, clientY);
-      if (!hit) {
-        return null;
-      }
-      return hit.object?.userData?.selectTarget || hit.object || null;
+    function takeShot() {
+      renderOnce();
+      const link = document.createElement("a");
+      link.download = "workstation-preview.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      addLog("Local screenshot captured.", "View");
     }
 
-    function getSelectableObjects() {
-      const items = gizmoPickables.filter((mesh) => mesh.visible);
-      if (imagePlane) {
-        items.push(imagePlane);
-      } else {
-        items.push(objectFrameHelper.interactionSurface);
-      }
-      if (clientState.uiMode !== "client") {
-        items.push(objectFrameHelper.interactionSurface);
-      }
-      return items;
-    }
-
-    function updateSettingsReadout() {
-      const thickness = Number(el("thicknessRange").value).toFixed(2);
-      const scale = Number(el("scaleRange").value).toFixed(2);
-      el("thicknessValue").textContent = thickness;
-      el("scaleValue").textContent = scale;
-      if (el("thicknessInput")) el("thicknessInput").value = thickness;
-      if (el("scaleInput")) el("scaleInput").value = scale;
-
-      const state = deriveConstructionState();
-      const width = state.width.toFixed(2);
-      const height = state.height.toFixed(2);
-      const depth = state.depth.toFixed(2);
-
-      el("objectState").textContent = `${width}w / ${height}h / ${depth}d`;
-      el("dimensionWidth").textContent = width;
-      el("dimensionHeight").textContent = height;
-      el("dimensionDepth").textContent = depth;
-
-      if (el("xValue")) el("xValue").textContent = width;
-      if (el("yValue")) el("yValue").textContent = height;
-      if (el("zValue")) el("zValue").textContent = depth;
-      if (el("xRange")) el("xRange").value = width;
-      if (el("xInput")) el("xInput").value = width;
-      if (el("yRange")) el("yRange").value = height;
-      if (el("yInput")) el("yInput").value = height;
-      if (el("zRange")) el("zRange").value = depth;
-      if (el("zInput")) el("zInput").value = depth;
-    }
-
-    function updateProxyDepth(depth) {
-      constructionDepth = depth;
-      syncObjectHelpers();
-      updateSettingsReadout();
-    }
-
-    function setHoveredObject(obj) {
-      hoveredObject = obj;
-      objectFrameHelper.setHovered(Boolean(obj), clientState.uiMode);
-      if (drag.active) {
-        canvas.style.cursor = drag.mode === "pointer" ? "crosshair" : "grabbing";
-        return;
-      }
-      if (clientState.currentTool === "Select") {
-        canvas.style.cursor = "crosshair";
-        return;
-      }
-      canvas.style.cursor = ["Orbit", "Pan", "Zoom"].includes(clientState.currentTool) ? "grab" : obj ? "pointer" : "default";
-    }
-
-    function setSelectedObject(obj) {
-      selectedObject = obj;
-      const active = Boolean(obj);
-      selectionRing.visible = active;
-      objectFrameHelper.setSelected(active, clientState.uiMode);
-      el("previewState").textContent = active ? "Object selected" : clientState.previewMode;
-      if (active) {
-        const current = INTERACTION_MODES[clientState.interactionMode] || INTERACTION_MODES.object;
-        el("selectionTitle").textContent = current.label;
-        el("selectionMessage").textContent = `Selected frame ready. Width ${el("dimensionWidth").textContent}, height ${el("dimensionHeight").textContent}, depth ${el("dimensionDepth").textContent}.`;
-      } else {
-        const current = INTERACTION_MODES[clientState.interactionMode] || INTERACTION_MODES.object;
-        el("selectionTitle").textContent = current.selectionTitle;
-        el("selectionMessage").textContent = current.selectionMessage;
-      }
-      updateGizmoPresentation();
-    }
-
-    function beginDrag(event, mode) {
-      drag.active = true;
-      drag.mode = mode;
-      drag.gizmoAxis = "";
-      drag.gizmoKind = "";
-      drag.pointerId = event.pointerId;
-      drag.startX = event.clientX;
-      drag.startY = event.clientY;
-      drag.startTheta = orbitTheta;
-      drag.startPhi = orbitPhi;
-      drag.startRadius = orbitRadius;
-      drag.startTarget.copy(orbitTarget);
-      drag.startPosition.copy(objectFrameHelper.group.position);
-      drag.startRotationY = new THREE.Euler().setFromQuaternion(objectFrameHelper.group.quaternion, "XYZ").y;
-      drag.startScale.setScalar(Number(el("scaleRange").value || 1));
-      drag.startDepth = Number(el("thicknessRange").value);
-      drag.startPointers = clonePointers(pointerState);
-      canvas.classList.add("dragging");
-      canvas.setPointerCapture(event.pointerId);
-      setHoveredObject(hoveredObject);
-    }
-
-    function endDrag() {
-      drag.active = false;
-      drag.mode = "idle";
-      drag.gizmoAxis = "";
-      drag.gizmoKind = "";
-      drag.pointerId = null;
-      canvas.classList.remove("dragging");
-      setHoveredObject(hoveredObject);
-    }
-
-    function removeMountedPlane() {
-      if (!imagePlane) {
-        return;
-      }
-      makerGroup.remove(imagePlane);
-      if (imagePlane.material.map) {
-        imagePlane.material.map.dispose();
-      }
-      imagePlane.material.dispose();
-      imagePlane.geometry.dispose();
-      imagePlane = null;
-    }
-
-    function setOrientation(value) {
-      const rotations = {
-        front: 0,
-        quarter: Math.PI / 4,
-        profile: Math.PI / 2,
-        back: Math.PI
-      };
-      const snapshot = clonePointers(pointerState);
-      const anchor = objectToVec3(snapshot.A.hit_point);
-      const currentPrimary = objectToVec3(snapshot.B.hit_point).sub(anchor);
-      const currentAngle = Math.atan2(currentPrimary.x, currentPrimary.z);
-      const nextAngle = rotations[value] || 0;
-      const rotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), nextAngle - currentAngle);
-      ["B", "C"].forEach((pointerId) => {
-        const point = objectToVec3(snapshot[pointerId].hit_point).sub(anchor).applyQuaternion(rotation).add(anchor);
-        setPointerHit(pointerId, point);
-      });
-      syncObjectHelpers();
-    }
-
-    function translatePointerSnapshot(snapshot, delta) {
-      ["A", "B", "C"].forEach((pointerId) => {
-        const point = objectToVec3(snapshot[pointerId].hit_point).add(delta);
-        setPointerHit(pointerId, point);
-      });
-    }
-
-    function rotatePointerSnapshot(snapshot, radians) {
-      const anchor = objectToVec3(snapshot.A.hit_point);
-      const rotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), radians);
-      ["B", "C"].forEach((pointerId) => {
-        const point = objectToVec3(snapshot[pointerId].hit_point).sub(anchor).applyQuaternion(rotation).add(anchor);
-        setPointerHit(pointerId, point);
-      });
-      setPointerHit("A", anchor);
-    }
-
-    function scalePointerSnapshot(snapshot, factor) {
-      const anchor = objectToVec3(snapshot.A.hit_point);
-      ["B", "C"].forEach((pointerId) => {
-        const point = objectToVec3(snapshot[pointerId].hit_point).sub(anchor).multiplyScalar(factor).add(anchor);
-        setPointerHit(pointerId, point);
-      });
-      setPointerHit("A", anchor);
-    }
-
-    function updatePointerFromScreen(pointerId, clientX, clientY) {
-      screenToPointer(clientX, clientY);
-      raycaster.setFromCamera(pointer, camera);
-      const plane = new THREE.Plane();
-      const anchor = getPointerHit("A");
-      if (pointerId === "A") {
-        plane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 1, 0), anchor);
-      } else if (pointerId === "B") {
-        const cameraForward = new THREE.Vector3();
-        camera.getWorldDirection(cameraForward);
-        plane.setFromNormalAndCoplanarPoint(cameraForward.normalize(), anchor);
-      } else {
-        const cameraForward = new THREE.Vector3();
-        camera.getWorldDirection(cameraForward);
-        const cameraRight = new THREE.Vector3().crossVectors(cameraForward, camera.up).normalize();
-        plane.setFromNormalAndCoplanarPoint(cameraRight.lengthSq() > 0 ? cameraRight : new THREE.Vector3(1, 0, 0), anchor);
-      }
-      const intersection = new THREE.Vector3();
-      if (!raycaster.ray.intersectPlane(plane, intersection)) {
-        return false;
-      }
-      if (pointerId === "A") {
-        const delta = intersection.clone().sub(anchor);
-        const snapshot = clonePointers(pointerState);
-        translatePointerSnapshot(snapshot, delta);
-      } else {
-        setPointerHit(pointerId, intersection);
-      }
-      syncObjectHelpers();
-      return true;
-    }
-
-    function styleColors(styleName) {
-      const map = {
-        "premium product render": { background: "#1f3c5d", foreground: "#d4fff4", accent: "#8edcff" },
-        "soft concept illustration": { background: "#563969", foreground: "#fff5f1", accent: "#ffcfb5" },
-        "studio prototype": { background: "#1e2d40", foreground: "#eef5ff", accent: "#93f3de" },
-        "architectural white model": { background: "#d8dde6", foreground: "#122036", accent: "#86a8c8" }
-      };
-      return map[styleName] || map["premium product render"];
-    }
-
-    function buildPromptTexture(prompt, styleName) {
-      const colors = styleColors(styleName);
-      const textureCanvas = document.createElement("canvas");
-      textureCanvas.width = 1024;
-      textureCanvas.height = 1024;
-      const ctx = textureCanvas.getContext("2d");
-
-      const gradient = ctx.createLinearGradient(0, 0, textureCanvas.width, textureCanvas.height);
-      gradient.addColorStop(0, colors.background);
-      gradient.addColorStop(1, "#0c1728");
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, textureCanvas.width, textureCanvas.height);
-
-      ctx.fillStyle = "rgba(255,255,255,0.08)";
-      for (let i = 0; i < 18; i++) {
-        ctx.fillRect(60 + i * 44, 120 + (i % 4) * 180, 12, 12);
-      }
-
-      ctx.strokeStyle = colors.accent;
-      ctx.lineWidth = 10;
-      ctx.strokeRect(64, 64, textureCanvas.width - 128, textureCanvas.height - 128);
-
-      ctx.fillStyle = colors.accent;
-      ctx.font = "700 44px Inter, Arial, sans-serif";
-      ctx.fillText("3D Model Maker", 110, 168);
-
-      ctx.fillStyle = colors.foreground;
-      ctx.font = "600 70px Noto Serif SC, serif";
-      ctx.fillText("Client Prompt", 108, 270);
-
-      ctx.fillStyle = colors.foreground;
-      ctx.font = "500 34px Inter, Arial, sans-serif";
-      ctx.fillText(styleName, 110, 336);
-
-      ctx.font = "500 36px Inter, Arial, sans-serif";
-      const words = prompt.trim().split(/\s+/);
-      const lines = [];
-      let current = "";
-
-      words.forEach((word) => {
-        const next = current ? `${current} ${word}` : word;
-        if (ctx.measureText(next).width > 760) {
-          lines.push(current);
-          current = word;
-        } else {
-          current = next;
-        }
-      });
-
-      if (current) {
-        lines.push(current);
-      }
-
-      lines.slice(0, 6).forEach((line, index) => {
-        ctx.fillText(line, 110, 438 + index * 58);
-      });
-
-      ctx.fillStyle = "rgba(255,255,255,0.78)";
-      ctx.font = "500 26px Inter, Arial, sans-serif";
-      ctx.fillText("Local concept card only. Backend generation will connect later.", 110, 896);
-
-      const texture = new THREE.CanvasTexture(textureCanvas);
-      texture.colorSpace = THREE.SRGBColorSpace;
-      return texture;
-    }
-
-    function mountTexture(texture, summary, previewMode) {
-      removeMountedPlane();
-      imagePlane = new THREE.Mesh(
-        new THREE.PlaneGeometry(1, 1),
-        new THREE.MeshStandardMaterial({ map: texture, transparent: true, side: THREE.DoubleSide })
-      );
-      makerGroup.add(imagePlane);
-      syncObjectHelpers();
-
-      clientState.previewMode = previewMode;
-      el("previewState").textContent = previewMode;
-      setOutputStatus(summary);
-      setResultSummary(summary);
-      setSelectedObject(imagePlane);
-    }
-
-    function mountImagePreview(url, logIt = true) {
-      const loader = new THREE.TextureLoader();
-      loader.setCrossOrigin("anonymous");
-      loader.load(
-        url,
-        (texture) => {
-          texture.colorSpace = THREE.SRGBColorSpace;
-          const summary = clientState.uploadName
-            ? `Mounted uploaded reference: ${clientState.uploadName}.`
-            : "Mounted uploaded client reference.";
-          mountTexture(texture, summary, "Uploaded reference");
-          if (logIt) {
-            addLog(summary, "Upload");
-          }
-        },
-        undefined,
-        () => {
-          addLog("Uploaded preview could not be mounted into the workstation view.", "Upload");
-        }
-      );
-    }
-
-    function mountPromptConcept(prompt, styleName) {
-      const texture = buildPromptTexture(prompt, styleName);
-      mountTexture(texture, `Local concept staged from prompt in ${styleName}.`, "Prompt concept");
-      addLog(`Prompt concept staged locally using style ${styleName}.`, "AI");
-    }
-
-    function setTool(toolName, silent) {
-      clientState.currentTool = toolName;
-      el("activeToolState").textContent = toolName;
-
-      document.querySelectorAll(".tool-btn[data-tool]").forEach((button) => {
-        button.classList.toggle("active", button.getAttribute("data-tool") === toolName);
-      });
-
-      if (toolName === "Fit View") {
-        fitView();
-      }
-
-      if (toolName === "Measure") {
-        addLog("Measure is prepared as a future precision tool placeholder.", "Tool");
-      }
-
-      if (!silent && !["Fit View", "Measure", "Screenshot", "Record"].includes(toolName)) {
-        addLog(`Active tool switched to ${toolName}.`, "Tool");
-      }
-
-      setHoveredObject(hoveredObject);
-      updateGizmoPresentation();
-    }
-
-    function takeScreenshot() {
-      try {
-        const url = renderer.domElement.toDataURL("image/png");
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "5xliving-client-workstation.png";
-        link.click();
-        addLog("Local screenshot exported.", "Capture");
-      } catch (_) {
-        addLog("Screenshot export was blocked in this browser context.", "Capture");
-      }
-    }
-
-    function toggleRecord() {
-      clientState.isRecording = !clientState.isRecording;
-      const label = clientState.isRecording ? "Stop" : "Rec";
-      const button = el("toolRecord");
-      button.querySelector(".txt").textContent = label;
-      button.classList.toggle("active", clientState.isRecording || clientState.currentTool === "Record");
-      addLog(clientState.isRecording ? "Recording placeholder started." : "Recording placeholder stopped.", "Capture");
-    }
-
-    async function pushPointerState(action) {
-      try {
-        await submitModularPointerAction(action);
-      } catch (error) {
-        const message = String(error.message || error);
-        if (message.toLowerCase().includes("fetch")) {
-          setModularSendState("offline", "Backend not connected");
-          setSaveStatus("Backend not connected");
-        } else {
-          setSaveStatus("Core CTR error");
-        }
-        addLog(String(error.message || error), "Modular");
-      }
-    }
+    const interaction = {
+      dragging: false,
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      startTheta: 0,
+      startPhi: 0,
+      startRadius: 0,
+      startPos: new THREE.Vector3(),
+      startRotY: 0,
+      startScale: 1
+    };
 
     canvas.addEventListener("pointerdown", (event) => {
-      const hit = pickHit(event.clientX, event.clientY);
-      const picked = hit?.object?.userData?.selectTarget || hit?.object || null;
-      const gizmoData = hit?.object?.userData?.gizmo ? hit.object.userData : null;
-      setSelectedObject(picked || imagePlane || objectFrameHelper.interactionSurface);
-
-      let mode = "camera";
-      if (["Orbit", "Pan", "Zoom"].includes(clientState.currentTool)) {
-        mode = "camera";
-      } else if (gizmoData && ["Move", "Rotate", "Scale"].includes(clientState.currentTool)) {
-        mode = "gizmo";
-      } else if (["Move", "Rotate", "Scale"].includes(clientState.currentTool)) {
-        mode = gizmoData ? "gizmo" : "select";
-      } else if (clientState.currentTool === "Push/Pull") {
-        mode = "adjustment";
-      } else if (clientState.currentTool === "Select") {
-        mode = "select";
-      }
-
-      beginDrag(event, mode);
-      if (gizmoData) {
-        drag.gizmoAxis = gizmoData.axis;
-        drag.gizmoKind = gizmoData.kind;
-      }
+      interaction.dragging = true;
+      interaction.pointerId = event.pointerId;
+      interaction.startX = event.clientX;
+      interaction.startY = event.clientY;
+      interaction.startTheta = orbitTheta;
+      interaction.startPhi = orbitPhi;
+      interaction.startRadius = orbitRadius;
+      interaction.startPos.copy(previewGroup.position);
+      interaction.startRotY = previewGroup.rotation.y;
+      interaction.startScale = state.scale;
+      canvas.classList.add("dragging");
+      canvas.setPointerCapture(event.pointerId);
     });
 
     canvas.addEventListener("pointermove", (event) => {
-      const picked = pickObject(event.clientX, event.clientY);
-      setHoveredObject(picked);
+      if (!interaction.dragging || interaction.pointerId !== event.pointerId) return;
 
-      if (!drag.active || drag.pointerId !== event.pointerId) {
-        return;
-      }
+      const dx = event.clientX - interaction.startX;
+      const dy = event.clientY - interaction.startY;
 
-      const dx = event.clientX - drag.startX;
-      const dy = event.clientY - drag.startY;
-
-      if (clientState.currentTool === "Orbit") {
-        orbitTheta = drag.startTheta - dx * 0.01;
-        orbitPhi = Math.max(0.16, Math.min(Math.PI - 0.16, drag.startPhi + dy * 0.01));
+      if (state.currentTool === "Orbit") {
+        orbitTheta = interaction.startTheta - dx * 0.01;
+        orbitPhi = clamp(interaction.startPhi + dy * 0.01, 0.15, Math.PI - 0.15);
         updateCamera();
-        return;
-      }
-      if (clientState.currentTool === "Pan") {
-        const panFactor = 0.006 * orbitRadius;
-        const forward = new THREE.Vector3();
-        camera.getWorldDirection(forward);
-        const right = new THREE.Vector3().crossVectors(forward, camera.up).normalize();
-        const up = camera.up.clone().normalize();
-        orbitTarget.copy(drag.startTarget)
-          .addScaledVector(right, -dx * panFactor)
-          .addScaledVector(up, dy * panFactor);
+      } else if (state.currentTool === "Pan") {
+        const panFactor = 0.004 * orbitRadius;
+        previewGroup.position.set(
+          interaction.startPos.x + dx * panFactor,
+          interaction.startPos.y - dy * panFactor,
+          interaction.startPos.z
+        );
+      } else if (state.currentTool === "Zoom") {
+        orbitRadius = clamp(interaction.startRadius + dy * 0.02, 2.2, 20);
         updateCamera();
-        return;
-      }
-      if (clientState.currentTool === "Zoom") {
-        orbitRadius = Math.max(2.2, Math.min(18, drag.startRadius + dy * 0.03));
-        updateCamera();
-        return;
-      }
-      if (drag.mode === "gizmo" && drag.gizmoAxis && drag.gizmoKind) {
-        const amount = axisDragAmount(drag.gizmoAxis, dx, dy);
-        if (drag.gizmoKind === "move") {
-          const delta = axisVectorInWorld(drag.gizmoAxis).multiplyScalar(amount * 0.008);
-          translatePointerSnapshot(drag.startPointers, delta);
-          syncObjectHelpers();
-        } else if (drag.gizmoKind === "rotate") {
-          rotatePointerSnapshot(drag.startPointers, amount * 0.01);
-          syncObjectHelpers();
-        } else if (drag.gizmoKind === "scale") {
-          const factor = Math.max(0.35, 1 + amount * 0.004);
-          scalePointerSnapshot(drag.startPointers, factor);
-          el("scaleRange").value = String(Math.max(0.5, Math.min(2.8, factor)).toFixed(2));
-          el("scaleRange").dataset.lastScale = el("scaleRange").value;
-          syncObjectHelpers();
-        }
-        return;
-      }
-      if (drag.mode === "pointer") {
-        updatePointerFromScreen(activeConstructionPointerId, event.clientX, event.clientY);
-        return;
-      }
-      if (!selectedObject) {
-        return;
+      } else if (state.currentTool === "Move") {
+        previewGroup.position.set(
+          interaction.startPos.x + dx * 0.01,
+          interaction.startPos.y - dy * 0.01,
+          interaction.startPos.z
+        );
+      } else if (state.currentTool === "Rotate") {
+        previewGroup.rotation.y = interaction.startRotY + dx * 0.01;
+      } else if (state.currentTool === "Scale") {
+        const s = clamp(interaction.startScale + dx * 0.005, 0.5, 2.8);
+        state.scale = s;
+        el("scaleRange").value = s.toFixed(2);
+        el("scaleInput").value = s.toFixed(2);
+        updatePreviewObject();
+      } else if (state.currentTool === "Push/Pull") {
+        const d = clamp(state.depth + dx * 0.002, 0.08, 3.0);
+        state.depth = d;
+        el("zRange").value = d.toFixed(2);
+        el("zInput").value = d.toFixed(2);
+        createPreviewMesh();
       }
 
-      if (clientState.currentTool === "Move") {
-        const forward = new THREE.Vector3();
-        camera.getWorldDirection(forward);
-        const right = new THREE.Vector3().crossVectors(forward, camera.up).normalize();
-        const up = camera.up.clone().normalize();
-        const delta = right.multiplyScalar(dx * 0.01).add(up.multiplyScalar(-dy * 0.01));
-        translatePointerSnapshot(drag.startPointers, delta);
-        syncObjectHelpers();
-      } else if (clientState.currentTool === "Rotate") {
-        rotatePointerSnapshot(drag.startPointers, dx * 0.01);
-        syncObjectHelpers();
-      } else if (clientState.currentTool === "Scale") {
-        const scale = Math.max(0.5, Math.min(2.8, Number(el("scaleRange").value) + dx * 0.004 - dy * 0.003));
-        el("scaleRange").value = scale.toFixed(2);
-        el("scaleRange").dataset.lastScale = String(scale.toFixed(2));
-        scalePointerSnapshot(drag.startPointers, scale);
-        syncObjectHelpers();
-      } else if (clientState.currentTool === "Push/Pull") {
-        const depth = Math.max(0.08, Math.min(1.2, drag.startDepth + dx * 0.003));
-        el("thicknessRange").value = depth.toFixed(2);
-        updateProxyDepth(depth);
-      }
+      renderOnce();
     });
 
-    canvas.addEventListener("pointerup", (event) => {
-      if (drag.pointerId !== event.pointerId) {
-        return;
-      }
-      if (drag.mode === "pointer") {
-        void pushPointerState("modular.pointer_update");
-      } else if (["Move", "Rotate", "Scale", "Push/Pull"].includes(clientState.currentTool) && selectedObject) {
-        void pushPointerState("modular.pointer_update");
-      }
-      endDrag();
-    });
+    function endDrag(event) {
+      if (interaction.pointerId !== event.pointerId) return;
+      interaction.dragging = false;
+      interaction.pointerId = null;
+      canvas.classList.remove("dragging");
+      renderOnce();
+    }
 
+    canvas.addEventListener("pointerup", endDrag);
     canvas.addEventListener("pointercancel", endDrag);
+    window.addEventListener("resize", resize);
 
-    canvas.addEventListener("wheel", (event) => {
-      event.preventDefault();
-      orbitRadius = Math.max(2.2, Math.min(18, orbitRadius + event.deltaY * 0.0035));
-      updateCamera();
-    }, { passive: false });
-
-    function animate() {
-      if (selectionRing.visible) {
-        const pulse = 0.96 + Math.sin(performance.now() * 0.004) * 0.04;
-        selectionRing.scale.setScalar(Math.max(Number(el("dimensionWidth").textContent || 1), Number(el("dimensionHeight").textContent || 1)) * 0.62 * pulse);
-        selectionRing.material.opacity = 0.74 + Math.sin(performance.now() * 0.004) * 0.14;
-      }
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
-
-    document.querySelectorAll(".tool-btn[data-tool]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const toolName = button.getAttribute("data-tool");
-        if (toolName === "Screenshot") {
-          takeScreenshot();
-          return;
-        }
-        if (toolName === "Record") {
-          toggleRecord();
-          return;
-        }
-        setTool(toolName);
-      });
-    });
-
-    [["modeClient", "client"], ["modeExpert", "expert"]].forEach(([id, mode]) => {
-      el(id).addEventListener("click", () => setUiMode(mode));
-    });
-
-    [["workModeObject", "object"], ["workModePerimeter", "perimeter"], ["workModeDetail", "detail"]].forEach(([id, mode]) => {
-      const node = el(id);
-      if (!node) {
-        return;
-      }
-      node.addEventListener("click", () => setInteractionMode(mode));
-    });
-
-    ["A", "B", "C"].forEach((pointerId) => {
-      el(`constructionPointer${pointerId}`).addEventListener("click", () => {
-        activeConstructionPointerId = pointerId;
-        syncObjectHelpers();
-        addLog(`Construction pointer switched to ${pointerId}.`, "Pointer");
-      });
-    });
-
-    el("constructionCommit").addEventListener("click", async () => {
-      await pushPointerState("modular.pointer_commit");
-      addLog("Construction pointers committed to Modular.", "Pointer");
-    });
-
-
-    function clampValue(value, min, max, fallback) {
-      const next = Number(value);
-      if (!Number.isFinite(next)) {
-        return fallback;
-      }
-      return Math.min(max, Math.max(min, next));
-    }
-
-    function bindRangeNumberPair(rangeId, inputId, onApply) {
-      const rangeEl = el(rangeId);
-      const inputEl = el(inputId);
-      if (!rangeEl || !inputEl) {
-        return;
-      }
-
-      rangeEl.addEventListener("input", () => {
-        inputEl.value = Number(rangeEl.value).toFixed(2);
-        onApply(Number(rangeEl.value), "range");
-      });
-
-      inputEl.addEventListener("input", () => {
-        const min = Number(inputEl.min || rangeEl.min || 0);
-        const max = Number(inputEl.max || rangeEl.max || 9999);
-        const fallback = Number(rangeEl.value);
-        const next = clampValue(inputEl.value, min, max, fallback);
-        rangeEl.value = next.toFixed(2);
-        inputEl.value = next.toFixed(2);
-        onApply(next, "input");
-      });
-    }
-
-    function setDimensionsFromInputs() {
-      const current = buildCurrentObjectState();
-      const width = clampValue(el("xInput").value, 0.38, 6.0, current.dimensions.width);
-      const height = clampValue(el("yInput").value, 0.38, 6.0, current.dimensions.height);
-      const depth = clampValue(el("zInput").value, 0.08, 3.0, current.dimensions.depth);
-
-      applyObjectState({
-        dimensions: { width, height, depth },
-        transform: current.transform,
-        selection: current.selection
-      });
-
-      el("thicknessRange").value = depth.toFixed(2);
-      if (el("thicknessInput")) el("thicknessInput").value = depth.toFixed(2);
-      updateSettingsReadout();
-      syncObjectHelpers();
-      setSaveStatus("Unsaved local changes");
-    }
-
-    bindRangeNumberPair("thicknessRange", "thicknessInput", (value) => {
-      updateProxyDepth(value);
-      if (el("zInput")) el("zInput").value = Number(value).toFixed(2);
-      if (el("zRange")) el("zRange").value = Number(value).toFixed(2);
-      updateSettingsReadout();
-      setSaveStatus("Unsaved local changes");
-    });
-
-    bindRangeNumberPair("scaleRange", "scaleInput", (value) => {
-      const scale = Number(value);
-      const previousScale = Number(el("scaleRange").dataset.lastScale || 1);
-      const factor = previousScale > 0 ? scale / previousScale : scale;
-      scalePointerSnapshot(clonePointers(pointerState), factor);
-      el("scaleRange").dataset.lastScale = String(scale);
-      syncObjectHelpers();
-      updateSettingsReadout();
-      setSaveStatus("Unsaved local changes");
-    });
-
-    el("scaleRange").addEventListener("change", () => {
-      void pushPointerState("modular.pointer_update");
-    });
-
-    bindRangeNumberPair("xRange", "xInput", () => {
-      setDimensionsFromInputs();
-    });
-
-    bindRangeNumberPair("yRange", "yInput", () => {
-      setDimensionsFromInputs();
-    });
-
-    bindRangeNumberPair("zRange", "zInput", (value) => {
-      if (el("thicknessRange")) el("thicknessRange").value = Number(value).toFixed(2);
-      if (el("thicknessInput")) el("thicknessInput").value = Number(value).toFixed(2);
-      setDimensionsFromInputs();
-    });
-
-    el("orientationSelect").addEventListener("change", () => {
-      setOrientation(el("orientationSelect").value);
-      addLog(`Orientation switched to ${el("orientationSelect").value}.`, "Object");
-      setSaveStatus("Unsaved local changes");
-      void pushPointerState("modular.pointer_update");
-    });
-
-    el("aiPrompt").addEventListener("input", () => {
-      clientState.aiPrompt = el("aiPrompt").value;
-      setSaveStatus("Unsaved local changes");
-    });
-
-    el("aiStyle").addEventListener("change", () => {
-      clientState.aiStyle = el("aiStyle").value;
-      setSaveStatus("Unsaved local changes");
-    });
-
-    el("uploadFile").addEventListener("change", () => {
-      const file = el("uploadFile").files && el("uploadFile").files[0];
-      if (!file) {
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        clientState.uploadUrl = typeof reader.result === "string" ? reader.result : "";
-        clientState.uploadName = file.name;
-        el("uploadPreview").innerHTML = `<img src="${clientState.uploadUrl}" alt="${file.name}">`;
-        el("btnAttach").disabled = false;
-        setSaveStatus("Unsaved local changes");
-        addLog(`Client reference loaded: ${file.name}.`, "Upload");
-      };
-      reader.readAsDataURL(file);
-    });
-
-    el("btnAttach").addEventListener("click", () => {
-      if (!clientState.uploadUrl) {
-        addLog("Attach skipped because no client reference is loaded.", "Upload");
-        return;
-      }
-
-      mountImagePreview(clientState.uploadUrl, true);
-      fitView();
-      setOutputStatus("Reference mounted locally");
-      setSaveStatus("Unsaved local changes");
-    });
-
-    el("btnClearUpload").addEventListener("click", () => {
-      el("uploadFile").value = "";
-      clientState.uploadUrl = "";
-      clientState.uploadName = "";
-      el("uploadPreview").textContent = "No image uploaded yet";
-      el("btnAttach").disabled = true;
-      removeMountedPlane();
-      clientState.previewMode = "idle";
-      el("previewState").textContent = "Idle";
-      setOutputStatus("Waiting for input");
-      setResultSummary("No Maker request sent yet. Upload a reference or stage a prompt preview, then send it through Core CTR.");
-      setSelectedObject(null);
-      setSaveStatus("Unsaved local changes");
-      addLog("Upload preview cleared from the client workstation.", "Upload");
-    });
-
-    el("btnAiGenerate").addEventListener("click", () => {
-      const prompt = el("aiPrompt").value.trim();
-      const style = el("aiStyle").value;
-      if (!prompt) {
-        addLog("Prompt preview needs text before it can be staged locally.", "AI");
-        return;
-      }
-
-      clientState.aiPrompt = prompt;
-      clientState.aiStyle = style;
-      mountPromptConcept(prompt, style);
-      fitView();
-      setResultSummary("Prompt preview staged locally. Use Generate to send the Maker request through Core CTR.");
-      setSaveStatus("Unsaved local changes");
-    });
-
-    el("btnGenerate").addEventListener("click", async () => {
-      const prompt = el("aiPrompt").value.trim();
-      if (!clientState.uploadUrl && !prompt) {
-        addLog("Generate needs either an upload or a prompt before the client result can update.", "Action");
-        return;
-      }
-
-      setOutputStatus("Submitting Maker request through Core CTR");
-      try {
-        const data = await submitCoreCtrAction("generate");
-        const envelope = applyMakerResponse("generate", data);
-        await submitModularPointerAction("modular.get_construction_state", {
-          sourceJobId: envelope.jobId || clientState.currentSourceJobId,
-          sourceModule: "Maker",
-          objectState: buildCurrentObjectState({ sourceJobId: envelope.jobId || clientState.currentSourceJobId })
-        });
-      } catch (error) {
-        setSaveStatus("Core CTR error");
-        addLog(String(error.message || error), "Core CTR");
-      }
-    });
-      } catch (error) {
-        setSaveStatus("Core CTR error");
-        addLog(String(error.message || error), "Core CTR");
-      }
-    });
-
-    el("btnSendOutput").addEventListener("click", async () => {
-      const sendButton = el("btnSendOutput");
-      if (!clientState.backendConnected) {
-        const backendReady = await verifyBackendConnection();
-        if (!backendReady) {
-          setModularSendState("offline", "Backend not connected");
-          setSaveStatus("Backend not connected");
-          return;
-        }
-      }
-
-      sendButton.disabled = true;
-      sendButton.textContent = "Sending...";
-      const target = el("outputTarget") ? el("outputTarget").value : "modular";
-      const targetLabel = target === "modular" ? "Modular" : target === "review_room" ? "Review Room" : "XYZ Package";
-      setModularSendState("loading", `Sending object state to ${targetLabel}...`);
-      try {
-        if (target !== "modular") {
-          const summary = `Output prepared for ${targetLabel}. Backend route can be mapped later.`;
-          setModularSendState("success", summary);
-          setSaveStatus(`Output prepared for ${targetLabel}`);
-          setHandoffStatus(targetLabel);
-          addLog(summary, "Output");
-          return;
-        }
-
-        const makerResponse = await submitCoreCtrAction("send_to_modular");
-        applyMakerResponse("send_to_modular", makerResponse);
-        const data = await submitModularPointerAction("modular.pointer_commit", {
-          sourceJobId: clientState.currentSourceJobId,
-          sourceModule: "Maker",
-          objectState: buildCurrentObjectState({ sourceJobId: clientState.currentSourceJobId })
-        });
-        const summary = (data?.result || {}).summary || "Object state sent to Modular.";
-        setModularSendState("success", summary);
-        setSaveStatus("Modular handoff sent");
-        setHandoffStatus("sent");
-      } catch (error) {
-        const message = String(error.message || error);
-        if (message.toLowerCase().includes("fetch") || message.toLowerCase().includes("expected json response")) {
-          setModularSendState("offline", "Backend not connected");
-          setConnectionSummary("Backend not connected", false);
-          setSaveStatus("Backend not connected");
-        } else {
-          setModularSendState("fail", message);
-          setSaveStatus("Modular send failed");
-        }
-        addLog(message, "Core CTR");
-      } finally {
-        sendButton.disabled = false;
-        sendButton.textContent = "Send Output";
-      }
-    });
-
-    async function initializeClientWorkstation() {
-      setUiMode(clientState.uiMode);
-      syncInteractionModeUi();
-      updateSettingsReadout();
-      el("scaleRange").dataset.lastScale = el("scaleRange").value;
-      syncObjectHelpers();
-      setSelectedObject(imagePlane || objectFrameHelper.interactionSurface);
-      updateCamera();
-      resizeViewport();
-      restoreDraft();
-      await loadRuntimeConfig();
-      await verifyBackendConnection();
-      if (clientState.currentSourceJobId || clientState.currentObjectId) {
-        try {
-          await submitModularPointerAction("modular.get_construction_state", {
-            sourceJobId: clientState.currentSourceJobId,
-            objectId: clientState.currentObjectId,
-            sourceModule: "Maker",
-            objectState: buildCurrentObjectState({
-              sourceJobId: clientState.currentSourceJobId,
-              objectId: clientState.currentObjectId
-            })
-          });
-        } catch (_) {}
-      }
-      animate();
-      addLog("Client WorkStation initialized with object-frame editing mounted in the main view.", "System");
-    }
-
-    void initializeClientWorkstation();
+    createPreviewMesh();
+    resize();
+    fitView();
+    updateMetricText();
+    healthCheck().catch(() => {});
   </script>
-  <script>
-const API_BASE =
-  window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
-    ? "http://127.0.0.1:5000"
-    : window.location.origin;
-
-const CORE_CTR_BASE = `${API_BASE}/core-ctr/v1`;
-</script>
 </body>
 </html>

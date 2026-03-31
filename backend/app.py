@@ -1,6 +1,7 @@
 from pathlib import Path
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
+from routes.core_ctr_routes import core_ctr_bp
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -26,6 +27,8 @@ def serve_static_images(filename):
 @app.get("/__which_app")
 def which_app():
     return jsonify({"ok": True, "marker": "backend-app-clean"})
+
+app.register_blueprint(core_ctr_bp)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

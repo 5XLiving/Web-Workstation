@@ -495,7 +495,6 @@
         <button class="nav-btn active" data-target="execution-plan">Execution Plan</button>
         <button class="nav-btn" data-target="codebooks">Codebooks</button>
         <button class="nav-btn" data-target="overview">Overview</button>
-        <button class="nav-btn" data-target="xyz-spatial">XYZ Spatial</button>
         <button class="nav-btn" data-target="history">History / Audit</button>
         <button class="nav-btn" data-target="health">Health</button>
       </div>
@@ -722,7 +721,7 @@
               <span class="tag">Project Source of Truth</span>
               <span class="tag">Approval Gate</span>
               <span class="tag">Audit Trail</span>
-              <span class="tag">Core CTR Prep</span>
+
             </div>
             <div class="status"><span class="dot ok"></span> No client-room automation is enabled here.</div>
             <div class="status"><span class="dot warn"></span> Internal locked codebook writes require protected edit mode.</div>
@@ -753,114 +752,7 @@
         </div>
       </section>
 
-      <section id="xyz-spatial" class="section">
-        <div class="layout">
-          <div class="card">
-            <h3 class="panel-title">XYZ Spatial Composer</h3>
-            <p class="panel-sub">WorkStation-only structured planning flow for hologram preview and generation packages.</p>
-            <div class="form-stack">
-              <div>
-                <label for="xyzPrompt">Spatial Prompt</label>
-                <textarea id="xyzPrompt" placeholder="Describe the room goal, object arrangement, and spatial intent."></textarea>
-              </div>
-              <div>
-                <label for="xyzNotes">Spatial Notes</label>
-                <textarea id="xyzNotes" placeholder="Optional planning notes, references, and constraints."></textarea>
-              </div>
-              <div class="row-3">
-                <div>
-                  <label for="xyzRoomWidth">Room Width (X)</label>
-                  <input id="xyzRoomWidth" type="number" step="0.1" value="6" />
-                </div>
-                <div>
-                  <label for="xyzRoomHeight">Room Height (Y)</label>
-                  <input id="xyzRoomHeight" type="number" step="0.1" value="3.2" />
-                </div>
-                <div>
-                  <label for="xyzRoomDepth">Room Depth (Z)</label>
-                  <input id="xyzRoomDepth" type="number" step="0.1" value="6" />
-                </div>
-              </div>
-              <div class="row-3">
-                <div>
-                  <label for="xyzObjectCount">Object Count</label>
-                  <input id="xyzObjectCount" type="number" min="1" max="24" step="1" value="1" />
-                </div>
-                <div>
-                  <label for="xyzDimX">Object X</label>
-                  <input id="xyzDimX" type="number" step="0.1" value="1.8" />
-                </div>
-                <div>
-                  <label for="xyzDimY">Object Y</label>
-                  <input id="xyzDimY" type="number" step="0.1" value="1.2" />
-                </div>
-              </div>
-              <div class="row">
-                <div>
-                  <label for="xyzDimZ">Object Z</label>
-                  <input id="xyzDimZ" type="number" step="0.1" value="1.0" />
-                </div>
-                <div>
-                  <label for="xyzZoneName">Zone Label</label>
-                  <input id="xyzZoneName" type="text" value="primary display zone" />
-                </div>
-              </div>
-              <div class="btn-row">
-                <button class="btn btn-primary" id="xyzPlanBtn">Create Spatial Plan</button>
-                <button class="btn btn-secondary" id="xyzPreviewBtn" disabled>Build Hologram Preview</button>
-                <button class="btn btn-secondary" id="xyzJobBtn" disabled>Prepare Generation Package</button>
-              </div>
-            </div>
-          </div>
 
-          <div class="card">
-            <h3 class="panel-title">XYZ Run State</h3>
-            <div class="stack">
-              <div class="item">
-                <h4>Current Plan</h4>
-                <p id="xyzPlanIdValue">No plan created yet.</p>
-              </div>
-              <div class="item">
-                <h4>Current Preview</h4>
-                <p id="xyzPreviewIdValue">No preview package yet.</p>
-              </div>
-              <div class="item">
-                <h4>Current Job</h4>
-                <p id="xyzJobIdValue">No generation package yet.</p>
-              </div>
-              <div class="item">
-                <h4>XYZ Summary</h4>
-                <pre id="xyzSummaryView">No XYZ pipeline activity yet.</pre>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="layout" style="margin-top: 18px;">
-          <div class="card">
-            <h3 class="panel-title">Spatial Plan Panel</h3>
-            <pre id="xyzPlanView">No plan yet.</pre>
-          </div>
-
-          <div class="card">
-            <h3 class="panel-title">Hologram Preview Panel</h3>
-            <pre id="xyzPreviewView">No preview package yet.</pre>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top: 18px;">
-          <h3 class="panel-title">Generation Package Panel</h3>
-          <pre id="xyzJobView">No generation package yet.</pre>
-        </div>
-
-        <div class="card" style="margin-top: 18px;">
-          <h3 class="panel-title">XYZ History Panel</h3>
-          <div class="btn-row">
-            <button class="btn btn-secondary" id="xyzRefreshHistoryBtn">Refresh XYZ History</button>
-          </div>
-          <div id="xyzHistoryList" class="history-list"></div>
-        </div>
-      </section>
 
       <section id="history" class="section">
         <div class="card">
@@ -1025,31 +917,12 @@
       syncOutputIntent();
     }
 
+
     function syncOutputIntent() {
-      const scope = currentScope();
-      const map = devroomState.bootstrap?.requestTypeOutputIntentMap || {};
-      if (scope.module === "XYZ Spatial") {
-        const suggested = map[scope.requestType] || "scene_layout";
-        if ((devroomState.bootstrap?.outputIntentOptions || []).includes(suggested)) {
-          el("scopeOutputIntent").value = suggested;
-        }
-      }
       updateScopeSummary();
     }
 
-    function syncXyzScope(requestType) {
-      if (el("scopeModule").value !== "XYZ Spatial") {
-        el("scopeModule").value = "XYZ Spatial";
-        syncRequestTypeOptions();
-      }
-      if (requestType) {
-        const options = Array.from(el("scopeRequestType").options).map((option) => option.value);
-        if (options.includes(requestType)) {
-          el("scopeRequestType").value = requestType;
-        }
-      }
-      syncOutputIntent();
-    }
+
 
     function setButtonState() {
       const request = devroomState.currentRequest;
@@ -1093,46 +966,15 @@
       setText("historyCountValue", String(entries.length));
     }
 
-    function renderXyzHistory(entries) {
-      const container = el("xyzHistoryList");
-      container.innerHTML = "";
-      if (!entries || entries.length === 0) {
-        container.innerHTML = `<div class="history-entry"><p>No XYZ history recorded yet.</p></div>`;
-        return;
-      }
-      entries.forEach((entry) => {
-        const scope = entry.scope || {};
-        const node = document.createElement("div");
-        node.className = "history-entry";
-        node.innerHTML = `<h4>${entry.action || "xyz_event"}</h4><p>${entry.timestamp || "n/a"}</p><p>Actor: ${entry.actor || "devroom_admin"}</p><p>Workspace: ${entry.workspaceId || scope.workspaceId || "-"}</p><p>Scope: ${scope.company || "-"} / ${scope.project || "-"} / ${scope.module || "-"}</p><p>Plan: ${entry.planId || "-"}</p><p>Preview: ${entry.previewId || "-"}</p><p>Job: ${entry.jobId || "-"}</p><p>Objects: ${entry.objectCount || "-"}</p><p>State: ${entry.state || "-"}</p><p>Summary: ${entry.summary || "-"}</p>`;
-        container.appendChild(node);
-      });
-    }
 
-    function setXyzButtonState() {
-      el("xyzPreviewBtn").disabled = !devroomState.xyzPlan;
-      el("xyzJobBtn").disabled = !devroomState.xyzPlan;
-    }
 
-    function renderXyzPlan(plan) {
-      devroomState.xyzPlan = plan || null;
-      el("xyzPlanView").textContent = prettyJson(plan || "No plan yet.");
-      setText("xyzPlanIdValue", plan?.planId || "No plan created yet.");
-      el("xyzSummaryView").textContent = prettyJson(plan?.spatialSummary || "No XYZ pipeline activity yet.");
-      setXyzButtonState();
-    }
 
-    function renderXyzPreview(preview) {
-      devroomState.xyzPreview = preview || null;
-      el("xyzPreviewView").textContent = prettyJson(preview || "No preview package yet.");
-      setText("xyzPreviewIdValue", preview?.previewId || "No preview package yet.");
-    }
 
-    function renderXyzJob(job) {
-      devroomState.xyzJob = job || null;
-      el("xyzJobView").textContent = prettyJson(job || "No generation package yet.");
-      setText("xyzJobIdValue", job?.jobId || "No generation package yet.");
-    }
+
+
+
+
+
 
     function renderDecision(decision, request) {
       devroomState.currentDecision = decision;
@@ -1223,12 +1065,7 @@
       renderHistory(data.history || []);
     }
 
-    async function loadXyzBootstrap() {
-      const data = await fetchJson("/admin/devroom/xyz/bootstrap");
-      devroomState.xyzBootstrap = data;
-      renderXyzHistory(data.history || []);
-      setXyzButtonState();
-    }
+
 
     async function loadInternalCodebook() {
       const data = await fetchJson("/admin/devroom/internal-codebook");
@@ -1258,82 +1095,15 @@
       renderHistory(devroomState.history);
     }
 
-    async function loadXyzHistory() {
-      const params = new URLSearchParams({ limit: "80", workspaceId: currentScope().workspaceId || "" });
-      const data = await fetchJson(`/admin/devroom/xyz/history?${params.toString()}`);
-      devroomState.xyzHistory = data.history || [];
-      renderXyzHistory(devroomState.xyzHistory);
-    }
 
-    function xyzPayload(requestType) {
-      return {
-        scope: {
-          ...currentScope(),
-          module: "XYZ Spatial",
-          requestType,
-        },
-        prompt: el("xyzPrompt").value.trim() || el("requestPrompt").value.trim(),
-        notes: el("xyzNotes").value.trim() || el("requestNotes").value.trim(),
-        workspace: {
-          width: Number(el("xyzRoomWidth").value || 6),
-          height: Number(el("xyzRoomHeight").value || 3.2),
-          depth: Number(el("xyzRoomDepth").value || 6),
-          zoneName: el("xyzZoneName").value.trim() || "primary display zone",
-        },
-        objectCount: Number(el("xyzObjectCount").value || 1),
-        dimensions: {
-          x: Number(el("xyzDimX").value || 1.8),
-          y: Number(el("xyzDimY").value || 1.2),
-          z: Number(el("xyzDimZ").value || 1.0),
-        },
-      };
-    }
 
-    async function createXyzPlan() {
-      const requestType = ["layout_only", "proportion_adjust", "object_place", "zone_edit"].includes(el("scopeRequestType").value)
-        ? el("scopeRequestType").value
-        : "xyz_plan";
-      syncXyzScope(requestType);
-      const data = await fetchJson("/admin/devroom/xyz/plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(xyzPayload(requestType)),
-      });
-      renderXyzPlan(data.plan);
-      renderXyzPreview(null);
-      renderXyzJob(null);
-      el("requestResultView").textContent = prettyJson(data);
-      await loadXyzHistory();
-    }
 
-    async function createXyzPreview() {
-      if (!devroomState.xyzPlan) return;
-      syncXyzScope("hologram_preview");
-      const data = await fetchJson("/admin/devroom/xyz/preview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...xyzPayload("hologram_preview"), planId: devroomState.xyzPlan.planId }),
-      });
-      renderXyzPlan(data.plan);
-      renderXyzPreview(data.preview);
-      el("requestResultView").textContent = prettyJson(data);
-      await loadXyzHistory();
-    }
 
-    async function createXyzGenerationPackage() {
-      if (!devroomState.xyzPlan) return;
-      const requestType = el("scopeRequestType").value === "batch_model_generate" ? "batch_model_generate" : "model_generate";
-      syncXyzScope(requestType);
-      const data = await fetchJson("/admin/devroom/xyz/generation-package", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...xyzPayload(requestType), planId: devroomState.xyzPlan.planId }),
-      });
-      renderXyzPlan(data.plan);
-      renderXyzJob(data.job);
-      el("requestResultView").textContent = prettyJson(data);
-      await loadXyzHistory();
-    }
+
+
+
+
+
 
     async function evaluateRequest() {
       const payload = { scope: currentScope(), prompt: el("requestPrompt").value.trim(), notes: el("requestNotes").value.trim() };
