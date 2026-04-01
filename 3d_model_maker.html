@@ -660,13 +660,13 @@
     }
   </style>
 
-  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
 </head>
 <body>
   <div class="shell">
     <header class="topbar glass">
       <div class="brand">
-        <img src="assets/images/logo.png" alt="5xLiving logo" class="logo" />
+        <img src="static/assets/images/logo.png" alt="5xLiving logo" class="logo" />
         <div class="brand-copy">
           <strong>3D Model Maker</strong>
           <span>5xLiving / Workstation</span>
@@ -753,28 +753,20 @@
           </div>
         </div>
 
+
         <div class="viewport-main">
-          <canvas id="viewportCanvas"></canvas>
+          <iframe
+            id="modularMountFrame"
+            src="/xyz_modular"
+            title="XYZ Modular"
+            loading="eager"
+            style="position:absolute; inset:0; width:100%; height:100%; border:0; background:transparent;"
+          ></iframe>
 
           <div class="viewport-banner">
             <div class="selection-callout">
-              <strong id="selectionTitle">Object Focus</strong>
-              <span id="selectionMessage">Preview host only. Core CTR controls job submission and result flow.</span>
-            </div>
-
-            <div class="dimension-strip" aria-label="Object dimensions">
-              <div class="dimension-pill">
-                <span>Width</span>
-                <strong id="dimensionWidth">1.20</strong>
-              </div>
-              <div class="dimension-pill">
-                <span>Height</span>
-                <strong id="dimensionHeight">1.05</strong>
-              </div>
-              <div class="dimension-pill">
-                <span>Depth</span>
-                <strong id="dimensionDepth">0.35</strong>
-              </div>
+              <strong>Mounted Workspace</strong>
+              <span id="selectionMessage">XYZ Modular is mounted inside this shell.</span>
             </div>
           </div>
         </div>
@@ -1057,17 +1049,20 @@
       }
     }
 
-    // Updated: Render preview_object supporting box_proxy with size/position
+    // 3D Model Maker: Render preview_object supporting box_proxy with size/position
     function renderPreviewObject(obj) {
       if (!obj || obj.kind !== "box_proxy" || !obj.size) return;
 
+      // Set state dimensions from object size, with defaults
       state.width = Number(obj.size.x || 1.2);
       state.depth = Number(obj.size.y || 0.35);
       state.height = Number(obj.size.z || 1.05);
 
+      // Create the preview mesh and update metrics
       createPreviewMesh();
       updateMetricText();
 
+      // Set preview group position if provided
       if (obj.position) {
         previewGroup.position.set(
           Number(obj.position.x || 0),
@@ -1076,6 +1071,7 @@
         );
       }
 
+      // Render the scene once
       renderOnce();
     }
 
@@ -1132,12 +1128,30 @@
       addLog("Upload cleared.", "Input");
     });
 
-    el("btnAttach").addEventListener("click", () => {
-      if (!state.uploadUrl) return;
-      mountImagePreview(state.uploadUrl);
-      el("objectState").textContent = "Mounted";
-      el("mountedState").textContent = state.uploadName || "3D Model Maker";
-      addLog("Upload mounted into preview room.", "Preview");
+    el("btnAttach").addEventListener("click", async () => {
+      const file = uploadFile.files && uploadFile.files[0];
+      if (!file) return;
+      // Upload to backend
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const response = await fetch("/api/upload/image", {
+          method: "POST",
+          body: formData
+        });
+        const result = await response.json();
+        if (!result.ok) throw new Error(result.error || "Upload failed");
+        state.uploadedImageUrl = result.url;
+        if (window.localStorage) {
+          localStorage.setItem("uploadedImageUrl", result.url);
+        }
+        mountImagePreview(result.url);
+        el("objectState").textContent = "Mounted";
+        el("mountedState").textContent = state.uploadName || "3D Model Maker";
+        addLog("Image uploaded and mounted into preview room.", "Preview");
+      } catch (err) {
+        addLog("Image upload failed: " + err.message, "Error");
+      }
     });
 
     el("btnPreviewPrompt").addEventListener("click", () => {
@@ -1277,6 +1291,7 @@
 
     let previewMesh = null;
     let previewOutline = null;
+    // Declare imagePlane at top-level so all functions can access it safely
     let imagePlane = null;
 
     function createPreviewMesh() {

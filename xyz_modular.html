@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>5X WorkStation • XYZ Modular</title>
+  <style>
+    :root{
+      --bg:#020611;
+      --bg2:#071120;
+      --bg3:#050914;
+      --glass:rgba(7,14,24,.72);
+      --glass2:rgba(10,19,33,.88);
+      --line:rgba(255,255,255,.08);
+      --text:#f4f8ff;
+      --muted:#9db0c5;
+      --mint:#94f3de;
+      --mint2:#ccfff2;
+      --mintLine:rgba(148,243,222,.24);
+      --warn:#ffd37a;
+      --danger:#ff9d9d;
+      --shadow:0 28px 68px rgba(0,0,0,.36);
+      --shellPad:14px;
+      --shellGap:14px;
+      --topbarH:86px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(92,136,255,.18), transparent 24%),
+        radial-gradient(circle at 84% 14%, rgba(62,215,193,.14), transparent 24%),
+        radial-gradient(circle at 50% 0%, rgba(125,164,255,.08), transparent 28%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 56%, var(--bg3) 100%);
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size:120px 120px;
+      mask-image:radial-gradient(circle at center, rgba(0,0,0,.85), transparent 88%);
+      opacity:.18;
+    }
+
+    .shell{
+      min-height:100vh;
+      padding:var(--shellPad);
+      display:grid;
+      grid-template-rows:auto 1fr;
+      gap:var(--shellGap);
+    }
+
+    .glass{
+      border:1px solid var(--line);
+      background:
+        radial-gradient(circle at top right, rgba(148,243,222,.08), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+        linear-gradient(180deg, var(--glass2), var(--glass));
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(16px) saturate(140%);
+    }
+
+    .topbar{
+      min-height:var(--topbarH);
+      border-radius:24px;
+      padding:14px 18px;
+      display:grid;
+      grid-template-columns:minmax(320px,1.3fr) auto;
+      align-items:center;
+      gap:16px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .logo{
+      width:58px;
+      height:58px;
+      border-radius:16px;
+      object-fit:contain;
+      flex:none;
+      filter:drop-shadow(0 0 16px rgba(148,243,222,.18));
+    }
+
+    .brand-copy strong{
+      display:block;
+      font-family:"Noto Serif SC","Noto Serif",serif;
+      font-size:30px;
+      font-weight:600;
+      line-height:.98;
+      letter-spacing:-.03em;
+    }
+
+    .brand-copy span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      margin-top:5px;
+    }
+
+    .account{
+      display:grid;
+      gap:6px;
+      justify-items:end;
+      text-align:right;
+    }
+    .account strong{font-size:14px;color:var(--mint2)}
+    .account span{color:var(--muted);font-size:12px}
+
+    .layout{
+      min-height:0;
+      display:grid;
+      grid-template-columns:360px minmax(0,1fr) 330px;
+      gap:14px;
+      align-items:stretch;
+    }
+
+    .panel{
+      min-height:0;
+      border-radius:26px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .panel-head{
+      padding:16px 18px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+
+    .panel-head strong{
+      font-size:15px;
+      color:var(--mint2);
+      letter-spacing:.03em;
+    }
+
+    .panel-head span{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .panel-body{
+      min-height:0;
+      overflow:auto;
+      padding:16px;
+      display:grid;
+      gap:14px;
+      align-content:start;
+    }
+
+    .card{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(180deg, rgba(11,18,31,.86), rgba(10,16,28,.72));
+      padding:14px;
+      display:grid;
+      gap:12px;
+    }
+
+    .card h3{
+      margin:0;
+      font-size:14px;
+      color:var(--mint2);
+      letter-spacing:.02em;
+    }
+
+    .card p,.muted{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .field-grid{display:grid;gap:10px}
+    .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+
+    label{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin-bottom:6px;
+    }
+
+    input,select,textarea{
+      width:100%;
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:12px;
+      background:rgba(8,14,24,.9);
+      color:var(--text);
+      padding:11px 12px;
+      font:inherit;
+      outline:none;
+    }
+
+    .btn{
+      min-height:44px;
+      border-radius:12px;
+      border:1px solid var(--mintLine);
+      cursor:pointer;
+      padding:11px 14px;
+      font:inherit;
+      font-weight:800;
+      transition:transform .18s ease,border-color .18s ease,background .18s ease,opacity .18s ease;
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .btn-primary{color:#08221d;background:linear-gradient(135deg,#b8fff0 0%, #86efd8 100%)}
+    .btn-secondary{color:var(--text);background:rgba(148,243,222,.06)}
+    .btn-quiet{color:var(--muted);background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08)}
+
+    .tool-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+
+    .tool-chip{
+      min-height:48px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(10,17,29,.88);
+      color:var(--text);
+      cursor:pointer;
+      padding:10px 12px;
+      text-align:left;
+      font:inherit;
+      font-weight:700;
+      display:grid;
+      gap:4px;
+    }
+
+    .tool-chip small{
+      color:var(--muted);
+      font-size:11px;
+      font-weight:500;
+    }
+
+    .tool-chip.active{
+      color:var(--mint2);
+      background:rgba(148,243,222,.08);
+      border-color:var(--mintLine);
+      box-shadow:0 0 0 1px rgba(148,243,222,.08) inset;
+    }
+
+    .toggle-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .toggle{
+      border-radius:999px;
+      padding:9px 12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(10,17,29,.82);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .toggle.active{
+      color:var(--mint2);
+      background:rgba(148,243,222,.08);
+      border-color:var(--mintLine);
+    }
+
+    .viewport-shell{
+      min-height:0;
+      height:100%;
+      border-radius:28px;
+      overflow:hidden;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      background:
+        radial-gradient(circle at 16% 0%, rgba(112,146,255,.14), transparent 22%),
+        radial-gradient(circle at 88% 12%, rgba(148,243,222,.1), transparent 24%),
+        linear-gradient(180deg, rgba(9,16,28,.82), rgba(8,13,24,.92));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      position:relative;
+    }
+
+    .viewport-top{
+      position:relative;
+      z-index:10;
+      padding:16px 16px 0;
+      display:grid;
+      gap:12px;
+    }
+
+    .module-badge{
+      width:fit-content;
+      border-radius:999px;
+      padding:10px 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(7,14,24,.72);
+      color:var(--mint2);
+      font-size:12px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    .workspace-note{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 12px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(6,12,22,.74);
+    }
+
+    .mode-chip{
+      border-radius:999px;
+      padding:8px 12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(10,17,29,.82);
+      color:var(--mint2);
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .viewport-main{
+      position:relative;
+      min-height:420px;
+      overflow:hidden;
+    }
+
+    #viewportCanvas{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      cursor:grab;
+      touch-action:none;
+    }
+
+    #viewportCanvas.dragging{cursor:grabbing}
+
+    .viewport-banner{
+      position:absolute;
+      left:18px;
+      right:18px;
+      bottom:18px;
+      z-index:12;
+      pointer-events:none;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-end;
+    }
+
+    .selection-callout{
+      max-width:320px;
+      border-radius:18px;
+      padding:12px 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(180deg, rgba(9,16,28,.82), rgba(8,14,24,.72));
+      box-shadow:0 18px 34px rgba(0,0,0,.24);
+      display:grid;
+      gap:4px;
+    }
+
+    .selection-callout strong{
+      color:var(--mint2);
+      font-size:13px;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+
+    .selection-callout span{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .dimension-strip{
+      display:inline-flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .dimension-pill{
+      min-width:108px;
+      border-radius:14px;
+      padding:10px 12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(8,14,24,.7);
+      display:grid;
+      gap:4px;
+    }
+
+    .dimension-pill span{
+      color:var(--muted);
+      font-size:11px;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+    }
+
+    .dimension-pill strong{
+      color:var(--mint2);
+      font-size:14px;
+      letter-spacing:-.02em;
+    }
+
+    .viewport-bottom{
+      position:relative;
+      z-index:10;
+      padding:0 16px 16px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .chip-row{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{
+      border-radius:12px;
+      padding:10px 12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(8,14,24,.72);
+      color:var(--muted);
+      font-size:12px;
+    }
+    .chip strong{
+      color:var(--mint2);
+      margin-left:6px;
+      font-size:13px;
+    }
+
+    .side-metric{
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(9,14,24,.76);
+      padding:12px;
+      display:grid;
+      gap:8px;
+    }
+
+    .metric-line{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:13px;
+    }
+
+    .metric-line .k{color:var(--muted)}
+    .metric-line .v{color:var(--mint2);font-weight:700;text-align:right}
+
+    .send-status{
+      display:grid;
+      gap:8px;
+      padding:12px 14px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(9,14,24,.76);
+    }
+
+    .send-status-head{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 11px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(10,17,29,.88);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .status-badge::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:currentColor;
+      opacity:.9;
+    }
+
+    .is-idle{color:#9aa6bb}
+    .is-loading{color:var(--warn)}
+    .is-success{color:#8ef3d0}
+    .is-fail{color:var(--danger)}
+    .is-offline{color:#ffb36f}
+
+    .status-copy{color:var(--muted);font-size:13px;line-height:1.55}
+
+    .steps-list{
+      min-height:260px;
+      max-height:360px;
+      overflow:auto;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(7,12,22,.82);
+      padding:10px;
+      display:grid;
+      gap:8px;
+      align-content:start;
+    }
+
+    .step-entry{
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.02);
+      padding:10px 11px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .step-entry.active{
+      border-color:rgba(148,243,222,.38);
+      background:rgba(148,243,222,.06);
+    }
+
+    .step-entry strong{color:var(--text)}
+
+    .activity-log{
+      min-height:180px;
+      max-height:240px;
+      overflow:auto;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(7,12,22,.82);
+      padding:10px;
+      display:grid;
+      gap:8px;
+      align-content:start;
+    }
+
+    .log-entry{
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.02);
+      padding:10px 11px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .log-entry strong{color:var(--text)}
+
+    @media (max-width:1280px){
+      .layout{grid-template-columns:340px minmax(0,1fr)}
+      .topbar{grid-template-columns:1fr}
+      .account{justify-items:start;text-align:left}
+    }
+
+    @media (max-width:1080px){
+      body{overflow:auto}
+      .layout{grid-template-columns:1fr}
+      .viewport-main{min-height:460px}
+    }
+
+    @media (max-width:720px){
+      .shell{padding:10px}
+      .topbar{padding:14px}
+      .brand-copy strong{font-size:26px}
+      .row,.row3,.tool-grid{grid-template-columns:1fr}
+      .viewport-main{min-height:380px}
+    }
+  </style>
+
+  <!-- Use ES Modules for Three.js and OrbitControls -->
+  <!-- All logic will be in the main module script below -->
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar glass">
+      <div class="brand">
+        <!-- Update the path to logo.png as needed. Place logo.png in /public/assets/images/ or /static/assets/images/ -->
+        <img src="static/assets/images/logo.png" alt="5xLiving logo" class="logo" />
+        <div class="brand-copy">
+          <strong>XYZ Modular</strong>
+          <span>5xLiving / Workstation</span>
+        </div>
+      </div>
+
+      <div class="account">
+        <strong>Core Modular Engine</strong>
+        <span>XYZ printing logic + viewport-first modular tools</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel glass">
+        <div class="panel-head">
+          <strong>Modular Controls</strong>
+          <span>Printer logic + SketchUp-style tools</span>
+        </div>
+
+        <div class="panel-body">
+          <section class="card">
+            <h3>Tool Set</h3>
+            <div class="tool-grid">
+              <button id="toolPushPull" class="tool-chip active">
+                Push / Pull
+                <small>Size and extrusion control</small>
+              </button>
+              <button id="toolCut" class="tool-chip">
+                Scissors
+                <small>Cut / split placeholder</small>
+              </button>
+              <button id="toolPencil" class="tool-chip">
+                Pencil
+                <small>Straight line guide</small>
+              </button>
+              <button id="toolArc" class="tool-chip">
+                Arc Pencil
+                <small>Arc / circle guide</small>
+              </button>
+            </div>
+            <p class="muted">Phase 1 keeps the real engine on XYZ build steps. These tools are the viewport-side modular workflow that will keep expanding.</p>
+          </section>
+
+          <section class="card">
+            <h3>Viewport Toggles</h3>
+            <div class="toggle-row">
+              <button id="toggleGrid" class="toggle active">Grid</button>
+              <button id="toggleAxis" class="toggle active">Axis</button>
+              <button id="toggleWire" class="toggle">Wireframe</button>
+              <button id="toggleSnap" class="toggle">Snap</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <h3>Build Package</h3>
+            <div class="field-grid">
+              <div class="row">
+                <div>
+                  <label for="buildMode">Build Mode</label>
+                  <select id="buildMode">
+                    <option value="xyz_construct">xyz_construct</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="template">Template</label>
+                  <select id="template">
+                    <option value="box_block">box_block</option>
+                    <option value="cylinder_block">cylinder_block</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row3">
+                <div>
+                  <label for="widthInput">Width</label>
+                  <input id="widthInput" type="number" min="0.10" step="0.01" value="1.20" />
+                </div>
+                <div>
+                  <label for="heightInput">Height</label>
+                  <input id="heightInput" type="number" min="0.10" step="0.01" value="1.05" />
+                </div>
+                <div>
+                  <label for="depthInput">Depth</label>
+                  <input id="depthInput" type="number" min="0.10" step="0.01" value="0.35" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div>
+                  <label for="material">Material</label>
+                  <input id="material" type="text" value="default_shell" />
+                </div>
+                <div>
+                  <label for="layerHeight">Layer Height</label>
+                  <input id="layerHeight" type="number" min="0.01" step="0.01" value="0.05" />
+                </div>
+              </div>
+
+              <div>
+                <label for="pathStrategy">Path Strategy</label>
+                <select id="pathStrategy">
+                  <option value="layer_fill">layer_fill</option>
+                </select>
+              </div>
+
+              <div class="row3">
+                <div>
+                  <label for="originX">Origin X</label>
+                  <input id="originX" type="number" step="0.01" value="0.00" />
+                </div>
+                <div>
+                  <label for="originY">Origin Y</label>
+                  <input id="originY" type="number" step="0.01" value="0.00" />
+                </div>
+                <div>
+                  <label for="originZ">Origin Z</label>
+                  <input id="originZ" type="number" step="0.01" value="0.00" />
+                </div>
+              </div>
+
+              <div class="row">
+                <button id="btnPreviewBuild" class="btn btn-primary">Preview Build</button>
+                <button id="btnRefreshJob" class="btn btn-quiet">Refresh Job</button>
+              </div>
+
+              <div class="row">
+                <button id="btnPlay" class="btn btn-secondary">Play Steps</button>
+                <button id="btnPause" class="btn btn-quiet">Pause</button>
+              </div>
+
+              <div class="row">
+                <button id="btnStep" class="btn btn-secondary">Step Forward</button>
+                <button id="btnReset" class="btn btn-quiet">Reset Build</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </aside>
+
+      <section class="viewport-shell" aria-label="XYZ modular room">
+        <div class="viewport-top">
+          <div class="module-badge">Standalone XYZ Modular System</div>
+
+          <div class="workspace-note">
+            <span class="mode-chip" id="activeToolLabel">Push / Pull</span>
+            <div class="hint" id="modeGuidance">Viewport-first modular room. The object is not shown as a solid box by default. You are viewing printer-style build paths and toolhead motion.</div>
+          </div>
+        </div>
+
+        <div class="viewport-main">
+          <canvas id="viewportCanvas"></canvas>
+
+          <div class="viewport-banner">
+            <div class="selection-callout">
+              <strong>XYZ Build State</strong>
+              <span id="selectionMessage">Waiting for build. This room visualizes path steps, deposited layers, and toolhead position rather than a default block model.</span>
+            </div>
+
+            <div class="dimension-strip">
+              <div class="dimension-pill">
+                <span>Width</span>
+                <strong id="dimensionWidth">1.20</strong>
+              </div>
+              <div class="dimension-pill">
+                <span>Height</span>
+                <strong id="dimensionHeight">1.05</strong>
+              </div>
+              <div class="dimension-pill">
+                <span>Depth</span>
+                <strong id="dimensionDepth">0.35</strong>
+              </div>
+              <div class="dimension-pill">
+                <span>Layer</span>
+                <strong id="layerDisplay">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="viewport-bottom">
+          <div class="chip-row">
+            <div class="chip">Preview<strong id="previewState">Idle</strong></div>
+            <div class="chip">Job<strong id="jobState">None</strong></div>
+            <div class="chip">Steps<strong id="stepCount">0</strong></div>
+          </div>
+
+          <div class="chip-row">
+            <div class="chip">Latest Job<strong id="latestJobId">None</strong></div>
+            <div class="chip">Current Step<strong id="currentStepDisplay">0</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel glass">
+        <div class="panel-head">
+          <strong>Path & Result</strong>
+          <span>Returned modular data</span>
+        </div>
+
+        <div class="panel-body">
+          <section class="side-metric">
+            <div class="metric-line"><span class="k">Company</span><span class="v">5xLiving</span></div>
+            <div class="metric-line"><span class="k">Project</span><span class="v">Workstation</span></div>
+            <div class="metric-line"><span class="k">Module</span><span class="v">3DModelMaker</span></div>
+            <div class="metric-line"><span class="k">Connection</span><span class="v" id="connectionState">Unknown</span></div>
+            <div class="metric-line"><span class="k">Snap</span><span class="v" id="snapState">Off</span></div>
+          </section>
+
+          <section class="card">
+            <h3>Core CTR</h3>
+            <div class="send-status">
+              <div class="send-status-head">
+                <strong>Status</strong>
+                <span id="statusBadge" class="status-badge is-idle">Idle</span>
+              </div>
+              <div id="statusMessage" class="status-copy">Ready to build.</div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h3>Path Summary</h3>
+            <div class="side-metric">
+              <div class="metric-line"><span class="k">Total Steps</span><span class="v" id="summaryTotalSteps">0</span></div>
+              <div class="metric-line"><span class="k">Move Steps</span><span class="v" id="summaryMoveSteps">0</span></div>
+              <div class="metric-line"><span class="k">Deposit Steps</span><span class="v" id="summaryDepositSteps">0</span></div>
+              <div class="metric-line"><span class="k">Total Layers</span><span class="v" id="summaryTotalLayers">0</span></div>
+            </div>
+          </section>
+
+
+          <section class="card">
+            <h3>Uploaded Image</h3>
+            <div id="uploadedImageDisplay" class="preview-box">No image uploaded yet</div>
+          </section>
+
+          <section class="card">
+            <h3>Returned Steps</h3>
+            <div id="stepsList" class="steps-list"></div>
+          </section>
+
+          <section class="card">
+            <h3>Activity</h3>
+            <div id="activityLog" class="activity-log"></div>
+          </section>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+    // ...existing code...
+    const el = (id) => document.getElementById(id);
+
+    const API_BASE =
+      window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+        ? "http://127.0.0.1:5000"
+        : window.location.origin;
+
+    const CORE_CTR_BASE = `${API_BASE}/api/core-ctr/v1`;
+
+    const state = {
+      latestJobId: "",
+      latestJob: null,
+      latestResult: null,
+      backendConnected: false,
+      steps: [],
+      currentStepIndex: -1,
+      playTimer: null,
+      activeTool: "pushpull",
+      width: 1.20,
+      height: 1.05,
+      depth: 0.35,
+      builtHeight: 0,
+      builtLayers: 0,
+      showGrid: true,
+      showAxis: true,
+      showWire: false,
+      snap: false,
+      uploadedImageUrl: null
+    };
+
+    // Try to load uploaded image URL from localStorage (set by 3d_model_maker)
+    if (window.localStorage) {
+      const url = localStorage.getItem("uploadedImageUrl");
+      if (url) {
+        state.uploadedImageUrl = url;
+        displayUploadedImage(url);
+      }
+    }
+
+    function displayUploadedImage(url) {
+      // Example: add image to a known container or as a Three.js texture
+      const imgContainer = document.getElementById("uploadedImageDisplay");
+      if (imgContainer) {
+        imgContainer.innerHTML = `<img src="${url}" alt="Uploaded" style="max-width:100%;max-height:200px;">`;
+      }
+      // Optionally, add logic to use as a Three.js texture
+    }
+
+    function addLog(message, accent = "") {
+      const logNode = el("activityLog");
+      const entry = document.createElement("div");
+      entry.className = "log-entry";
+      const stamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const prefix = accent ? `<strong>${accent}</strong><br>` : "";
+      entry.innerHTML = `${prefix}[${stamp}] ${message}`;
+      logNode.prepend(entry);
+    }
+
+    function setStatus(stateName, message) {
+      const badge = el("statusBadge");
+      const map = {
+        idle: "is-idle",
+        loading: "is-loading",
+        success: "is-success",
+        fail: "is-fail",
+        offline: "is-offline"
+      };
+      badge.className = `status-badge ${map[stateName] || "is-idle"}`;
+      badge.textContent = stateName === "offline"
+        ? "Offline"
+        : stateName.charAt(0).toUpperCase() + stateName.slice(1);
+      el("statusMessage").textContent = message;
+    }
+
+    function setConnection(connected, text) {
+      state.backendConnected = connected;
+      el("connectionState").textContent = connected ? "Connected" : "Offline";
+      if (text) addLog(text, "Runtime");
+    }
+
+    function updateDimensionsUI() {
+      el("dimensionWidth").textContent = state.width.toFixed(2);
+      el("dimensionHeight").textContent = state.height.toFixed(2);
+      el("dimensionDepth").textContent = state.depth.toFixed(2);
+      el("layerDisplay").textContent = String(state.builtLayers);
+      el("snapState").textContent = state.snap ? "On" : "Off";
+    }
+
+    async function fetchJson(path, options = {}) {
+      const response = await fetch(path, options);
+      let payload;
+      try {
+        payload = await response.json();
+      } catch (_) {
+        throw new Error(`Expected JSON response from ${path}`);
+      }
+      if (!response.ok || payload.ok === false) {
+        const message = payload?.error?.message || `Request failed with ${response.status}`;
+        throw new Error(message);
+      }
+      return payload;
+    }
+
+    async function healthCheck() {
+      setStatus("loading", "Checking Core CTR health...");
+      try {
+        const data = await fetchJson(`${CORE_CTR_BASE}/health`);
+        setConnection(true, "Core CTR health check passed.");
+        setStatus("success", data.status || "Core CTR healthy.");
+        return data;
+      } catch (error) {
+        setConnection(false, "Core CTR health check failed.");
+        setStatus("offline", error.message || "Core CTR unavailable.");
+        throw error;
+      }
+    }
+
+    function buildInputData() {
+      const read = (id, fallback) => {
+        const value = Number(el(id).value);
+        return Number.isFinite(value) ? value : fallback;
+      };
+
+      let width = read("widthInput", 1.2);
+      let height = read("heightInput", 1.05);
+      let depth = read("depthInput", 0.35);
+
+      if (state.activeTool === "pushpull") {
+        depth = Math.max(0.10, depth);
+      }
+
+      if (state.snap) {
+        width = Math.round(width * 10) / 10;
+        height = Math.round(height * 10) / 10;
+        depth = Math.round(depth * 10) / 10;
+      }
+
+      state.width = width;
+      state.height = height;
+      state.depth = depth;
+      updateDimensionsUI();
+
+      return {
+        build_mode: el("buildMode").value,
+        template: el("template").value,
+        dimensions: {
+          width,
+          height,
+          depth
+        },
+        material: el("material").value || "default_shell",
+        layer_height: read("layerHeight", 0.05),
+        path_strategy: el("pathStrategy").value,
+        origin: {
+          x: read("originX", 0),
+          y: read("originY", 0),
+          z: read("originZ", 0)
+        }
+      };
+    }
+
+    async function previewBuild(input_data) {
+      const payload = {
+        company: "5xLiving",
+        project: "Workstation",
+        module: "3DModelMaker",
+        action: "preview",
+        input_data,
+        requested_by: "local-user"
+      };
+
+      return fetchJson(`${CORE_CTR_BASE}/jobs/preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    async function getJob(jobId) {
+      return fetchJson(`${CORE_CTR_BASE}/jobs/${jobId}`);
+    }
+
+    function renderStepsList() {
+      const list = el("stepsList");
+      list.innerHTML = "";
+
+      if (!state.steps.length) {
+        list.innerHTML = `<div class="step-entry"><strong>No steps</strong><br>Run Preview Build to load XYZ path steps.</div>`;
+        return;
+      }
+
+      state.steps.forEach((step, index) => {
+        const node = document.createElement("div");
+        node.className = `step-entry ${index === state.currentStepIndex ? "active" : ""}`;
+        const pos = step.position || {};
+        node.innerHTML = `
+          <strong>Step ${step.step_index} · ${step.kind}</strong><br>
+          Layer: ${step.layer_index || 0}<br>
+          X: ${Number(pos.x || 0).toFixed(2)} |
+          Y: ${Number(pos.y || 0).toFixed(2)} |
+          Z: ${Number(pos.z || 0).toFixed(2)}
+        `;
+        list.appendChild(node);
+      });
+    }
+
+    function applyPathSummary(summary) {
+      el("summaryTotalSteps").textContent = summary?.total_steps ?? 0;
+      el("summaryMoveSteps").textContent = summary?.move_steps ?? 0;
+      el("summaryDepositSteps").textContent = summary?.deposit_steps ?? 0;
+      el("summaryTotalLayers").textContent = summary?.total_layers ?? 0;
+      el("stepCount").textContent = summary?.total_steps ?? 0;
+    }
+
+    function clearDepositedLayers() {
+      while (depositedGroup.children.length) {
+        const child = depositedGroup.children.pop();
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+      }
+    }
+
+    function resetToolhead() {
+      toolhead.position.set(0, 0.15, 0);
+    }
+
+    function renderFullPathLines() {
+      while (pathGroup.children.length) {
+        const child = pathGroup.children.pop();
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+      }
+
+      if (!state.steps.length) return;
+
+      const points = [];
+      state.steps.forEach((step) => {
+        const p = step.position || {};
+        points.push(new THREE.Vector3(
+          Number(p.x || 0),
+          Number(p.z || 0) + 0.15,
+          Number(p.y || 0)
+        ));
+      });
+
+      if (points.length >= 2) {
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const material = new THREE.LineBasicMaterial({ color: 0x5fd1ff, transparent: true, opacity: 0.65 });
+        const line = new THREE.Line(geometry, material);
+        pathGroup.add(line);
+      }
+    }
+
+    function renderDepositedSlice(step) {
+      if (!step || step.kind !== "deposit" || !step.build_slice) return;
+
+      const slice = step.build_slice;
+      const pos = step.position || {};
+
+      const width = Number(slice.width || state.width);
+      const depth = Number(slice.depth || state.depth);
+      const layerHeight = Number(slice.layer_height || 0.05);
+
+      const geometry = new THREE.BoxGeometry(width, layerHeight, depth);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x94f3de,
+        roughness: 0.35,
+        metalness: 0.05,
+        transparent: true,
+        opacity: state.showWire ? 0.20 : 0.45,
+        wireframe: state.showWire
+      });
+
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(
+        Number(pos.x || 0),
+        Number(pos.z || 0) - (layerHeight / 2) + 0.15,
+        Number(pos.y || 0)
+      );
+      depositedGroup.add(mesh);
+    }
+
+    function applyGeometryState(geometryState) {
+      if (!geometryState) return;
+
+      if (geometryState.dimensions) {
+        state.width = Number(geometryState.dimensions.width || state.width);
+        state.height = Number(geometryState.dimensions.height || state.height);
+        state.depth = Number(geometryState.dimensions.depth || state.depth);
+      }
+
+      state.builtHeight = Number(geometryState?.build_progress?.built_height || 0);
+      state.builtLayers = Number(geometryState?.build_progress?.completed_layers || 0);
+      updateDimensionsUI();
+    }
+
+    function applyJobResult(data, modeLabel) {
+      const job = data?.job || null;
+      const result = data?.result || {};
+
+      state.latestJob = job;
+      state.latestResult = result;
+      state.latestJobId = job?.job_id || "";
+      state.steps = Array.isArray(result.steps) ? result.steps : [];
+      state.currentStepIndex = -1;
+      state.builtHeight = 0;
+      state.builtLayers = 0;
+
+      el("latestJobId").textContent = state.latestJobId || "None";
+      el("jobState").textContent = job?.status || "None";
+      el("previewState").textContent = modeLabel;
+      setStatus("success", result?.summary || `${modeLabel} completed.`);
+      addLog(result?.summary || `${modeLabel} completed.`, "Core CTR");
+
+      applyPathSummary(result.path_summary || {});
+      applyGeometryState(result.geometry_state || null);
+      renderStepsList();
+      clearDepositedLayers();
+      renderFullPathLines();
+      resetToolhead();
+      renderOnce();
+    }
+
+    function stepForward() {
+      if (!state.steps.length) return;
+
+      if (state.currentStepIndex < state.steps.length - 1) {
+        state.currentStepIndex += 1;
+      }
+
+      const step = state.steps[state.currentStepIndex];
+      el("currentStepDisplay").textContent = step?.step_index || 0;
+      renderStepsList();
+
+      if (step?.position) {
+        toolhead.position.set(
+          Number(step.position.x || 0),
+          Number(step.position.z || 0) + 0.18,
+          Number(step.position.y || 0)
+        );
+      }
+
+      if (step?.kind === "deposit") {
+        renderDepositedSlice(step);
+        state.builtLayers = Number(step.layer_index || state.builtLayers);
+        state.builtHeight = Number(step.position?.z || state.builtHeight);
+        el("selectionMessage").textContent = `Depositing layer ${state.builtLayers} at Z ${Number(step.position?.z || 0).toFixed(2)}.`;
+      } else {
+        el("selectionMessage").textContent = `Toolhead moving to layer ${Number(step.layer_index || 0)} position.`;
+      }
+
+      updateDimensionsUI();
+      renderOnce();
+    }
+
+    function resetPlayback() {
+      stopPlayback();
+      state.currentStepIndex = -1;
+      state.builtHeight = 0;
+      state.builtLayers = 0;
+      el("currentStepDisplay").textContent = "0";
+      el("layerDisplay").textContent = "0";
+      el("selectionMessage").textContent = "Build reset. Ready to replay XYZ construction steps.";
+      clearDepositedLayers();
+      resetToolhead();
+      renderStepsList();
+      renderOnce();
+    }
+
+    function playSteps() {
+      stopPlayback();
+      if (!state.steps.length) return;
+      state.playTimer = setInterval(() => {
+        if (state.currentStepIndex >= state.steps.length - 1) {
+          stopPlayback();
+          return;
+        }
+        stepForward();
+      }, 350);
+    }
+
+    function stopPlayback() {
+      if (state.playTimer) {
+        clearInterval(state.playTimer);
+        state.playTimer = null;
+      }
+    }
+
+    function setActiveTool(tool, label, hint) {
+      state.activeTool = tool;
+      el("activeToolLabel").textContent = label;
+      el("modeGuidance").textContent = hint;
+      document.querySelectorAll(".tool-chip").forEach((node) => node.classList.remove("active"));
+      if (tool === "pushpull") el("toolPushPull").classList.add("active");
+      if (tool === "cut") el("toolCut").classList.add("active");
+      if (tool === "pencil") el("toolPencil").classList.add("active");
+      if (tool === "arc") el("toolArc").classList.add("active");
+      addLog(`Modular tool changed to ${label}.`, "Tool");
+    }
+
+    el("toolPushPull").addEventListener("click", () => {
+      setActiveTool("pushpull", "Push / Pull", "Push / Pull controls size and extrusion logic while still following XYZ build flow.");
+    });
+
+    el("toolCut").addEventListener("click", () => {
+      setActiveTool("cut", "Scissors", "Scissors is prepared for cut / split actions in future passes.");
+    });
+
+    el("toolPencil").addEventListener("click", () => {
+      setActiveTool("pencil", "Pencil", "Pencil will define straight draw guides and edge logic in future passes.");
+    });
+
+    el("toolArc").addEventListener("click", () => {
+      setActiveTool("arc", "Arc Pencil", "Arc Pencil will define arc and circle guides in future passes.");
+    });
+
+    el("toggleGrid").addEventListener("click", () => {
+      state.showGrid = !state.showGrid;
+      grid.visible = state.showGrid;
+      el("toggleGrid").classList.toggle("active", state.showGrid);
+      renderOnce();
+    });
+
+    el("toggleAxis").addEventListener("click", () => {
+      state.showAxis = !state.showAxis;
+      axesHelper.visible = state.showAxis;
+      el("toggleAxis").classList.toggle("active", state.showAxis);
+      renderOnce();
+    });
+
+    el("toggleWire").addEventListener("click", () => {
+      state.showWire = !state.showWire;
+      el("toggleWire").classList.toggle("active", state.showWire);
+
+      depositedGroup.children.forEach((mesh) => {
+        if (mesh.material) {
+          mesh.material.wireframe = state.showWire;
+          mesh.material.opacity = state.showWire ? 0.20 : 0.45;
+          mesh.material.needsUpdate = true;
+        }
+      });
+
+      renderOnce();
+    });
+
+    el("toggleSnap").addEventListener("click", () => {
+      state.snap = !state.snap;
+      el("toggleSnap").classList.toggle("active", state.snap);
+      updateDimensionsUI();
+    });
+
+    el("btnPreviewBuild").addEventListener("click", async () => {
+      setStatus("loading", "Generating XYZ preview through Core CTR...");
+      try {
+        const data = await previewBuild(buildInputData());
+        applyJobResult(data, "Preview");
+      } catch (error) {
+        setStatus("fail", error.message || "Preview failed.");
+        addLog(error.message || "Preview failed.", "Error");
+      }
+    });
+
+    el("btnRefreshJob").addEventListener("click", async () => {
+      if (!state.latestJobId) {
+        setStatus("idle", "No job to refresh yet.");
+        return;
+      }
+      setStatus("loading", "Refreshing job...");
+      try {
+        const data = await getJob(state.latestJobId);
+        applyJobResult(data, "Refreshed");
+      } catch (error) {
+        setStatus("fail", error.message || "Refresh failed.");
+        addLog(error.message || "Refresh failed.", "Error");
+      }
+    });
+
+    el("btnPlay").addEventListener("click", playSteps);
+    el("btnPause").addEventListener("click", stopPlayback);
+    el("btnStep").addEventListener("click", stepForward);
+    el("btnReset").addEventListener("click", resetPlayback);
+
+    const canvas = el("viewportCanvas");
+    if (!canvas) {
+      console.error('Canvas element not found!');
+    } else {
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x08111f, 0.03);
+
+      const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
+
+      const orbitTarget = new THREE.Vector3(0, 0.8, 0);
+      let orbitRadius = 6.4;
+      let orbitTheta = Math.PI / 4;
+      let orbitPhi = 1.05;
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.enablePan = true;
+      controls.target.copy(orbitTarget);
+      // ...existing code continues, all rendering logic inside this else block...
+      // (No illegal return statement at top-level)
+      // ...existing code...
+    }
+
+    const ambient = new THREE.AmbientLight(0xffffff, 0.62);
+    scene.add(ambient);
+
+    const key = new THREE.DirectionalLight(0xffffff, 1.2);
+    key.position.set(4, 8, 5);
+    scene.add(key);
+
+    const rim = new THREE.DirectionalLight(0x8edcff, 0.65);
+    rim.position.set(-6, 4, -5);
+    scene.add(rim);
+
+    const grid = new THREE.GridHelper(40, 40, 0x36506c, 0x15202e);
+    grid.material.opacity = 0.4;
+    grid.material.transparent = true;
+    scene.add(grid);
+
+    const axesHelper = new THREE.AxesHelper(1.4);
+    axesHelper.position.set(0, 0.02, 0);
+    scene.add(axesHelper);
+
+    const floorGeo = new THREE.CircleGeometry(6, 64);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x0e1b2e, transparent: true, opacity: 0.92 });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = 0.01;
+    scene.add(floor);
+
+    const stageGeo = new THREE.CylinderGeometry(1.8, 1.8, 0.16, 48);
+    const stageMat = new THREE.MeshStandardMaterial({ color: 0x17304a, transparent: true, opacity: 0.96 });
+    const stage = new THREE.Mesh(stageGeo, stageMat);
+    stage.position.set(0, 0.09, 0);
+    scene.add(stage);
+
+    const stageRingGeo = new THREE.TorusGeometry(1.82, 0.025, 10, 80);
+    const stageRingMat = new THREE.MeshBasicMaterial({ color: 0x93f3de, transparent: true, opacity: 0.45 });
+    const stageRing = new THREE.Mesh(stageRingGeo, stageRingMat);
+    stageRing.rotation.x = Math.PI / 2;
+    stageRing.position.set(0, 0.11, 0);
+    scene.add(stageRing);
+
+    const previewGroup = new THREE.Group();
+    scene.add(previewGroup);
+
+    const pathGroup = new THREE.Group();
+    previewGroup.add(pathGroup);
+
+    const depositedGroup = new THREE.Group();
+    previewGroup.add(depositedGroup);
+
+    const toolheadGeo = new THREE.SphereGeometry(0.08, 18, 18);
+    const toolheadMat = new THREE.MeshStandardMaterial({ color: 0xffd37a, emissive: 0x553300, emissiveIntensity: 0.5 });
+    const toolhead = new THREE.Mesh(toolheadGeo, toolheadMat);
+    previewGroup.add(toolhead);
+    resetToolhead();
+
+    function updateCamera() {
+      const sinPhi = Math.sin(orbitPhi);
+      camera.position.set(
+        orbitTarget.x + orbitRadius * sinPhi * Math.sin(orbitTheta),
+        orbitTarget.y + orbitRadius * Math.cos(orbitPhi),
+        orbitTarget.z + orbitRadius * sinPhi * Math.cos(orbitTheta)
+      );
+      camera.lookAt(orbitTarget);
+    }
+
+    function resize() {
+      const w = canvas.clientWidth || canvas.parentElement.clientWidth || 800;
+      const h = canvas.clientHeight || canvas.parentElement.clientHeight || 500;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderOnce();
+    }
+
+    function fitView() {
+      orbitTarget.set(0, Math.max(0.8, state.height * 0.4), 0);
+      orbitRadius = 6.4;
+      orbitTheta = Math.PI / 4;
+      orbitPhi = 1.05;
+      updateCamera();
+      controls.target.copy(orbitTarget);
+      controls.update();
+      renderOnce();
+      addLog("View fitted.", "View");
+    }
+
+    function renderOnce() {
+      renderer.render(scene, camera);
+    }
+
+    function takeShot() {
+      renderOnce();
+      const link = document.createElement("a");
+      link.download = "xyz-modular.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      addLog("Local screenshot captured.", "View");
+    }
+
+    el("viewportCanvas").addEventListener("pointerdown", () => {
+      canvas.classList.add("dragging");
+    });
+
+    window.addEventListener("pointerup", () => {
+      canvas.classList.remove("dragging");
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (state.activeTool === "pushpull") {
+        if (event.key === "]") {
+          const next = Number(el("depthInput").value || 0.35) + 0.05;
+          el("depthInput").value = next.toFixed(2);
+        }
+        if (event.key === "[") {
+          const next = Math.max(0.10, Number(el("depthInput").value || 0.35) - 0.05);
+          el("depthInput").value = next.toFixed(2);
+        }
+      }
+    });
+
+    el("toolShot")?.addEventListener("click", takeShot);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    updateDimensionsUI();
+    resize();
+    fitView();
+    healthCheck().catch(() => {});
+    animate();
+  </script>
+</body>
+</html>
