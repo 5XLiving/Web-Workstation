@@ -43,27 +43,52 @@ def which_app():
 from routes.upload_routes import upload_bp
 app.register_blueprint(upload_bp)
 
-# --- Legacy Core CTR compatibility stub ---
-# Keeps old HTML pages working until CORE_CTR_BASE calls are fully removed.
-core_ctr_stub = Blueprint("core_ctr_stub", __name__, url_prefix="/api/core-ctr/v1")
+# --- XYZ Builder API ---
+from services.modular_service import handle_modular_job
+from schemas.job_schema import validate_job_payload, generate_job_id, current_timestamp
+from storage.job_store import create_job, get_job as store_get_job
 
-@core_ctr_stub.route("/health")
-def ctr_health():
-    return jsonify({"ok": True, "status": "stub", "message": "Core CTR retired — stub active"}), 200
+xyz_bp = Blueprint("xyz", __name__, url_prefix="/api/xyz/v1")
 
-@core_ctr_stub.route("/jobs/create", methods=["POST"])
-def ctr_jobs_create():
-    return jsonify({"ok": False, "error": "Core CTR create is retired. Use Dev Room."}), 410
+@xyz_bp.route("/health")
+def xyz_health():
+    return jsonify({"ok": True, "status": "active", "message": "XYZ builder healthy"}), 200
 
-@core_ctr_stub.route("/jobs/preview", methods=["POST"])
-def ctr_jobs_preview():
-    return jsonify({"ok": False, "error": "Core CTR preview is retired. Use XYZ Modular."}), 410
+@xyz_bp.route("/jobs/create", methods=["POST"])
+def xyz_jobs_create():
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"ok": False, "error": "Missing JSON body"}), 400
+    errors = validate_job_payload(payload)
+    if errors:
+        return jsonify({"ok": False, "errors": errors}), 400
+    job_id = generate_job_id()
+    job = {**payload, "job_id": job_id, "status": "queued", "created_at": current_timestamp()}
+    create_job(job)
+    result = handle_modular_job(job)
+    return jsonify({"ok": True, "job_id": job_id, **result}), 200
 
-@core_ctr_stub.route("/jobs/<job_id>")
-def ctr_jobs_get(job_id):
-    return jsonify({"ok": False, "error": f"Core CTR job lookup retired. job_id={job_id}"}), 410
+@xyz_bp.route("/jobs/preview", methods=["POST"])
+def xyz_jobs_preview():
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"ok": False, "error": "Missing JSON body"}), 400
+    errors = validate_job_payload(payload)
+    if errors:
+        return jsonify({"ok": False, "errors": errors}), 400
+    job_id = generate_job_id()
+    job = {**payload, "job_id": job_id, "status": "preview", "created_at": current_timestamp()}
+    result = handle_modular_job(job)
+    return jsonify({"ok": True, "job_id": job_id, **result}), 200
 
-app.register_blueprint(core_ctr_stub)
+@xyz_bp.route("/jobs/<job_id>")
+def xyz_jobs_get(job_id):
+    job = store_get_job(job_id)
+    if not job:
+        return jsonify({"ok": False, "error": f"Job not found: {job_id}"}), 404
+    return jsonify({"ok": True, **job}), 200
+
+app.register_blueprint(xyz_bp)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

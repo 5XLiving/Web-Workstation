@@ -934,7 +934,7 @@
         ? "http://127.0.0.1:5000"
         : window.location.origin;
 
-    const CORE_CTR_BASE = `${API_BASE}/api/core-ctr/v1`;
+    const XYZ_API = `${API_BASE}/api/xyz/v1`;
 
     const state = {
       latestJobId: "",
@@ -1099,15 +1099,15 @@
     }
 
     async function healthCheck() {
-      setStatus("loading", "Checking Core CTR health...");
+      setStatus("loading", "Checking XYZ builder health...");
       try {
-        const data = await fetchJson(`${CORE_CTR_BASE}/health`);
-        setConnection(true, "Core CTR health check passed.");
-        setStatus("success", data.status || "Core CTR healthy.");
+        const data = await fetchJson(`${XYZ_API}/health`);
+        setConnection(true, "XYZ builder health check passed.");
+        setStatus("success", data.status || "XYZ builder healthy.");
         return data;
       } catch (error) {
-        setConnection(false, "Core CTR health check failed.");
-        setStatus("offline", error.message || "Core CTR unavailable.");
+        setConnection(false, "XYZ builder health check failed.");
+        setStatus("offline", error.message || "XYZ builder unavailable.");
         throw error;
       }
     }
@@ -1166,7 +1166,7 @@
         requested_by: "local-user"
       };
 
-      return fetchJson(`${CORE_CTR_BASE}/jobs/preview`, {
+      return fetchJson(`${XYZ_API}/jobs/preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -1174,7 +1174,7 @@
     }
 
     async function getJob(jobId) {
-      return fetchJson(`${CORE_CTR_BASE}/jobs/${jobId}`);
+      return fetchJson(`${XYZ_API}/jobs/${jobId}`);
     }
 
     function renderStepsList() {
@@ -1622,7 +1622,7 @@
     });
 
     el("btnPreviewBuild").addEventListener("click", async () => {
-      setStatus("loading", "Generating XYZ preview through Core CTR...");
+      setStatus("loading", "Generating XYZ preview...");
       try {
         const data = await previewBuild(buildInputData());
         applyJobResult(data, "Preview");

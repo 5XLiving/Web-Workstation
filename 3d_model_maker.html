@@ -254,7 +254,7 @@
       window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
         ? "http://127.0.0.1:5000"
         : window.location.origin;
-    const CORE_CTR_BASE = `${API_BASE}/api/core-ctr/v1`;
+    const XYZ_API = `${API_BASE}/api/xyz/v1`;
 
     const state = {
       latestJob: null,
@@ -325,7 +325,7 @@
 
     async function healthCheck() {
       try {
-        const data = await fetchJson(`${CORE_CTR_BASE}/health`);
+        const data = await fetchJson(`${XYZ_API}/health`);
         setStatus("success", "Backend healthy: " + (data.status || "ok"));
         addLog("Health check passed.", "API");
       } catch (err) {
@@ -343,7 +343,7 @@
         input_data: inputData,
         requested_by: "local-user"
       };
-      return fetchJson(`${CORE_CTR_BASE}/jobs/create`, {
+      return fetchJson(`${XYZ_API}/jobs/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -359,7 +359,7 @@
         input_data: inputData,
         requested_by: "local-user"
       };
-      return fetchJson(`${CORE_CTR_BASE}/jobs/preview`, {
+      return fetchJson(`${XYZ_API}/jobs/preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -367,7 +367,7 @@
     }
 
     async function getJob(jobId) {
-      return fetchJson(`${CORE_CTR_BASE}/jobs/${encodeURIComponent(jobId)}`);
+      return fetchJson(`${XYZ_API}/jobs/${encodeURIComponent(jobId)}`);
     }
 
     function buildInputData() {
