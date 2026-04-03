@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <title>5X WorkStation • 3D Model Maker</title>
 
-  <style>
+    <style>
     :root{
       --bg:#020611;
       --bg2:#071120;
@@ -30,7 +30,6 @@
       --shellPad:14px;
       --shellGap:14px;
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -55,252 +54,368 @@
       mask-image:radial-gradient(circle at center, rgba(0,0,0,.85), transparent 88%);
       opacity:.18;
     }
+    .shell{height:100vh;padding:var(--shellPad);display:grid;grid-template-rows:auto 1fr;gap:var(--shellGap);overflow:hidden;}
+    .glass{border:1px solid var(--line);background:radial-gradient(circle at top right, rgba(148,243,222,.08), transparent 26%),linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),linear-gradient(180deg, var(--glass2), var(--glass));box-shadow:var(--shadow);backdrop-filter:blur(16px) saturate(140%);}
+    .topbar{min-height:var(--topbarH);border-radius:24px;padding:14px 18px;display:grid;grid-template-columns:minmax(260px,1.2fr) auto;align-items:center;gap:16px;}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0;}
+    .logo{width:58px;height:58px;border-radius:16px;object-fit:contain;flex:none;filter:drop-shadow(0 0 16px rgba(148,243,222,.18));}
+    .brand-copy strong{display:block;font-family:"Noto Serif SC","Noto Serif",serif;font-size:30px;font-weight:600;line-height:.98;letter-spacing:-.03em;}
+    .brand-copy span{display:block;color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin-top:5px;}
+    .account{display:grid;gap:6px;justify-items:end;text-align:right;}
+    .account strong{font-size:14px;color:var(--mint2);}
+    .account span{color:var(--muted);font-size:12px;}
+    .layout{min-height:0;display:grid;grid-template-columns:340px minmax(0,1fr) 310px;gap:14px;align-items:stretch;}
+    .panel{min-height:0;border-radius:26px;overflow:hidden;display:flex;flex-direction:column;}
+    .panel-head{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;gap:10px;align-items:center;}
+    .panel-head strong{font-size:15px;color:var(--mint2);letter-spacing:.03em;}
+    .panel-head span{color:var(--muted);font-size:12px;}
+    .panel-body{min-height:0;overflow:auto;padding:16px;display:grid;gap:14px;}
+    .card{border-radius:18px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg, rgba(11,18,31,.86), rgba(10,16,28,.72));padding:14px;display:grid;gap:10px;}
+    .card h3{margin:0;font-size:14px;color:var(--mint2);letter-spacing:.02em;}
+    .card p,.muted{margin:0;color:var(--muted);font-size:13px;line-height:1.6;}
+    label{display:block;color:var(--muted);font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;}
+    input,select,textarea{width:100%;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(8,14,24,.9);color:var(--text);padding:11px 12px;font:inherit;outline:none;}
+    textarea{min-height:110px;resize:vertical;}
+    input[type="range"]{padding:0;accent-color:#a6f6e4;}
+    .preview-box{min-height:146px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:radial-gradient(circle at top right, rgba(148,243,222,.06), transparent 28%),rgba(7,12,22,.82);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--muted);font-size:13px;text-align:center;}
+    .preview-box img{width:100%;height:100%;display:block;object-fit:cover;}
+    .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    .btn{min-height:44px;border-radius:12px;border:1px solid var(--mintLine);cursor:pointer;padding:11px 14px;font:inherit;font-weight:800;transition:transform .18s ease,border-color .18s ease,background .18s ease,opacity .18s ease;}
+    .btn:hover{transform:translateY(-1px)}.btn:disabled{opacity:.55; cursor:not-allowed; transform:none}.btn-primary{color:#08221d; background:linear-gradient(135deg,#b8fff0 0%, #86efd8 100%)}.btn-secondary{color:var(--text); background:rgba(148,243,222,.06)}.btn-quiet{color:var(--muted); background:rgba(255,255,255,.03); border-color:rgba(255,255,255,.08)}
+    .viewport-shell{min-height:0;flex:1;border-radius:28px;overflow:hidden;display:grid;}
+    .workspace-note .hint{color:var(--muted);font-size:12px;line-height:1.5;}
+    .status-bar{padding:10px 16px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;color:var(--muted);}
+    .status-bar.success{color:#94f3de;} .status-bar.fail{color:#ff6b6b;} .status-bar.loading{color:#f0c75e;}
+    .log-list{max-height:180px;overflow:auto;font-size:12px;color:var(--muted);padding:8px 12px;display:grid;gap:4px;}
+    .log-entry span{color:var(--mint);margin-right:6px;}
+    .tool-btn{min-height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;padding:6px 10px;font:inherit;font-size:12px;transition:background .15s,color .15s;}
+    .tool-btn.active{background:rgba(148,243,222,.12);color:var(--mint2);border-color:var(--mintLine);}
+    .toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.06);}
+    canvas.dragging{cursor:grabbing;}
+    .playback-bar{display:flex;gap:6px;padding:8px 14px;border-top:1px solid rgba(255,255,255,.06);align-items:center;}
+    .playback-bar button{min-height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;padding:4px 10px;font:inherit;font-size:11px;}
+    .playback-bar button:hover{background:rgba(148,243,222,.1);color:var(--mint2);}
+    .playback-bar .step-info{margin-left:auto;font-size:11px;color:var(--muted);}
+    .step-list{max-height:140px;overflow:auto;font-size:11px;color:var(--muted);padding:6px 10px;display:grid;gap:3px;}
+    .step-entry{padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid transparent;}
+    .step-entry.active{border-color:var(--mintLine);background:rgba(148,243,222,.06);color:var(--mint2);}
+    </style>
+</head>
+<body>
+  <div class="shell">
+    <!-- TOPBAR -->
+    <div class="topbar glass">
+      <div class="brand">
+        <div class="brand-copy">
+          <strong>五行 WorkStation</strong>
+          <span>3D Model Maker</span>
+        </div>
+      </div>
+      <div class="account">
+        <strong>Model Maker</strong>
+        <span>WorkStation Tool</span>
+      </div>
+    </div>
 
-    .shell{
-      min-height:100vh;
-      padding:var(--shellPad);
-      display:grid;
-      grid-template-rows:auto 1fr;
-      gap:var(--shellGap);
+    <!-- LAYOUT: LEFT / CENTER / RIGHT -->
+    <div class="layout">
+
+      <!-- LEFT PANEL: Input -->
+      <div class="panel glass">
+        <div class="panel-head"><strong>Input</strong><span>Configure</span></div>
+        <div class="panel-body">
+          <div class="card">
+            <h3>AI Prompt</h3>
+            <label>Describe your model</label>
+            <textarea id="aiPrompt" placeholder="A wooden desk with drawers..."></textarea>
+            <label>Style</label>
+            <select id="aiStyle">
+              <option value="realistic">Realistic</option>
+              <option value="lowpoly">Low Poly</option>
+              <option value="stylized">Stylized</option>
+              <option value="minimal">Minimal</option>
+            </select>
+            <button class="btn btn-secondary" id="btnPreviewPrompt">Preview Prompt</button>
+          </div>
+          <div class="card">
+            <h3>Upload Reference</h3>
+            <input type="file" id="uploadFile" accept="image/*" />
+            <div class="preview-box" id="uploadPreview">No image uploaded yet</div>
+            <div class="row">
+              <button class="btn btn-primary" id="btnAttach" disabled>Attach & Mount</button>
+              <button class="btn btn-quiet" id="btnClearUpload">Clear</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Dimensions</h3>
+            <label>Width (X) <span id="xValue">1.20</span></label>
+            <input type="range" id="xRange" min="0.38" max="6.0" step="0.01" value="1.2" />
+            <input type="number" id="xInput" min="0.38" max="6.0" step="0.01" value="1.2" />
+            <label>Height (Y) <span id="yValue">1.05</span></label>
+            <input type="range" id="yRange" min="0.38" max="6.0" step="0.01" value="1.05" />
+            <input type="number" id="yInput" min="0.38" max="6.0" step="0.01" value="1.05" />
+            <label>Depth (Z) <span id="zValue">0.35</span></label>
+            <input type="range" id="zRange" min="0.08" max="3.0" step="0.01" value="0.35" />
+            <input type="number" id="zInput" min="0.08" max="3.0" step="0.01" value="0.35" />
+            <label>Scale <span id="scaleValue">1.00</span></label>
+            <input type="range" id="scaleRange" min="0.5" max="2.8" step="0.01" value="1.0" />
+            <input type="number" id="scaleInput" min="0.5" max="2.8" step="0.01" value="1.0" />
+            <label>Thickness <span id="thicknessValue">0.20</span></label>
+            <input type="range" id="thicknessRange" min="0.08" max="1.2" step="0.01" value="0.2" />
+            <input type="number" id="thicknessInput" min="0.08" max="1.2" step="0.01" value="0.2" />
+            <label>Orientation</label>
+            <select id="orientationSelect">
+              <option value="front">Front</option>
+              <option value="quarter" selected>Quarter</option>
+              <option value="profile">Profile</option>
+              <option value="back">Back</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER: Viewport (XYZ Spatial Construction Chamber) -->
+      <div class="panel glass" style="display:flex;flex-direction:column;">
+        <div class="toolbar">
+          <button class="tool-btn" id="toolFit">Fit</button>
+          <button class="tool-btn" id="toolShot">Screenshot</button>
+          <span style="margin-left:auto;font-size:11px;color:var(--muted);">XYZ Spatial Chamber</span>
+        </div>
+        <div class="viewport-shell" style="flex:1;position:relative;">
+          <iframe id="xyzFrame" src="xyz_modular.html" style="width:100%;height:100%;border:none;display:block;border-radius:0 0 26px 26px;"></iframe>
+        </div>
+        <div class="playback-bar">
+          <button id="btnPlay">Play</button>
+          <button id="btnPause">Pause</button>
+          <button id="btnStep">Step</button>
+          <button id="btnReset">Reset</button>
+          <span class="step-info">Embedded XYZ viewport</span>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL: Status & Actions -->
+      <div class="panel glass">
+        <div class="panel-head"><strong>Status</strong><span>Actions</span></div>
+        <div class="panel-body">
+          <div class="card">
+            <h3>Job Info</h3>
+            <p>Job ID: <span id="latestJobId">None</span></p>
+            <p>Job State: <span id="jobState">None</span></p>
+            <p>Preview: <span id="previewState">None</span></p>
+            <p>Object: <span id="objectState">None</span></p>
+            <p>Mounted: <span id="mountedState">None</span></p>
+            <p>Tool: <span id="activeToolState">Orbit</span></p>
+          </div>
+          <div class="card">
+            <h3>Dimensions</h3>
+            <p>W: <span id="dimensionWidth">1.20</span> &nbsp; H: <span id="dimensionHeight">1.05</span> &nbsp; D: <span id="dimensionDepth">0.35</span></p>
+            <p>Layers: <span id="layerDisplay">0</span></p>
+          </div>
+          <div class="card">
+            <h3>Path Summary</h3>
+            <p>Total: <span id="summaryTotalSteps">0</span> steps &bull; Move: <span id="summaryMoveSteps">0</span> &bull; Deposit: <span id="summaryDepositSteps">0</span></p>
+            <p>Layers: <span id="summaryTotalLayers">0</span></p>
+          </div>
+          <div class="card">
+            <h3>Result</h3>
+            <p id="resultSummary">No result yet.</p>
+          </div>
+          <div class="card">
+            <h3>Steps</h3>
+            <div class="step-list" id="stepsList"><div class="step-entry">No steps yet. Run Generate to load XYZ path.</div></div>
+          </div>
+          <div class="card">
+            <h3>Actions</h3>
+            <div class="row">
+              <button class="btn btn-primary" id="btnCreateDraft">Create Draft</button>
+              <button class="btn btn-primary" id="btnGenerate">Generate</button>
+            </div>
+            <div class="row">
+              <button class="btn btn-secondary" id="btnRefreshJob">Refresh Job</button>
+              <button class="btn btn-quiet" id="btnHealth">Health Check</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Log</h3>
+            <div class="log-list" id="logList"></div>
+          </div>
+        </div>
+        <div class="status-bar" id="statusBar">Ready.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    /* ---------- HELPERS ---------- */
+    const el = (id) => document.getElementById(id);
+
+    const API_BASE =
+      window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+        ? "http://127.0.0.1:5000"
+        : window.location.origin;
+    const CORE_CTR_BASE = `${API_BASE}/api/core-ctr/v1`;
+
+    const state = {
+      latestJob: null,
+      latestJobId: "",
+      latestResult: null,
+      width: 1.2,
+      height: 1.05,
+      depth: 0.35,
+      scale: 1.0,
+      thickness: 0.2,
+      orientation: "quarter",
+      uploadName: "",
+      uploadUrl: "",
+      uploadedImageUrl: "",
+      steps: [],
+      currentStepIndex: -1,
+      builtHeight: 0,
+      builtLayers: 0
+    };
+
+    // === IFRAME BRIDGE ===
+    const xyzFrame = el('xyzFrame');
+
+    function postToXYZ(msg) {
+      if (xyzFrame && xyzFrame.contentWindow) {
+        xyzFrame.contentWindow.postMessage(msg, '*');
+      }
     }
 
-    .glass{
-      border:1px solid var(--line);
-      background:
-        radial-gradient(circle at top right, rgba(148,243,222,.08), transparent 26%),
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
-        linear-gradient(180deg, var(--glass2), var(--glass));
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(16px) saturate(140%);
+    function syncDimensionsToXYZ() {
+      postToXYZ({
+        type: 'setDimensions',
+        width: state.width,
+        height: state.height,
+        depth: state.depth,
+        layerHeight: state.thickness
+      });
     }
 
-    .topbar{
-      min-height:var(--topbarH);
-      border-radius:24px;
-      padding:14px 18px;
-      display:grid;
-      grid-template-columns:minmax(260px,1.2fr) auto;
-      align-items:center;
-      gap:16px;
+    function setStatus(type, message) {
+      const bar = el("statusBar");
+      bar.className = "status-bar " + type;
+      bar.textContent = message;
     }
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
+    function addLog(message, source) {
+      const list = el("logList");
+      const entry = document.createElement("div");
+      entry.className = "log-entry";
+      entry.innerHTML = `<span>[${source}]</span>${message}`;
+      list.prepend(entry);
+      if (list.children.length > 50) list.lastChild.remove();
     }
 
-    .logo{
-      width:58px;
-      height:58px;
-      border-radius:16px;
-      object-fit:contain;
-      flex:none;
-      filter:drop-shadow(0 0 16px rgba(148,243,222,.18));
+    /* ---------- API ---------- */
+    async function fetchJson(path, options = {}) {
+      const response = await fetch(path, options);
+      let payload;
+      try { payload = await response.json(); } catch (_) {
+        throw new Error(`Expected JSON response from ${path}`);
+      }
+      if (!response.ok || payload.ok === false) {
+        const message = payload?.error?.message || `Request failed with ${response.status}`;
+        throw new Error(message);
+      }
+      return payload;
     }
 
-    .brand-copy strong{
-      display:block;
-      font-family:"Noto Serif SC","Noto Serif",serif;
-      font-size:30px;
-      font-weight:600;
-      line-height:.98;
-      letter-spacing:-.03em;
+    async function healthCheck() {
+      try {
+        const data = await fetchJson(`${CORE_CTR_BASE}/health`);
+        setStatus("success", "Backend healthy: " + (data.status || "ok"));
+        addLog("Health check passed.", "API");
+      } catch (err) {
+        setStatus("fail", "Health check failed: " + err.message);
+        addLog("Health check failed: " + err.message, "Error");
+      }
     }
 
-    .brand-copy span{
-      display:block;
-      color:var(--muted);
-      font-size:12px;
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      margin-top:5px;
+    async function createJob(inputData) {
+      const payload = {
+        company: "5xLiving",
+        project: "Workstation",
+        module: "3DModelMaker",
+        action: "create",
+        input_data: inputData,
+        requested_by: "local-user"
+      };
+      return fetchJson(`${CORE_CTR_BASE}/jobs/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
     }
 
-    .account{
-      display:grid;
-      gap:6px;
-      justify-items:end;
-      text-align:right;
+    async function previewJob(inputData) {
+      const payload = {
+        company: "5xLiving",
+        project: "Workstation",
+        module: "3DModelMaker",
+        action: "preview",
+        input_data: inputData,
+        requested_by: "local-user"
+      };
+      return fetchJson(`${CORE_CTR_BASE}/jobs/preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
     }
 
-    .account strong{
-      font-size:14px;
-      color:var(--mint2);
+    async function getJob(jobId) {
+      return fetchJson(`${CORE_CTR_BASE}/jobs/${encodeURIComponent(jobId)}`);
     }
 
-    .account span{
-      color:var(--muted);
-      font-size:12px;
+    function buildInputData() {
+      return {
+        build_mode: "xyz_construct",
+        template: "box_block",
+        dimensions: { width: state.width, height: state.height, depth: state.depth },
+        material: "default_shell",
+        layer_height: state.thickness,
+        path_strategy: "layer_fill",
+        origin: { x: 0, y: 0, z: 0 },
+        prompt: el("aiPrompt").value.trim(),
+        style: el("aiStyle").value,
+        image_url: state.uploadedImageUrl || undefined
+      };
     }
 
-    .layout{
-      min-height:0;
-      display:grid;
-      grid-template-columns:340px minmax(0,1fr) 310px;
-      gap:14px;
-      align-items:stretch;
+    /* ---------- JOB RESULT ---------- */
+    function applyPathSummary(summary) {
+      el("summaryTotalSteps").textContent = summary?.total_steps ?? 0;
+      el("summaryMoveSteps").textContent = summary?.move_steps ?? 0;
+      el("summaryDepositSteps").textContent = summary?.deposit_steps ?? 0;
+      el("summaryTotalLayers").textContent = summary?.total_layers ?? 0;
     }
 
-    .panel{
-      min-height:0;
-      border-radius:26px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
+    function applyGeometryState(gs) {
+      if (!gs) return;
+      if (gs.dimensions) {
+        state.width = Number(gs.dimensions.width || state.width);
+        state.height = Number(gs.dimensions.height || state.height);
+        state.depth = Number(gs.dimensions.depth || state.depth);
+      }
+      state.builtHeight = Number(gs?.build_progress?.built_height || 0);
+      state.builtLayers = Number(gs?.build_progress?.completed_layers || 0);
+      updateMetricText();
     }
 
-    .panel-head{
-      padding:16px 18px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-    }
-
-    .panel-head strong{
-      font-size:15px;
-      color:var(--mint2);
-      letter-spacing:.03em;
-    }
-
-    .panel-head span{
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .panel-body{
-      min-height:0;
-      overflow:auto;
-      padding:16px;
-      display:grid;
-      gap:14px;
-    }
-
-    .card{
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.08);
-      background:linear-gradient(180deg, rgba(11,18,31,.86), rgba(10,16,28,.72));
-      padding:14px;
-      display:grid;
-      gap:10px;
-    }
-
-    .card h3{
-      margin:0;
-      font-size:14px;
-      color:var(--mint2);
-      letter-spacing:.02em;
-    }
-
-    .card p,.muted{
-      margin:0;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.6;
-    }
-
-    label{
-      display:block;
-      color:var(--muted);
-      font-size:12px;
-      letter-spacing:.04em;
-      text-transform:uppercase;
-      margin-bottom:6px;
-    }
-
-    input,select,textarea{
-      width:100%;
-      border:1px solid rgba(255,255,255,.1);
-      border-radius:12px;
-      background:rgba(8,14,24,.9);
-      color:var(--text);
-      padding:11px 12px;
-      font:inherit;
-      outline:none;
-    }
-
-    textarea{
-      min-height:110px;
-      resize:vertical;
-    }
-
-    input[type="range"]{
-      padding:0;
-      accent-color:#a6f6e4;
-    }
-
-    .preview-box{
-      min-height:146px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.08);
-      background:
-        radial-gradient(circle at top right, rgba(148,243,222,.06), transparent 28%),
-        rgba(7,12,22,.82);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      color:var(--muted);
-      font-size:13px;
-      text-align:center;
-    }
-
-    .preview-box img{
-      width:100%;
-      height:100%;
-      display:block;
-      object-fit:cover;
-    }
-
-    .row{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-    }
-
-    .btn{
-      min-height:44px;
-      border-radius:12px;
-      border:1px solid var(--mintLine);
-      cursor:pointer;
-      padding:11px 14px;
-      font:inherit;
-      font-weight:800;
-      transition:transform .18s ease,border-color .18s ease,background .18s ease,opacity .18s ease;
-    }
-
-    .btn:hover{transform:translateY(-1px)}
-    .btn:disabled{opacity:.55; cursor:not-allowed; transform:none}
-    .btn-primary{color:#08221d; background:linear-gradient(135deg,#b8fff0 0%, #86efd8 100%)}
-    .btn-secondary{color:var(--text); background:rgba(148,243,222,.06)}
-    .btn-quiet{color:var(--muted); background:rgba(255,255,255,.03); border-color:rgba(255,255,255,.08)}
-
-    .viewport-shell{
-      min-height:0;
-      height:100%;
-      border-radius:28px;
-      overflow:hidden;
-      display:grid;
-    }
-    .workspace-note .hint{
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.5;
-    }
-
-    <script type="module">
-      import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-      // ...existing code...
-      // (Paste all the JavaScript logic that was previously misplaced in the CSS block here)
-      // For brevity, the full JS logic is preserved and moved here as a module script.
-    </script>
+    function applyJobResult(data, modeLabel) {
       const job = data?.job || null;
       const result = data?.result || {};
       state.latestJob = job;
+      state.latestResult = result;
       state.latestJobId = job?.job_id || "";
+      state.steps = Array.isArray(result.steps) ? result.steps : [];
+      state.currentStepIndex = -1;
+      state.builtHeight = 0;
+      state.builtLayers = 0;
+
       el("latestJobId").textContent = state.latestJobId || "None";
       el("jobState").textContent = job?.status || "None";
       el("previewState").textContent = modeLabel;
@@ -308,36 +423,12 @@
       setStatus("success", result?.summary || `${modeLabel} completed.`);
       addLog(result?.summary || `${modeLabel} completed.`, "Core CTR");
 
-      // Phase 1: If geometry_state.preview_object exists, render it
-      if (result.geometry_state && result.geometry_state.preview_object) {
-        renderPreviewObject(result.geometry_state.preview_object);
-      }
-    }
+      applyPathSummary(result.path_summary || {});
+      applyGeometryState(result.geometry_state || null);
 
-    // 3D Model Maker: Render preview_object supporting box_proxy with size/position
-    function renderPreviewObject(obj) {
-      if (!obj || obj.kind !== "box_proxy" || !obj.size) return;
-
-      // Set state dimensions from object size, with defaults
-      state.width = Number(obj.size.x || 1.2);
-      state.depth = Number(obj.size.y || 0.35);
-      state.height = Number(obj.size.z || 1.05);
-
-      // Create the preview mesh and update metrics
-      createPreviewMesh();
-      updateMetricText();
-
-      // Set preview group position if provided
-      if (obj.position) {
-        previewGroup.position.set(
-          Number(obj.position.x || 0),
-          0,
-          Number(obj.position.y || 0)
-        );
-      }
-
-      // Render the scene once
-      renderOnce();
+      // Sync dimensions and trigger the embedded XYZ construction viewport
+      syncDimensionsToXYZ();
+      postToXYZ({ type: 'triggerPreview' });
     }
 
     function updateMetricText() {
@@ -349,6 +440,7 @@
       el("zValue").textContent = state.depth.toFixed(2);
       el("scaleValue").textContent = state.scale.toFixed(2);
       el("thicknessValue").textContent = state.thickness.toFixed(2);
+      el("layerDisplay").textContent = String(state.builtLayers);
     }
 
     function syncNumberAndRange(rangeId, inputId, key, min, max) {
@@ -361,13 +453,14 @@
         range.value = String(num);
         input.value = String(num);
         updateMetricText();
-        updatePreviewObject();
+        syncDimensionsToXYZ();
       };
 
       range.addEventListener("input", () => apply(range.value));
       input.addEventListener("change", () => apply(input.value));
     }
 
+    /* ---------- UPLOAD / INPUT HANDLERS ---------- */
     const uploadFile = el("uploadFile");
     const uploadPreview = el("uploadPreview");
 
@@ -389,14 +482,12 @@
       uploadFile.value = "";
       uploadPreview.textContent = "No image uploaded yet";
       el("btnAttach").disabled = true;
-      removeImagePlane();
       addLog("Upload cleared.", "Input");
     });
 
     el("btnAttach").addEventListener("click", async () => {
       const file = uploadFile.files && uploadFile.files[0];
       if (!file) return;
-      // Upload to backend
       const formData = new FormData();
       formData.append("file", file);
       try {
@@ -410,10 +501,9 @@
         if (window.localStorage) {
           localStorage.setItem("uploadedImageUrl", result.url);
         }
-        mountImagePreview(result.url);
         el("objectState").textContent = "Mounted";
         el("mountedState").textContent = state.uploadName || "3D Model Maker";
-        addLog("Image uploaded and mounted into preview room.", "Preview");
+        addLog("Image uploaded and stored.", "Preview");
       } catch (err) {
         addLog("Image upload failed: " + err.message, "Error");
       }
@@ -426,7 +516,6 @@
         setStatus("fail", "Prompt is empty.");
         return;
       }
-      mountPromptConcept(prompt, style);
       el("previewState").textContent = "Local Prompt";
       el("resultSummary").textContent = `Local prompt preview staged: ${prompt}`;
       addLog("Prompt preview staged locally.", "Preview");
@@ -434,6 +523,7 @@
 
     el("btnCreateDraft").addEventListener("click", async () => {
       setStatus("loading", "Creating draft job...");
+      syncDimensionsToXYZ();
       try {
         const data = await createJob(buildInputData());
         applyJobResult(data, "Draft");
@@ -445,6 +535,7 @@
 
     el("btnGenerate").addEventListener("click", async () => {
       setStatus("loading", "Generating preview through Core CTR...");
+      syncDimensionsToXYZ();
       try {
         const data = await previewJob(buildInputData());
         applyJobResult(data, "Preview");
@@ -470,14 +561,11 @@
     });
 
     el("btnHealth").addEventListener("click", async () => {
-      try {
-        await healthCheck();
-      } catch (_) {}
+      try { await healthCheck(); } catch (_) {}
     });
 
     el("orientationSelect").addEventListener("change", () => {
       state.orientation = el("orientationSelect").value;
-      updatePreviewObject();
     });
 
     syncNumberAndRange("thicknessRange", "thicknessInput", "thickness", 0.08, 1.2);
@@ -486,321 +574,15 @@
     syncNumberAndRange("yRange", "yInput", "height", 0.38, 6.0);
     syncNumberAndRange("zRange", "zInput", "depth", 0.08, 3.0);
 
-    document.querySelectorAll(".tool-btn[data-tool]").forEach((button) => {
-      button.addEventListener("click", () => {
-        document.querySelectorAll(".tool-btn[data-tool]").forEach((node) => node.classList.remove("active"));
-        button.classList.add("active");
-        state.currentTool = button.dataset.tool;
-        el("activeToolState").textContent = state.currentTool;
-        addLog(`Tool changed to ${state.currentTool}.`, "UI");
-      });
-    });
+    /* ---------- PLAYBACK CONTROLS (delegated to iframe) ---------- */
+    el("btnPlay").addEventListener("click", () => postToXYZ({ type: 'triggerPlay' }));
+    el("btnPause").addEventListener("click", () => postToXYZ({ type: 'triggerPause' }));
+    el("btnStep").addEventListener("click", () => postToXYZ({ type: 'triggerStep' }));
+    el("btnReset").addEventListener("click", () => postToXYZ({ type: 'triggerReset' }));
 
-    el("toolFit").addEventListener("click", fitView);
-    el("toolShot").addEventListener("click", takeShot);
+    el("toolFit").addEventListener("click", () => postToXYZ({ type: 'triggerFit' }));
+    el("toolShot").addEventListener("click", () => postToXYZ({ type: 'triggerShot' }));
 
-    /* ---------- THREE.JS PREVIEW ROOM ---------- */
-
-    const canvas = el("viewportCanvas");
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x08111f, 0.03);
-
-    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
-
-    const orbitTarget = new THREE.Vector3(0, 1, 0);
-    let orbitRadius = 5.8;
-    let orbitTheta = Math.PI / 4;
-    let orbitPhi = 1.05;
-
-    const ambient = new THREE.AmbientLight(0xffffff, 0.62);
-    scene.add(ambient);
-
-    const key = new THREE.DirectionalLight(0xffffff, 1.2);
-    key.position.set(4, 8, 5);
-    scene.add(key);
-
-    const rim = new THREE.DirectionalLight(0x8edcff, 0.65);
-    rim.position.set(-6, 4, -5);
-    scene.add(rim);
-
-    const grid = new THREE.GridHelper(40, 40, 0x36506c, 0x15202e);
-    grid.material.opacity = 0.4;
-    grid.material.transparent = true;
-    scene.add(grid);
-
-    const floorGeo = new THREE.CircleGeometry(6, 64);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x0e1b2e, transparent: true, opacity: 0.92 });
-    const floor = new THREE.Mesh(floorGeo, floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = 0.01;
-    scene.add(floor);
-
-    const stageGeo = new THREE.CylinderGeometry(1.6, 1.8, 0.25, 48);
-    const stageMat = new THREE.MeshStandardMaterial({ color: 0x17304a, transparent: true, opacity: 0.96 });
-    const stage = new THREE.Mesh(stageGeo, stageMat);
-    stage.position.set(0, 0.13, 0);
-    scene.add(stage);
-
-    const stageRingGeo = new THREE.TorusGeometry(1.65, 0.03, 10, 80);
-    const stageRingMat = new THREE.MeshBasicMaterial({ color: 0x93f3de, transparent: true, opacity: 0.45 });
-    const stageRing = new THREE.Mesh(stageRingGeo, stageRingMat);
-    stageRing.rotation.x = Math.PI / 2;
-    stageRing.position.set(0, 0.145, 0);
-    scene.add(stageRing);
-
-    const previewGroup = new THREE.Group();
-    scene.add(previewGroup);
-
-    let previewMesh = null;
-    let previewOutline = null;
-    // Declare imagePlane at top-level so all functions can access it safely
-    let imagePlane = null;
-
-    function createPreviewMesh() {
-      if (previewMesh) {
-        previewGroup.remove(previewMesh);
-        previewMesh.geometry.dispose();
-        previewMesh.material.dispose();
-      }
-      if (previewOutline) {
-        previewGroup.remove(previewOutline);
-        previewOutline.geometry.dispose();
-        previewOutline.material.dispose();
-      }
-
-      const geo = new THREE.BoxGeometry(state.width, state.height, state.depth);
-      const mat = new THREE.MeshStandardMaterial({
-        color: 0x93f3de,
-        roughness: 0.32,
-        metalness: 0.08,
-        transparent: true,
-        opacity: 0.92
-      });
-
-      previewMesh = new THREE.Mesh(geo, mat);
-      previewMesh.position.set(0, state.height / 2 + 0.25, 0);
-      previewGroup.add(previewMesh);
-
-      const edges = new THREE.EdgesGeometry(geo);
-      const edgeMat = new THREE.LineBasicMaterial({ color: 0xcafff1, transparent: true, opacity: 0.7 });
-      previewOutline = new THREE.LineSegments(edges, edgeMat);
-      previewOutline.position.copy(previewMesh.position);
-      previewGroup.add(previewOutline);
-
-      updatePreviewObject();
-    }
-
-    function removeImagePlane() {
-      if (imagePlane) {
-        previewGroup.remove(imagePlane);
-        if (imagePlane.material.map) imagePlane.material.map.dispose();
-        imagePlane.material.dispose();
-        imagePlane.geometry.dispose();
-        imagePlane = null;
-      }
-    }
-
-    function mountImagePreview(url) {
-      const loader = new THREE.TextureLoader();
-      loader.setCrossOrigin("anonymous");
-      loader.load(url, (tex) => {
-        tex.colorSpace = THREE.SRGBColorSpace;
-        removeImagePlane();
-
-        const aspect = tex.image ? (tex.image.width / tex.image.height || 1) : 1;
-        const h = Math.max(1.4, state.height * 1.3);
-        const w = h * aspect;
-
-        const geo = new THREE.PlaneGeometry(w, h);
-        const mat = new THREE.MeshStandardMaterial({
-          map: tex,
-          transparent: true,
-          side: THREE.DoubleSide
-        });
-
-        imagePlane = new THREE.Mesh(geo, mat);
-        imagePlane.position.set(0, Math.max(1.1, state.height * 0.65), state.depth / 2 + 0.04);
-        previewGroup.add(imagePlane);
-        addLog("Image preview mounted.", "Preview");
-      }, undefined, () => {
-        addLog("Image preview failed to load.", "Error");
-      });
-    }
-
-    function mountPromptConcept(prompt, style) {
-      removeImagePlane();
-      const hue = prompt.length % 360;
-      const color = new THREE.Color(`hsl(${hue}, 55%, 62%)`);
-      previewMesh.material.color.copy(color);
-      el("resultSummary").textContent = `Prompt staged locally: ${prompt} (${style})`;
-      addLog(`Local prompt concept updated with style "${style}".`, "Preview");
-    }
-
-    function updatePreviewObject() {
-      if (!previewMesh || !previewOutline) return;
-
-      previewMesh.scale.set(state.scale, 1, 1);
-      previewMesh.position.set(0, state.height / 2 + 0.25, 0);
-
-      previewOutline.scale.copy(previewMesh.scale);
-      previewOutline.position.copy(previewMesh.position);
-
-      if (state.orientation === "front") {
-        previewGroup.rotation.y = 0;
-      } else if (state.orientation === "quarter") {
-        previewGroup.rotation.y = Math.PI / 4;
-      } else if (state.orientation === "profile") {
-        previewGroup.rotation.y = Math.PI / 2;
-      } else if (state.orientation === "back") {
-        previewGroup.rotation.y = Math.PI;
-      }
-
-      if (imagePlane) {
-        imagePlane.position.set(0, Math.max(1.1, state.height * 0.65), state.depth / 2 + 0.04);
-      }
-
-      updateMetricText();
-      renderOnce();
-    }
-
-    function clamp(v, min, max) {
-      return Math.max(min, Math.min(max, v));
-    }
-
-    function updateCamera() {
-      const sinPhi = Math.sin(orbitPhi);
-      camera.position.set(
-        orbitTarget.x + orbitRadius * sinPhi * Math.sin(orbitTheta),
-        orbitTarget.y + orbitRadius * Math.cos(orbitPhi),
-        orbitTarget.z + orbitRadius * sinPhi * Math.cos(orbitTheta)
-      );
-      camera.lookAt(orbitTarget);
-    }
-
-    function resize() {
-      const w = canvas.clientWidth || canvas.parentElement.clientWidth || 800;
-      const h = canvas.clientHeight || canvas.parentElement.clientHeight || 500;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      updateCamera();
-      renderOnce();
-    }
-
-    function fitView() {
-      orbitTarget.set(0, Math.max(1, state.height * 0.5), 0);
-      orbitRadius = 5.8;
-      orbitTheta = Math.PI / 4;
-      orbitPhi = 1.05;
-      updateCamera();
-      renderOnce();
-      addLog("View fitted.", "View");
-    }
-
-    function renderOnce() {
-      renderer.render(scene, camera);
-    }
-
-    function takeShot() {
-      renderOnce();
-      const link = document.createElement("a");
-      link.download = "workstation-preview.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-      addLog("Local screenshot captured.", "View");
-    }
-
-    const interaction = {
-      dragging: false,
-      pointerId: null,
-      startX: 0,
-      startY: 0,
-      startTheta: 0,
-      startPhi: 0,
-      startRadius: 0,
-      startPos: new THREE.Vector3(),
-      startRotY: 0,
-      startScale: 1
-    };
-
-    canvas.addEventListener("pointerdown", (event) => {
-      interaction.dragging = true;
-      interaction.pointerId = event.pointerId;
-      interaction.startX = event.clientX;
-      interaction.startY = event.clientY;
-      interaction.startTheta = orbitTheta;
-      interaction.startPhi = orbitPhi;
-      interaction.startRadius = orbitRadius;
-      interaction.startPos.copy(previewGroup.position);
-      interaction.startRotY = previewGroup.rotation.y;
-      interaction.startScale = state.scale;
-      canvas.classList.add("dragging");
-      canvas.setPointerCapture(event.pointerId);
-    });
-
-    canvas.addEventListener("pointermove", (event) => {
-      if (!interaction.dragging || interaction.pointerId !== event.pointerId) return;
-
-      const dx = event.clientX - interaction.startX;
-      const dy = event.clientY - interaction.startY;
-
-      if (state.currentTool === "Orbit") {
-        orbitTheta = interaction.startTheta - dx * 0.01;
-        orbitPhi = clamp(interaction.startPhi + dy * 0.01, 0.15, Math.PI - 0.15);
-        updateCamera();
-      } else if (state.currentTool === "Pan") {
-        const panFactor = 0.004 * orbitRadius;
-        previewGroup.position.set(
-          interaction.startPos.x + dx * panFactor,
-          interaction.startPos.y - dy * panFactor,
-          interaction.startPos.z
-        );
-      } else if (state.currentTool === "Zoom") {
-        orbitRadius = clamp(interaction.startRadius + dy * 0.02, 2.2, 20);
-        updateCamera();
-      } else if (state.currentTool === "Move") {
-        previewGroup.position.set(
-          interaction.startPos.x + dx * 0.01,
-          interaction.startPos.y - dy * 0.01,
-          interaction.startPos.z
-        );
-      } else if (state.currentTool === "Rotate") {
-        previewGroup.rotation.y = interaction.startRotY + dx * 0.01;
-      } else if (state.currentTool === "Scale") {
-        const s = clamp(interaction.startScale + dx * 0.005, 0.5, 2.8);
-        state.scale = s;
-        el("scaleRange").value = s.toFixed(2);
-        el("scaleInput").value = s.toFixed(2);
-        updatePreviewObject();
-      } else if (state.currentTool === "Push/Pull") {
-        const d = clamp(state.depth + dx * 0.002, 0.08, 3.0);
-        state.depth = d;
-        el("zRange").value = d.toFixed(2);
-        el("zInput").value = d.toFixed(2);
-        createPreviewMesh();
-      }
-
-      renderOnce();
-    });
-
-    function endDrag(event) {
-      if (interaction.pointerId !== event.pointerId) return;
-      interaction.dragging = false;
-      interaction.pointerId = null;
-      canvas.classList.remove("dragging");
-      renderOnce();
-    }
-
-    canvas.addEventListener("pointerup", endDrag);
-    canvas.addEventListener("pointercancel", endDrag);
-    window.addEventListener("resize", resize);
-
-    createPreviewMesh();
-    resize();
-    fitView();
     updateMetricText();
     healthCheck().catch(() => {});
   </script>

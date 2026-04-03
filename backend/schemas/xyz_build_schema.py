@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Any
 
 ALLOWED_TEMPLATES = {
     "box_block",
@@ -32,47 +33,77 @@ DEFAULT_BUILD_PACKAGE = {
 }
 
 
-def build_default_package() -> dict:
+def build_default_package() -> dict[str, Any]:
     return deepcopy(DEFAULT_BUILD_PACKAGE)
 
 
-def normalize_xyz_build_package(input_data: dict) -> dict:
+def _clean_string(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    value = value.strip()
+    return value if value else None
+
+
+def _to_number(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        value = value.strip()
+        if not value:
+            return None
+        try:
+            return float(value)
+        except ValueError:
+            return None
+    return None
+
+
+def normalize_xyz_build_package(input_data: dict[str, Any]) -> dict[str, Any]:
     package = build_default_package()
 
     if not isinstance(input_data, dict):
         return package
 
-    if isinstance(input_data.get("build_mode"), str) and input_data["build_mode"].strip():
-        package["build_mode"] = input_data["build_mode"].strip()
+    build_mode = _clean_string(input_data.get("build_mode"))
+    if build_mode:
+        package["build_mode"] = build_mode.lower()
 
-    if isinstance(input_data.get("template"), str) and input_data["template"].strip():
-        package["template"] = input_data["template"].strip()
+    template = _clean_string(input_data.get("template"))
+    if template:
+        package["template"] = template.lower()
 
-    if isinstance(input_data.get("material"), str) and input_data["material"].strip():
-        package["material"] = input_data["material"].strip()
+    material = _clean_string(input_data.get("material"))
+    if material:
+        package["material"] = material
 
-    if isinstance(input_data.get("path_strategy"), str) and input_data["path_strategy"].strip():
-        package["path_strategy"] = input_data["path_strategy"].strip()
+    path_strategy = _clean_string(input_data.get("path_strategy"))
+    if path_strategy:
+        package["path_strategy"] = path_strategy.lower()
 
-    if isinstance(input_data.get("layer_height"), (int, float)):
-        package["layer_height"] = float(input_data["layer_height"])
+    layer_height = _to_number(input_data.get("layer_height"))
+    if layer_height is not None:
+        package["layer_height"] = layer_height
 
     dimensions = input_data.get("dimensions", {})
     if isinstance(dimensions, dict):
         for key in ("width", "height", "depth"):
-            if isinstance(dimensions.get(key), (int, float)):
-                package["dimensions"][key] = float(dimensions[key])
+            value = _to_number(dimensions.get(key))
+            if value is not None:
+                package["dimensions"][key] = value
 
     origin = input_data.get("origin", {})
     if isinstance(origin, dict):
         for key in ("x", "y", "z"):
-            if isinstance(origin.get(key), (int, float)):
-                package["origin"][key] = float(origin[key])
+            value = _to_number(origin.get(key))
+            if value is not None:
+                package["origin"][key] = value
 
     return package
 
 
-def validate_xyz_build_package(package: dict) -> list[str]:
+def validate_xyz_build_package(package: dict[str, Any]) -> list[str]:
     errors: list[str] = []
 
     if not isinstance(package, dict):
@@ -91,7 +122,7 @@ def validate_xyz_build_package(package: dict) -> list[str]:
         errors.append(f"Invalid path_strategy: {path_strategy}")
 
     layer_height = package.get("layer_height")
-    if not isinstance(layer_height, (int, float)) or float(layer_height) <= 0:
+    if isinstance(layer_height, bool) or not isinstance(layer_height, (int, float)) or float(layer_height) <= 0:
         errors.append("layer_height must be a positive number")
 
     dimensions = package.get("dimensions")
@@ -100,7 +131,7 @@ def validate_xyz_build_package(package: dict) -> list[str]:
     else:
         for key in ("width", "height", "depth"):
             value = dimensions.get(key)
-            if not isinstance(value, (int, float)) or float(value) <= 0:
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or float(value) <= 0:
                 errors.append(f"dimensions.{key} must be a positive number")
 
     origin = package.get("origin")
@@ -109,7 +140,7 @@ def validate_xyz_build_package(package: dict) -> list[str]:
     else:
         for key in ("x", "y", "z"):
             value = origin.get(key)
-            if not isinstance(value, (int, float)):
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
                 errors.append(f"origin.{key} must be a number")
 
     material = package.get("material")

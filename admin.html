@@ -810,79 +810,108 @@
   </div>
 
   <script>
-    const DEVROOM_PASSWORD = "Newgem168#";
-    let API_BASE = location.origin;
-    let devroomState = {
-      bootstrap: null,
-      xyzBootstrap: null,
-      internalCodebook: null,
-      projectCodebook: null,
-      currentRequest: null,
-      currentDecision: null,
-      history: [],
-      queueResult: null,
-      xyzPlan: null,
-      xyzPreview: null,
-      xyzJob: null,
-      xyzHistory: [],
-    };
+  const DEVROOM_PASSWORD = "Newgem168#";
+  let API_BASE = location.origin;
 
-    function el(id) { return document.getElementById(id); }
-    function setText(id, value) { const node = el(id); if (node) node.textContent = value; }
-    function prettyJson(value) { try { return typeof value === "string" ? value : JSON.stringify(value, null, 2); } catch (_) { return String(value); } }
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+  const devroomState = {
+    bootstrap: null,
+    internalCodebook: null,
+    projectCodebook: null,
+    currentRequest: null,
+    currentDecision: null,
+    history: [],
+    queueResult: null
+  };
+
+  function el(id) {
+    return document.getElementById(id);
+  }
+
+  function setText(id, value) {
+    const node = el(id);
+    if (node) node.textContent = value;
+  }
+
+  function on(id, event, handler) {
+    const node = el(id);
+    if (node) node.addEventListener(event, handler);
+  }
+
+  function prettyJson(value) {
+    try {
+      return typeof value === "string" ? value : JSON.stringify(value, null, 2);
+    } catch (_) {
+      return String(value);
     }
+  }
 
-    function highlightJson(value) {
-      const json = escapeHtml(prettyJson(value));
-      return json.replace(/("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"\s*:)|("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*")|\b(true|false)\b|\bnull\b|-?\d+(?:\.\d+)?(?:[eE][+\-]?\d+)?/g, (match) => {
-        if (match.endsWith(":")) {
-          return `<span class="json-key">${match}</span>`;
-        }
-        if (match.startsWith('"')) {
-          return `<span class="json-string">${match}</span>`;
-        }
-        if (match === "true" || match === "false") {
-          return `<span class="json-boolean">${match}</span>`;
-        }
-        if (match === "null") {
-          return `<span class="json-null">${match}</span>`;
-        }
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function highlightJson(value) {
+    const json = escapeHtml(prettyJson(value));
+    return json.replace(
+      /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"\s*:)|("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*")|\b(true|false)\b|\bnull\b|-?\d+(?:\.\d+)?(?:[eE][+\-]?\d+)?/g,
+      (match) => {
+        if (match.endsWith(":")) return `<span class="json-key">${match}</span>`;
+        if (match.startsWith('"')) return `<span class="json-string">${match}</span>`;
+        if (match === "true" || match === "false") return `<span class="json-boolean">${match}</span>`;
+        if (match === "null") return `<span class="json-null">${match}</span>`;
         return `<span class="json-number">${match}</span>`;
-      });
-    }
-
-    function currentScope() {
-      return {
-        company: el("scopeCompany").value,
-        project: el("scopeProject").value,
-        module: el("scopeModule").value,
-        requestType: el("scopeRequestType").value,
-        requestSource: el("scopeRequestSource").value,
-        workspaceId: el("scopeWorkspaceId").value,
-        objectType: el("scopeObjectType").value,
-        outputIntent: el("scopeOutputIntent").value,
-      };
-    }
-
-    async function fetchJson(path, options = {}) {
-      const target = /^https?:\/\//i.test(path) ? path : `${API_BASE}${path}`;
-      const response = await fetch(target, options);
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload.ok === false) {
-        const message = payload?.error?.message || payload?.error || `Request failed with ${response.status}`;
-        throw new Error(message);
       }
-      return payload;
+    );
+  }
+
+  function currentScope() {
+    return {
+      company: el("scopeCompany")?.value || "5xLiving",
+      project: el("scopeProject")?.value || "WorkStation",
+      module: el("scopeModule")?.value || "Dev Room",
+      requestType: el("scopeRequestType")?.value || "review",
+      requestSource: el("scopeRequestSource")?.value || "devroom_manual",
+      workspaceId: el("scopeWorkspaceId")?.value || "devroom-main",
+      objectType: el("scopeObjectType")?.value || "assembly",
+      outputIntent: el("scopeOutputIntent")?.value || "scene_layout"
+    };
+  }
+
+  async function fetchJson(path, options = {}) {
+    const target = /^https?:\/\//i.test(path) ? path : `${API_BASE}${path}`;
+    const response = await fetch(target, options);
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok || payload.ok === false) {
+      const message =
+        payload?.error?.message ||
+        payload?.error ||
+        `Request failed with ${response.status}`;
+      throw new Error(message);
     }
 
-    function updateScopeSummary() {
-      const scope = currentScope();
-      el("scopeSummary").innerHTML = `
+    return payload;
+  }
+
+  function populateSelect(node, options, selected) {
+    if (!node) return;
+    node.innerHTML = "";
+    options.forEach((option) => {
+      const opt = document.createElement("option");
+      opt.value = option;
+      opt.textContent = option;
+      opt.selected = option === selected;
+      node.appendChild(opt);
+    });
+  }
+
+  function updateScopeSummary() {
+    const scope = currentScope();
+    const summary = el("scopeSummary");
+    if (summary) {
+      summary.innerHTML = `
         <span class="tag">${scope.company}</span>
         <span class="tag">${scope.project}</span>
         <span class="tag">${scope.module}</span>
@@ -892,370 +921,481 @@
         <span class="tag">${scope.objectType}</span>
         <span class="tag">${scope.outputIntent}</span>
       `;
-      setText("overviewScope", `${scope.company} / ${scope.project} / ${scope.module}`);
-      setText("overviewRequestMode", `${scope.requestType} from ${scope.requestSource}`);
-      setText("overviewSpatialMode", `${scope.workspaceId} / ${scope.objectType} / ${scope.outputIntent}`);
-      setText("metricCompany", scope.company);
-      setText("metricProject", scope.project);
-      setText("metricModule", scope.module);
-      setText("metricRequestType", scope.requestType);
-      setText("metricRequestSource", scope.requestSource);
-      setText("metricWorkspaceId", scope.workspaceId);
-      setText("metricObjectType", scope.objectType);
-      setText("metricOutputIntent", scope.outputIntent);
     }
 
-    function syncRequestTypeOptions() {
-      if (!devroomState.bootstrap) return;
-      const scopeModule = el("scopeModule").value;
-      const moduleMap = devroomState.bootstrap.moduleRequestTypeMap || {};
-      const options = moduleMap[scopeModule] && moduleMap[scopeModule].length
+    setText("overviewScope", `${scope.company} / ${scope.project} / ${scope.module}`);
+    setText("overviewRequestMode", `${scope.requestType} from ${scope.requestSource}`);
+    setText("overviewSpatialMode", `${scope.workspaceId} / ${scope.objectType} / ${scope.outputIntent}`);
+    setText("metricCompany", scope.company);
+    setText("metricProject", scope.project);
+    setText("metricModule", scope.module);
+    setText("metricRequestType", scope.requestType);
+    setText("metricRequestSource", scope.requestSource);
+    setText("metricWorkspaceId", scope.workspaceId);
+    setText("metricObjectType", scope.objectType);
+    setText("metricOutputIntent", scope.outputIntent);
+  }
+
+  function syncRequestTypeOptions() {
+    if (!devroomState.bootstrap) return;
+
+    const scopeModule = el("scopeModule")?.value || "Dev Room";
+    const moduleMap = devroomState.bootstrap.moduleRequestTypeMap || {};
+    const options =
+      moduleMap[scopeModule] && moduleMap[scopeModule].length
         ? moduleMap[scopeModule]
         : (devroomState.bootstrap.requestTypeOptions || []);
-      const selected = options.includes(el("scopeRequestType").value) ? el("scopeRequestType").value : (options[0] || "");
-      populateSelect(el("scopeRequestType"), options, selected);
-      syncOutputIntent();
+
+    const current = el("scopeRequestType")?.value || "";
+    const selected = options.includes(current) ? current : (options[0] || "");
+    populateSelect(el("scopeRequestType"), options, selected);
+    updateScopeSummary();
+  }
+
+  function setButtonState() {
+    const request = devroomState.currentRequest;
+    const decision = devroomState.currentDecision;
+    const state = request?.state || "";
+    const decisionName = decision?.decision || "";
+
+    const canQueue =
+      !!request &&
+      (
+        state === "approved" ||
+        (decisionName === "allowed" && state === "evaluated")
+      );
+
+    const canApprove = !!request && state === "approval_required";
+    const canBlock = !!request && !["blocked", "completed", "failed", "queued"].includes(state);
+
+    if (el("queueBtn")) el("queueBtn").disabled = !canQueue;
+    if (el("approveBtn")) el("approveBtn").disabled = !canApprove;
+    if (el("blockBtn")) el("blockBtn").disabled = !canBlock;
+  }
+
+  function renderVersions(targetId, versions) {
+    const container = el(targetId);
+    if (!container) return;
+
+    container.innerHTML = "";
+    if (!versions || versions.length === 0) {
+      container.innerHTML = `<div class="version-entry"><p>No versions recorded yet.</p></div>`;
+      return;
     }
 
+    versions.forEach((version) => {
+      const node = document.createElement("div");
+      node.className = "version-entry";
+      node.innerHTML = `
+        <h4>${version.file || "version"}</h4>
+        <p>Version: ${version.version || "n/a"}</p>
+        <p>Updated: ${version.updatedAt || "n/a"}</p>
+        <p>Actor: ${version.updatedBy || "n/a"}</p>
+      `;
+      container.appendChild(node);
+    });
+  }
 
-    function syncOutputIntent() {
-      updateScopeSummary();
+  function renderHistory(entries) {
+    const container = el("historyList");
+    if (!container) return;
+
+    container.innerHTML = "";
+    if (!entries || entries.length === 0) {
+      container.innerHTML = `<div class="history-entry"><p>No history recorded yet.</p></div>`;
+      setText("historyCountValue", "0");
+      return;
     }
 
+    entries.forEach((entry) => {
+      const node = document.createElement("div");
+      node.className = "history-entry";
+      const scope = entry.scope || {};
+      node.innerHTML = `
+        <h4>${entry.actionType || entry.action || entry.source || "event"}</h4>
+        <p>${entry.timestamp || "n/a"}</p>
+        <p>Actor: ${entry.actor || "devroom_admin"}</p>
+        <p>Scope: ${scope.company || "-"} / ${scope.project || "-"} / ${scope.module || "-"}</p>
+        <p>Decision: ${entry.decision || "-"}</p>
+        <p>Job ID: ${entry.jobId || "-"}</p>
+        <p>Codebook changed: ${entry.codebookChanged ? "yes" : "no"}</p>
+        <p>Codebook version: ${entry.codebookVersion || "-"}</p>
+        <p>Prompt: ${entry.requestPrompt || entry.prompt || "-"}</p>
+      `;
+      container.appendChild(node);
+    });
 
+    setText("historyCountValue", String(entries.length));
+  }
 
-    function setButtonState() {
-      const request = devroomState.currentRequest;
-      const decision = devroomState.currentDecision;
-      const state = request?.state || "";
-      const decisionName = decision?.decision || "";
-      el("queueBtn").disabled = !(request && ((decisionName === "allowed" && (state === "evaluated" || state === "approved")) || state === "approved"));
-      el("approveBtn").disabled = !(request && state === "approval_required");
-      el("blockBtn").disabled = !(request && !["blocked", "completed", "failed"].includes(state));
-    }
+  function renderDecision(decision, request) {
+    devroomState.currentDecision = decision;
+    devroomState.currentRequest = request;
 
-    function renderVersions(targetId, versions) {
-      const container = el(targetId);
-      container.innerHTML = "";
-      if (!versions || versions.length === 0) {
-        container.innerHTML = `<div class="version-entry"><p>No versions recorded yet.</p></div>`;
-        return;
-      }
-      versions.forEach((version) => {
-        const node = document.createElement("div");
-        node.className = "version-entry";
-        node.innerHTML = `<h4>${version.file || "version"}</h4><p>Version: ${version.version || "n/a"}</p><p>Updated: ${version.updatedAt || "n/a"}</p><p>Actor: ${version.updatedBy || "n/a"}</p>`;
-        container.appendChild(node);
-      });
-    }
-
-    function renderHistory(entries) {
-      const container = el("historyList");
-      container.innerHTML = "";
-      if (!entries || entries.length === 0) {
-        container.innerHTML = `<div class="history-entry"><p>No history recorded yet.</p></div>`;
-        return;
-      }
-      entries.forEach((entry) => {
-        const node = document.createElement("div");
-        node.className = "history-entry";
-        const scope = entry.scope || {};
-        node.innerHTML = `<h4>${entry.actionType || entry.action || entry.source || "event"}</h4><p>${entry.timestamp || "n/a"}</p><p>Actor: ${entry.actor || "devroom_admin"}</p><p>Scope: ${scope.company || "-"} / ${scope.project || "-"} / ${scope.module || "-"}</p><p>Decision: ${entry.decision || "-"}</p><p>Job ID: ${entry.jobId || "-"}</p><p>Codebook changed: ${entry.codebookChanged ? "yes" : "no"}</p><p>Codebook version: ${entry.codebookVersion || "-"}</p><p>Prompt: ${entry.requestPrompt || entry.prompt || "-"}</p>`;
-        container.appendChild(node);
-      });
-      setText("historyCountValue", String(entries.length));
-    }
-
-
-
-
-
-
-
-
-
-
-
-    function renderDecision(decision, request) {
-      devroomState.currentDecision = decision;
-      devroomState.currentRequest = request;
-      if (!decision) {
-        setText("decisionSummary", "No decision available yet.");
-        el("decisionReasonsView").textContent = "[]";
-        el("matchedRulesView").textContent = "[]";
-        setText("decisionEscalationValue", "No decision yet.");
-        setText("recommendedRouteValue", "Not evaluated.");
-        el("recommendedPayloadView").textContent = "{}";
-        el("decisionJsonView").textContent = "{}";
-        setText("decisionValue", "Waiting");
-        setText("decisionSub", "Evaluate a request to populate the decision panel.");
-        setButtonState();
-        return;
-      }
-      setText("decisionSummary", decision.summary || "Decision returned.");
-      el("decisionReasonsView").textContent = prettyJson(decision.reasons || []);
-      el("matchedRulesView").textContent = prettyJson(decision.matchedRules || []);
-      setText("decisionEscalationValue", decision.escalationRequired ? "Yes" : "No");
-      setText("recommendedRouteValue", decision.recommendedRoute || "n/a");
-      el("recommendedPayloadView").textContent = prettyJson(decision.recommendedPayload || {});
-      el("decisionJsonView").textContent = prettyJson(decision);
-      setText("decisionValue", decision.decision || "evaluated");
-      setText("decisionSub", decision.escalationRequired ? "Escalation required" : "Can proceed without escalation");
-      setText("overviewRoute", decision.recommendedRoute || "No route available.");
-      setText("requestIdValue", request?.requestId || "No request evaluated yet.");
-      setText("requestStateValue", request?.state || "evaluated");
-      setText("lastRequestLabel", request?.requestId || "none");
+    if (!decision) {
+      setText("decisionSummary", "No decision available yet.");
+      if (el("decisionReasonsView")) el("decisionReasonsView").textContent = "[]";
+      if (el("matchedRulesView")) el("matchedRulesView").textContent = "[]";
+      setText("decisionEscalationValue", "No decision yet.");
+      setText("recommendedRouteValue", "Not evaluated.");
+      if (el("recommendedPayloadView")) el("recommendedPayloadView").textContent = "{}";
+      if (el("decisionJsonView")) el("decisionJsonView").textContent = "{}";
+      setText("decisionValue", "Waiting");
+      setText("decisionSub", "Evaluate a request to populate the decision panel.");
+      setText("requestIdValue", "No request evaluated yet.");
+      setText("requestStateValue", "Waiting");
+      setText("overviewRoute", "No request evaluated yet.");
       setButtonState();
+      return;
     }
 
-    async function loadRuntimeConfig() {
-      const data = await fetchJson(`${location.origin}/api/runtime-config`);
-      API_BASE = data.apiBase || location.origin;
-      setText("apiBaseLabel", API_BASE);
-      setText("runtimePill", `Runtime: ${API_BASE}`);
+    setText("decisionSummary", decision.summary || "Decision returned.");
+    if (el("decisionReasonsView")) el("decisionReasonsView").textContent = prettyJson(decision.reasons || []);
+    if (el("matchedRulesView")) el("matchedRulesView").textContent = prettyJson(decision.matchedRules || []);
+    setText("decisionEscalationValue", decision.escalationRequired ? "Yes" : "No");
+    setText("recommendedRouteValue", decision.recommendedRoute || "n/a");
+    if (el("recommendedPayloadView")) el("recommendedPayloadView").textContent = prettyJson(decision.recommendedPayload || {});
+    if (el("decisionJsonView")) el("decisionJsonView").textContent = prettyJson(decision);
+    setText("decisionValue", decision.decision || "evaluated");
+    setText("decisionSub", decision.escalationRequired ? "Escalation required" : "Can proceed without escalation");
+    setText("overviewRoute", decision.recommendedRoute || "No route available.");
+    setText("requestIdValue", request?.requestId || "No request evaluated yet.");
+    setText("requestStateValue", request?.state || "evaluated");
+    setText("lastRequestLabel", request?.requestId || "none");
+    setButtonState();
+  }
+
+  async function loadRuntimeConfig() {
+    const data = await fetchJson(`${location.origin}/api/runtime-config`);
+    API_BASE = data.apiBase || location.origin;
+    setText("apiBaseLabel", API_BASE);
+    setText("runtimePill", `Runtime: ${API_BASE}`);
+  }
+
+  async function checkHealth() {
+    try {
+      const data = await fetchJson("/health");
+      if (el("healthText")) el("healthText").textContent = prettyJson(data);
+      setText("healthPill", "Health: healthy");
+    } catch (error) {
+      if (el("healthText")) el("healthText").textContent = String(error.message || error);
+      setText("healthPill", "Health: unavailable");
+    }
+  }
+
+  async function checkAdminPing() {
+    try {
+      const data = await fetchJson("/admin/ping");
+      if (el("pingText")) el("pingText").textContent = prettyJson(data);
+      setText("pingPill", "Admin Ping: reachable");
+    } catch (error) {
+      if (el("pingText")) el("pingText").textContent = String(error.message || error);
+      setText("pingPill", "Admin Ping: unavailable");
+    }
+  }
+
+  async function loadBootstrap() {
+    const data = await fetchJson("/admin/devroom/bootstrap");
+    devroomState.bootstrap = data;
+
+    if (el("bootstrapText")) el("bootstrapText").textContent = prettyJson(data);
+
+    populateSelect(el("scopeCompany"), data.companyOptions || [], data.defaults?.company || "5xLiving");
+    populateSelect(el("scopeProject"), (data.projects || []).map((item) => item.project), data.defaults?.project || "WorkStation");
+    populateSelect(el("scopeModule"), data.moduleOptions || [], data.defaults?.module || "Dev Room");
+    populateSelect(el("scopeRequestType"), data.requestTypeOptions || [], data.defaults?.requestType || "review");
+    populateSelect(el("scopeRequestSource"), data.requestSourceOptions || [], data.defaults?.requestSource || "devroom_manual");
+    populateSelect(el("scopeWorkspaceId"), data.workspaceOptions || [], data.defaults?.workspaceId || "devroom-main");
+    populateSelect(el("scopeObjectType"), data.objectTypeOptions || [], data.defaults?.objectType || "assembly");
+    populateSelect(el("scopeOutputIntent"), data.outputIntentOptions || [], data.defaults?.outputIntent || "scene_layout");
+
+    syncRequestTypeOptions();
+    updateScopeSummary();
+    renderHistory(data.history || []);
+  }
+
+  async function loadInternalCodebook() {
+    const data = await fetchJson("/admin/devroom/internal-codebook");
+    devroomState.internalCodebook = data;
+
+    const view = el("internalCodebookView");
+    if (view) {
+      view.classList.add("json-viewer");
+      view.innerHTML = highlightJson(data.codebook || {});
     }
 
-    async function checkHealth() {
-      try {
-        const data = await fetchJson("/health");
-        el("healthText").textContent = prettyJson(data);
-        setText("healthPill", "Health: healthy");
-      } catch (error) {
-        el("healthText").textContent = String(error.message || error);
-        setText("healthPill", "Health: unavailable");
-      }
-    }
-
-    async function checkAdminPing() {
-      try {
-        const data = await fetchJson("/admin/ping");
-        el("pingText").textContent = prettyJson(data);
-        setText("pingPill", "Admin Ping: reachable");
-      } catch (error) {
-        el("pingText").textContent = String(error.message || error);
-        setText("pingPill", "Admin Ping: unavailable");
-      }
-    }
-
-    function populateSelect(node, options, selected) {
-      node.innerHTML = "";
-      options.forEach((option) => {
-        const element = document.createElement("option");
-        element.value = option;
-        element.textContent = option;
-        element.selected = option === selected;
-        node.appendChild(element);
-      });
-    }
-
-    async function loadBootstrap() {
-      const data = await fetchJson("/admin/devroom/bootstrap");
-      devroomState.bootstrap = data;
-      el("bootstrapText").textContent = prettyJson(data);
-      populateSelect(el("scopeCompany"), data.companyOptions || [], data.defaults?.company || "5xLiving");
-      populateSelect(el("scopeProject"), (data.projects || []).map((item) => item.project), data.defaults?.project || "WorkStation");
-      populateSelect(el("scopeModule"), data.moduleOptions || [], data.defaults?.module || "Admin Shell");
-      populateSelect(el("scopeRequestType"), data.requestTypeOptions || [], data.defaults?.requestType || "review");
-      populateSelect(el("scopeRequestSource"), data.requestSourceOptions || [], data.defaults?.requestSource || "devroom_manual");
-      populateSelect(el("scopeWorkspaceId"), data.workspaceOptions || [], data.defaults?.workspaceId || "devroom-main");
-      populateSelect(el("scopeObjectType"), data.objectTypeOptions || [], data.defaults?.objectType || "assembly");
-      populateSelect(el("scopeOutputIntent"), data.outputIntentOptions || [], data.defaults?.outputIntent || "scene_layout");
-      syncRequestTypeOptions();
-      updateScopeSummary();
-      renderHistory(data.history || []);
-    }
-
-
-
-    async function loadInternalCodebook() {
-      const data = await fetchJson("/admin/devroom/internal-codebook");
-      devroomState.internalCodebook = data;
-      el("internalCodebookView").classList.add("json-viewer");
-      el("internalCodebookView").innerHTML = highlightJson(data.codebook || {});
+    if (el("internalCodebookEditor")) {
       el("internalCodebookEditor").value = prettyJson(data.codebook || {});
-      renderVersions("internalVersionList", data.versions || []);
-      setText("internalVersionValue", `v${data.codebook?.version || 0}`);
     }
 
-    async function loadProjectCodebook() {
-      const scope = currentScope();
-      const params = new URLSearchParams({ company: scope.company, project: scope.project });
-      const data = await fetchJson(`/admin/devroom/project-codebook?${params.toString()}`);
-      devroomState.projectCodebook = data;
+    renderVersions("internalVersionList", data.versions || []);
+    setText("internalVersionValue", `v${data.codebook?.version || 0}`);
+  }
+
+  async function loadProjectCodebook() {
+    const scope = currentScope();
+    const params = new URLSearchParams({
+      company: scope.company,
+      project: scope.project
+    });
+
+    const data = await fetchJson(`/admin/devroom/project-codebook?${params.toString()}`);
+    devroomState.projectCodebook = data;
+
+    if (el("projectCodebookEditor")) {
       el("projectCodebookEditor").value = prettyJson(data.codebook || {});
-      renderVersions("projectVersionList", data.versions || []);
-      setText("projectVersionValue", `v${data.codebook?.version || 0}`);
     }
 
-    async function loadHistory() {
-      const scope = currentScope();
-      const params = new URLSearchParams({ limit: "120", company: scope.company, project: scope.project, module: scope.module });
-      const data = await fetchJson(`/admin/devroom/history?${params.toString()}`);
-      devroomState.history = data.history || [];
-      renderHistory(devroomState.history);
-    }
+    renderVersions("projectVersionList", data.versions || []);
+    setText("projectVersionValue", `v${data.codebook?.version || 0}`);
+  }
 
+  async function loadHistory() {
+    const scope = currentScope();
+    const params = new URLSearchParams({
+      limit: "120",
+      company: scope.company,
+      project: scope.project,
+      module: scope.module
+    });
 
+    const data = await fetchJson(`/admin/devroom/history?${params.toString()}`);
+    devroomState.history = data.history || [];
+    renderHistory(devroomState.history);
+  }
 
+  async function evaluateRequest() {
+    const payload = {
+      scope: currentScope(),
+      prompt: el("requestPrompt")?.value.trim() || "",
+      notes: el("requestNotes")?.value.trim() || ""
+    };
 
+    const data = await fetchJson("/admin/devroom/evaluate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
+    if (el("requestResultView")) el("requestResultView").textContent = prettyJson(data);
+    renderDecision(data.decision, data.request);
+    await loadHistory();
+  }
 
+  async function approveRequest() {
+    if (!devroomState.currentRequest) return;
 
-
-
-
-
-    async function evaluateRequest() {
-      const payload = { scope: currentScope(), prompt: el("requestPrompt").value.trim(), notes: el("requestNotes").value.trim() };
-      const data = await fetchJson("/admin/devroom/evaluate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      el("requestResultView").textContent = prettyJson(data);
-      renderDecision(data.decision, data.request);
-      await loadHistory();
-    }
-
-    async function approveRequest() {
-      if (!devroomState.currentRequest) return;
-      const data = await fetchJson(`/admin/devroom/requests/${devroomState.currentRequest.requestId}/approve`, { method: "POST", headers: { "Content-Type": "application/json" } });
-      el("requestResultView").textContent = prettyJson(data);
-      renderDecision(data.decision, data.request);
-      await loadHistory();
-    }
-
-    async function queueRequest() {
-      if (!devroomState.currentRequest) return;
-      const data = await fetchJson(`/admin/devroom/requests/${devroomState.currentRequest.requestId}/queue`, { method: "POST", headers: { "Content-Type": "application/json" } });
-      devroomState.queueResult = data.queueResult || null;
-      el("queueResultView").textContent = prettyJson(data.queueResult || {});
-      el("requestResultView").textContent = prettyJson(data);
-      renderDecision(data.decision, data.request);
-      await loadHistory();
-    }
-
-    async function blockRequest() {
-      if (!devroomState.currentRequest) return;
-      const data = await fetchJson(`/admin/devroom/requests/${devroomState.currentRequest.requestId}/block`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: "Blocked from Dev Room UI" }) });
-      el("requestResultView").textContent = prettyJson(data);
-      renderDecision(data.decision, data.request);
-      await loadHistory();
-    }
-
-    async function saveInternalCodebook() {
-      const payload = JSON.parse(el("internalCodebookEditor").value);
-      const data = await fetchJson("/admin/devroom/internal-codebook", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scope: currentScope(), protectedEdit: true, codebook: payload }) });
-      el("requestResultView").textContent = prettyJson(data);
-      await loadInternalCodebook();
-      await loadHistory();
-    }
-
-    async function saveProjectCodebook() {
-      const payload = JSON.parse(el("projectCodebookEditor").value);
-      const scope = currentScope();
-      const data = await fetchJson("/admin/devroom/project-codebook", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scope, company: scope.company, project: scope.project, codebook: payload }) });
-      el("requestResultView").textContent = prettyJson(data);
-      await loadProjectCodebook();
-      await loadHistory();
-    }
-
-    function toggleInternalEditor() {
-      const editing = el("internalProtectedToggle").checked;
-      el("internalCodebookView").style.display = editing ? "none" : "block";
-      el("internalCodebookEditor").style.display = editing ? "block" : "none";
-      el("saveInternalBtn").disabled = !editing;
-    }
-
-    function unlockDevRoom() {
-      const input = el("passwordInput").value;
-      if (input === DEVROOM_PASSWORD) {
-        el("passwordOverlay").style.display = "none";
-        el("appShell").classList.remove("locked");
-        sessionStorage.setItem("devroom_unlocked", "1");
-      } else {
-        el("gateNote").textContent = "Wrong password.";
+    const data = await fetchJson(
+      `/admin/devroom/requests/${devroomState.currentRequest.requestId}/approve`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
       }
+    );
+
+    if (el("requestResultView")) el("requestResultView").textContent = prettyJson(data);
+    renderDecision(data.decision, data.request);
+    await loadHistory();
+  }
+
+  async function queueRequest() {
+    if (!devroomState.currentRequest) return;
+
+    const data = await fetchJson(
+      `/admin/devroom/requests/${devroomState.currentRequest.requestId}/queue`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+
+    devroomState.queueResult = data.queueResult || null;
+    if (el("queueResultView")) el("queueResultView").textContent = prettyJson(data.queueResult || {});
+    if (el("requestResultView")) el("requestResultView").textContent = prettyJson(data);
+    renderDecision(data.decision, data.request);
+    await loadHistory();
+  }
+
+  async function blockRequest() {
+    if (!devroomState.currentRequest) return;
+
+    const data = await fetchJson(
+      `/admin/devroom/requests/${devroomState.currentRequest.requestId}/block`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note: "Blocked from Dev Room UI" })
+      }
+    );
+
+    if (el("requestResultView")) el("requestResultView").textContent = prettyJson(data);
+    renderDecision(data.decision, data.request);
+    await loadHistory();
+  }
+
+  async function saveInternalCodebook() {
+    let payload;
+    try {
+      payload = JSON.parse(el("internalCodebookEditor")?.value || "{}");
+    } catch (error) {
+      throw new Error("Internal codebook JSON is invalid.");
     }
 
-    function lockDevRoom() {
-      sessionStorage.removeItem("devroom_unlocked");
-      window.location.reload();
+    const data = await fetchJson("/admin/devroom/internal-codebook", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        scope: currentScope(),
+        protectedEdit: true,
+        codebook: payload
+      })
+    });
+
+    if (el("requestResultView")) el("requestResultView").textContent = prettyJson(data);
+    await loadInternalCodebook();
+    await loadHistory();
+  }
+
+  async function saveProjectCodebook() {
+    let payload;
+    try {
+      payload = JSON.parse(el("projectCodebookEditor")?.value || "{}");
+    } catch (error) {
+      throw new Error("Project codebook JSON is invalid.");
     }
 
-    function bindNavigation() {
-      document.querySelectorAll(".nav-btn").forEach((button) => {
-        button.addEventListener("click", () => {
-          document.querySelectorAll(".nav-btn").forEach((node) => node.classList.remove("active"));
-          document.querySelectorAll(".section").forEach((node) => node.classList.remove("active"));
-          button.classList.add("active");
-          el(button.getAttribute("data-target")).classList.add("active");
-        });
+    const scope = currentScope();
+
+    const data = await fetchJson("/admin/devroom/project-codebook", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        scope,
+        company: scope.company,
+        project: scope.project,
+        codebook: payload
+      })
+    });
+
+    if (el("requestResultView")) el("requestResultView").textContent = prettyJson(data);
+    await loadProjectCodebook();
+    await loadHistory();
+  }
+
+  function toggleInternalEditor() {
+    const editing = !!el("internalProtectedToggle")?.checked;
+    if (el("internalCodebookView")) el("internalCodebookView").style.display = editing ? "none" : "block";
+    if (el("internalCodebookEditor")) el("internalCodebookEditor").style.display = editing ? "block" : "none";
+    if (el("saveInternalBtn")) el("saveInternalBtn").disabled = !editing;
+  }
+
+  function unlockDevRoom() {
+    const input = el("passwordInput")?.value || "";
+    if (input === DEVROOM_PASSWORD) {
+      if (el("passwordOverlay")) el("passwordOverlay").style.display = "none";
+      if (el("appShell")) el("appShell").classList.remove("locked");
+      sessionStorage.setItem("devroom_unlocked", "1");
+    } else {
+      setText("gateNote", "Wrong password.");
+    }
+  }
+
+  function lockDevRoom() {
+    sessionStorage.removeItem("devroom_unlocked");
+    window.location.reload();
+  }
+
+  function bindNavigation() {
+    document.querySelectorAll(".nav-btn").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".nav-btn").forEach((node) => node.classList.remove("active"));
+        document.querySelectorAll(".section").forEach((node) => node.classList.remove("active"));
+        button.classList.add("active");
+        const target = button.getAttribute("data-target");
+        if (target && el(target)) el(target).classList.add("active");
       });
-    }
+    });
+  }
 
-    function bindScopeControls() {
-      ["scopeCompany", "scopeProject", "scopeModule", "scopeRequestType", "scopeRequestSource", "scopeWorkspaceId", "scopeObjectType", "scopeOutputIntent"].forEach((id) => {
-        el(id).addEventListener("change", async () => {
-          if (id === "scopeModule") {
-            syncRequestTypeOptions();
-          }
-          if (id === "scopeRequestType") {
-            syncOutputIntent();
-          }
-          updateScopeSummary();
-          if (id === "scopeProject" || id === "scopeCompany") {
-            await loadProjectCodebook();
-          }
-          await loadHistory();
-          await loadXyzHistory();
-        });
+  function bindScopeControls() {
+    [
+      "scopeCompany",
+      "scopeProject",
+      "scopeModule",
+      "scopeRequestType",
+      "scopeRequestSource",
+      "scopeWorkspaceId",
+      "scopeObjectType",
+      "scopeOutputIntent"
+    ].forEach((id) => {
+      on(id, "change", async () => {
+        if (id === "scopeModule") {
+          syncRequestTypeOptions();
+        }
+
+        updateScopeSummary();
+
+        if (id === "scopeProject" || id === "scopeCompany") {
+          await loadProjectCodebook();
+        }
+
+        await loadHistory();
       });
+    });
+  }
+
+  function handleError(error) {
+    const message = error && error.message ? error.message : String(error);
+    if (el("requestResultView")) el("requestResultView").textContent = message;
+    setText("decisionSummary", message);
+  }
+
+  async function init() {
+    bindNavigation();
+    bindScopeControls();
+
+    on("unlockBtn", "click", unlockDevRoom);
+    on("passwordInput", "keydown", (event) => {
+      if (event.key === "Enter") unlockDevRoom();
+    });
+    on("lockBtn", "click", lockDevRoom);
+    on("evaluateBtn", "click", () => evaluateRequest().catch(handleError));
+    on("approveBtn", "click", () => approveRequest().catch(handleError));
+    on("queueBtn", "click", () => queueRequest().catch(handleError));
+    on("blockBtn", "click", () => blockRequest().catch(handleError));
+    on("reloadInternalBtn", "click", () => loadInternalCodebook().catch(handleError));
+    on("saveInternalBtn", "click", () => saveInternalCodebook().catch(handleError));
+    on("reloadProjectBtn", "click", () => loadProjectCodebook().catch(handleError));
+    on("saveProjectBtn", "click", () => saveProjectCodebook().catch(handleError));
+    on("refreshHistoryBtn", "click", () => loadHistory().catch(handleError));
+    on("internalProtectedToggle", "change", toggleInternalEditor);
+
+    if (sessionStorage.getItem("devroom_unlocked") === "1") {
+      if (el("passwordOverlay")) el("passwordOverlay").style.display = "none";
+      if (el("appShell")) el("appShell").classList.remove("locked");
     }
 
-    function handleError(error) {
-      const message = error && error.message ? error.message : String(error);
-      el("requestResultView").textContent = message;
-      setText("decisionSummary", message);
+    try {
+      await loadRuntimeConfig();
+      await Promise.all([
+        checkHealth(),
+        checkAdminPing(),
+        loadBootstrap()
+      ]);
+      await Promise.all([
+        loadInternalCodebook(),
+        loadProjectCodebook(),
+        loadHistory()
+      ]);
+      renderDecision(null, null);
+      toggleInternalEditor();
+      setButtonState();
+    } catch (error) {
+      handleError(error);
     }
+  }
 
-    async function init() {
-      bindNavigation();
-      bindScopeControls();
-      el("unlockBtn").addEventListener("click", unlockDevRoom);
-      el("passwordInput").addEventListener("keydown", (event) => { if (event.key === "Enter") unlockDevRoom(); });
-      el("lockBtn").addEventListener("click", lockDevRoom);
-      el("evaluateBtn").addEventListener("click", () => evaluateRequest().catch(handleError));
-      el("approveBtn").addEventListener("click", () => approveRequest().catch(handleError));
-      el("queueBtn").addEventListener("click", () => queueRequest().catch(handleError));
-      el("blockBtn").addEventListener("click", () => blockRequest().catch(handleError));
-      el("reloadInternalBtn").addEventListener("click", () => loadInternalCodebook().catch(handleError));
-      el("saveInternalBtn").addEventListener("click", () => saveInternalCodebook().catch(handleError));
-      el("reloadProjectBtn").addEventListener("click", () => loadProjectCodebook().catch(handleError));
-      el("saveProjectBtn").addEventListener("click", () => saveProjectCodebook().catch(handleError));
-      el("refreshHistoryBtn").addEventListener("click", () => loadHistory().catch(handleError));
-      el("xyzPlanBtn").addEventListener("click", () => createXyzPlan().catch(handleError));
-      el("xyzPreviewBtn").addEventListener("click", () => createXyzPreview().catch(handleError));
-      el("xyzJobBtn").addEventListener("click", () => createXyzGenerationPackage().catch(handleError));
-      el("xyzRefreshHistoryBtn").addEventListener("click", () => loadXyzHistory().catch(handleError));
-      el("internalProtectedToggle").addEventListener("change", toggleInternalEditor);
-
-      if (sessionStorage.getItem("devroom_unlocked") === "1") {
-        el("passwordOverlay").style.display = "none";
-        el("appShell").classList.remove("locked");
-      }
-
-      try {
-        await loadRuntimeConfig();
-        await Promise.all([checkHealth(), checkAdminPing(), loadBootstrap(), loadXyzBootstrap()]);
-        await Promise.all([loadInternalCodebook(), loadProjectCodebook(), loadHistory()]);
-        renderDecision(null, null);
-        renderXyzPlan(null);
-        renderXyzPreview(null);
-        renderXyzJob(null);
-        toggleInternalEditor();
-      } catch (error) {
-        handleError(error);
-      }
-    }
-
-    init();
-  </script>
+  init();
+</script>
 </body>
 </html>
