@@ -1,5 +1,5 @@
 from pathlib import Path
-from flask import Blueprint, Flask, jsonify, request, send_from_directory
+from flask import Blueprint, Flask, jsonify, make_response, request, send_from_directory
 from flask_cors import CORS
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -25,7 +25,11 @@ def serve_3d_model_maker():
 @app.route("/xyz_modular")
 def serve_xyz_modular():
     html_path = (BASE_DIR.parent / "xyz_modular.html").resolve()
-    return send_from_directory(html_path.parent, html_path.name)
+    resp = make_response(send_from_directory(html_path.parent, html_path.name))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 @app.route("/static/images/<path:filename>")
 def serve_static_images(filename):

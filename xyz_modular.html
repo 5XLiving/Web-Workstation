@@ -173,6 +173,7 @@
     .panel-body{
       min-height:0;
       overflow:auto;
+      -webkit-overflow-scrolling:touch;
       padding:16px;
       display:grid;
       gap:14px;
@@ -234,10 +235,13 @@
       padding:11px 14px;
       font:inherit;
       font-weight:800;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
       transition:transform .18s ease,border-color .18s ease,background .18s ease,opacity .18s ease;
     }
 
     .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:scale(0.97)}
     .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
     .btn-primary{color:#08221d;background:linear-gradient(135deg,#b8fff0 0%, #86efd8 100%)}
     .btn-secondary{color:var(--text);background:rgba(148,243,222,.06)}
@@ -262,6 +266,8 @@
       font-weight:700;
       display:grid;
       gap:4px;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
     }
 
     .tool-chip small{
@@ -292,6 +298,8 @@
       font-size:12px;
       font-weight:700;
       cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
     }
 
     .toggle.active{
@@ -609,11 +617,155 @@
     }
 
     @media (max-width:720px){
-      .shell{padding:10px}
-      .topbar{padding:14px}
-      .brand-copy strong{font-size:26px}
+      :root{
+        --shellPad:6px;
+        --shellGap:8px;
+        --topbarH:auto;
+      }
+      body{overflow:auto}
+      .shell{
+        height:auto;
+        min-height:100vh;
+        min-height:100dvh;
+        padding:var(--shellPad);
+        overflow:visible;
+      }
+      .topbar{
+        padding:10px 12px;
+        border-radius:16px;
+        grid-template-columns:1fr;
+        gap:8px;
+      }
+      .brand{gap:8px}
+      .logo{width:40px;height:40px;border-radius:10px}
+      .brand-copy strong{font-size:20px}
+      .brand-copy span{font-size:10px;margin-top:3px}
+      .account{
+        justify-items:start;
+        text-align:left;
+        padding-top:4px;
+        border-top:1px solid var(--line);
+      }
+      .account strong{font-size:12px}
+      .account span{font-size:11px}
+
+      .layout{
+        grid-template-columns:1fr;
+        gap:8px;
+      }
+
+      .panel{border-radius:18px}
+      .panel-head{padding:12px 14px}
+      .panel-head strong{font-size:13px}
+      .panel-body{padding:10px;gap:10px}
+
+      .card{padding:10px;gap:8px;border-radius:14px}
+      .card h3{font-size:13px}
+
       .row,.row3,.tool-grid{grid-template-columns:1fr}
-      .viewport-main{min-height:380px}
+      .tool-grid-4{grid-template-columns:repeat(4,1fr);gap:6px}
+      .tool-chip-sm{min-height:38px;padding:6px 4px;font-size:11px;border-radius:10px}
+
+      .dim-field label{font-size:11px}
+      input,select,textarea{padding:9px 10px;border-radius:10px;font-size:14px}
+      input[type="range"]{height:8px}
+
+      .btn{min-height:40px;padding:9px 10px;font-size:13px;border-radius:10px}
+      .toggle{padding:7px 10px;font-size:11px}
+      .utility-row{gap:4px}
+      .utility-row .btn{min-height:34px;padding:7px 8px;font-size:11px}
+
+      .viewport-shell{
+        border-radius:18px;
+        min-height:0;
+        height:auto;
+      }
+      .viewport-top{padding:10px 10px 0}
+      .module-badge{font-size:10px;padding:7px 10px;letter-spacing:.12em}
+      .workspace-note{padding:8px 10px;border-radius:14px}
+      .mode-chip{font-size:11px;padding:6px 10px}
+      .hint{font-size:11px}
+      .viewport-main{min-height:320px;min-height:45dvh}
+
+      .viewport-banner{
+        left:8px;right:8px;bottom:8px;
+        flex-direction:column;
+        align-items:stretch;
+        gap:6px;
+      }
+      .selection-callout{
+        max-width:none;
+        padding:8px 10px;
+        border-radius:12px;
+      }
+      .selection-callout strong{font-size:11px}
+      .selection-callout span{font-size:11px}
+
+      .dimension-strip{
+        justify-content:center;
+        gap:4px;
+      }
+      .dimension-pill{
+        min-width:0;
+        flex:1;
+        padding:6px 8px;
+        border-radius:10px;
+        text-align:center;
+      }
+      .dimension-pill span{font-size:9px;letter-spacing:.06em}
+      .dimension-pill strong{font-size:12px}
+
+      .viewport-bottom{
+        padding:0 10px 10px;
+        gap:6px;
+      }
+      .chip-row{gap:4px}
+      .chip{padding:6px 8px;font-size:11px;border-radius:8px}
+      .chip strong{font-size:11px;margin-left:4px}
+
+      .side-metric{padding:10px;border-radius:12px;gap:6px}
+      .metric-line{font-size:12px}
+
+      .send-status{padding:10px;border-radius:14px}
+      .status-badge{font-size:11px;padding:5px 9px}
+
+      .steps-list{min-height:180px;max-height:260px;padding:8px;border-radius:12px}
+      .step-entry{padding:8px 9px;font-size:11px;border-radius:10px}
+
+      .activity-log{min-height:140px;max-height:200px;padding:8px;border-radius:12px}
+      .log-entry{padding:8px 9px;font-size:11px;border-radius:10px}
+
+      .upload-area{gap:6px}
+      .field-grid{gap:8px}
+      .toggle-row{gap:6px}
+    }
+
+    @media (max-width:420px){
+      .shell{padding:4px}
+      .topbar{padding:8px 10px;border-radius:12px}
+      .logo{width:34px;height:34px;border-radius:8px}
+      .brand-copy strong{font-size:18px}
+      .account{display:none}
+
+      .panel{border-radius:14px}
+      .viewport-shell{border-radius:14px}
+      .viewport-main{min-height:280px;min-height:40dvh}
+
+      .tool-grid-4{grid-template-columns:repeat(2,1fr)}
+
+      .dimension-strip{flex-wrap:wrap}
+      .dimension-pill{min-width:60px}
+
+      .viewport-banner{left:6px;right:6px;bottom:6px}
+    }
+
+    /* Safe area insets for notched phones */
+    @supports(padding: env(safe-area-inset-bottom)){
+      .shell{
+        padding-bottom:calc(var(--shellPad) + env(safe-area-inset-bottom));
+        padding-left:calc(var(--shellPad) + env(safe-area-inset-left));
+        padding-right:calc(var(--shellPad) + env(safe-area-inset-right));
+      }
     }
 
     .module-badge{
@@ -626,14 +778,6 @@
 
     /* === Upload & Preview === */
     .upload-area{display:grid;gap:10px}
-    .preview-box{
-      width:100%;min-height:120px;border-radius:12px;
-      border:1px dashed rgba(255,255,255,.12);
-      background:rgba(8,14,24,.9);
-      display:flex;align-items:center;justify-content:center;
-      overflow:hidden;color:var(--muted);font-size:12px;
-    }
-    .preview-box img{max-width:100%;max-height:180px;object-fit:contain}
 
     /* === Range sliders === */
     .dim-field{display:grid;gap:4px}
@@ -645,11 +789,11 @@
       background:rgba(148,243,222,.12);border:none;padding:0;outline:none;
     }
     input[type="range"]::-webkit-slider-thumb{
-      -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+      -webkit-appearance:none;width:20px;height:20px;border-radius:50%;
       background:var(--mint);cursor:pointer;border:2px solid var(--bg2);
     }
     input[type="range"]::-moz-range-thumb{
-      width:16px;height:16px;border-radius:50%;
+      width:20px;height:20px;border-radius:50%;
       background:var(--mint);cursor:pointer;border:2px solid var(--bg2);
     }
 
@@ -705,7 +849,6 @@
             <h3>Upload Image</h3>
             <div class="upload-area">
               <input type="file" id="uploadFile" accept="image/*" />
-              <div id="uploadPreview" class="preview-box">No image selected</div>
               <button id="btnClearUpload" class="btn btn-quiet" style="justify-self:start">Clear</button>
             </div>
 
@@ -903,12 +1046,6 @@
             </div>
           </section>
 
-
-          <section class="card">
-            <h3>Uploaded Image</h3>
-            <div id="uploadedImageDisplay" class="preview-box">No image uploaded yet</div>
-          </section>
-
           <section class="card">
             <h3>Construction Sequence</h3>
             <div id="stepsList" class="steps-list"></div>
@@ -922,1229 +1059,1226 @@
       </aside>
     </main>
   </div>
-
   <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    // ...existing code...
-    const el = (id) => document.getElementById(id);
+  import * as THREE from "three";
+  import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-    const API_BASE =
-      window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
-        ? "http://127.0.0.1:5000"
-        : window.location.origin;
+  const el = (id) => document.getElementById(id);
 
-    const XYZ_API = `${API_BASE}/api/xyz/v1`;
+  const API_BASE =
+    window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+      ? "http://127.0.0.1:5000"
+      : window.location.origin;
 
-    const state = {
-      latestJobId: "",
-      latestJob: null,
-      latestResult: null,
-      backendConnected: false,
-      steps: [],
-      playTimer: null,
-      activeTool: "pushpull",
-      width: 1.20,
-      height: 1.05,
-      depth: 0.35,
-      scale: 1.00,
-      thickness: 0.20,
-      orientation: "front",
-      builtHeight: 0,
-      builtLayers: 0,
-      showGrid: true,
-      showAxis: true,
-      showWire: false,
-      snap: false,
-      uploadedImageUrl: null,
-      uploadedPreviewObjectUrl: null,
-      // === Playback state machine ===
-      // "idle" | "ready" | "playing" | "paused" | "completed"
-      playbackState: "idle",
-      totalSteps: 0,
-      totalLayers: 0,
-      currentStep: 0,
-      currentPhase: 0,
-      currentLayer: 0,
-      constructionProgress: 0
+  const XYZ_API = `${API_BASE}/api/xyz/v1`;
+
+  const state = {
+    latestJobId: "",
+    latestJob: null,
+    latestResult: null,
+    backendConnected: false,
+
+    steps: [],
+    playTimer: null,
+    playbackState: "idle", // idle | ready | playing | paused | completed
+    totalSteps: 0,
+    totalLayers: 0,
+    currentStep: 0,
+    currentLayer: 0,
+    currentPhase: 0,
+
+    width: 1.2,
+    height: 1.05,
+    depth: 0.35,
+    scale: 1.0,
+    thickness: 0.2,
+    orientation: "front",
+
+    builtHeight: 0,
+    builtLayers: 0,
+    constructionProgress: 0,
+
+    activeTool: "pushpull",
+    showGrid: true,
+    showAxis: true,
+    showWire: false,
+    snap: false,
+
+    uploadedImageUrl: null,
+    uploadedPreviewObjectUrl: null,
+
+    scaffoldSpin: 0,
+    chamberTime: 0,
+    needsRender: true
+  };
+
+  function requestRender() {
+    state.needsRender = true;
+  }
+
+  function pretty(value) {
+    return Number(value || 0).toFixed(2);
+  }
+
+  function addLog(message, accent = "") {
+    const logNode = el("activityLog");
+    if (!logNode) return;
+    const entry = document.createElement("div");
+    entry.className = "log-entry";
+    const stamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const prefix = accent ? `<strong>${accent}</strong><br>` : "";
+    entry.innerHTML = `${prefix}[${stamp}] ${message}`;
+    logNode.prepend(entry);
+  }
+
+  function setStatus(kind, message) {
+    const badge = el("statusBadge");
+    const map = {
+      idle: "is-idle",
+      loading: "is-loading",
+      success: "is-success",
+      fail: "is-fail",
+      offline: "is-offline"
+    };
+    if (badge) {
+      badge.className = `status-badge ${map[kind] || "is-idle"}`;
+      badge.textContent = kind === "offline"
+        ? "Offline"
+        : kind.charAt(0).toUpperCase() + kind.slice(1);
+    }
+    if (el("statusMessage")) el("statusMessage").textContent = message;
+  }
+
+  function setConnection(connected, message = "") {
+    state.backendConnected = connected;
+    if (el("connectionState")) el("connectionState").textContent = connected ? "Connected" : "Offline";
+    if (message) addLog(message, "Runtime");
+  }
+
+  function setPlaybackState(next) {
+    state.playbackState = next;
+    const labelMap = {
+      idle: "Idle",
+      ready: "Ready",
+      playing: "Building",
+      paused: "Paused",
+      completed: "Complete"
+    };
+    if (el("previewState")) el("previewState").textContent = labelMap[next] || "Idle";
+  }
+
+  function updateDimensionsUI() {
+    if (el("dimensionWidth")) el("dimensionWidth").textContent = pretty(state.width);
+    if (el("dimensionHeight")) el("dimensionHeight").textContent = pretty(state.height);
+    if (el("dimensionDepth")) el("dimensionDepth").textContent = pretty(state.depth);
+    if (el("layerDisplay")) el("layerDisplay").textContent = String(state.currentLayer);
+    if (el("snapState")) el("snapState").textContent = state.snap ? "On" : "Off";
+    if (el("currentStepDisplay")) el("currentStepDisplay").textContent = String(state.currentStep);
+    if (el("stepCount")) el("stepCount").textContent = String(state.totalSteps || state.steps.length || 0);
+
+    const label = el("layerDisplay")?.previousElementSibling;
+    if (label) label.textContent = "Current Layer";
+  }
+
+  function applySummary(summary = {}) {
+    state.totalSteps = Number(summary.total_steps ?? state.steps.length ?? 0);
+    state.totalLayers = Number(summary.total_layers ?? 0);
+
+    if (el("summaryTotalSteps")) el("summaryTotalSteps").textContent = String(state.totalSteps);
+    if (el("summaryMoveSteps")) el("summaryMoveSteps").textContent = String(Number(summary.move_steps ?? 0));
+    if (el("summaryDepositSteps")) el("summaryDepositSteps").textContent = String(Number(summary.deposit_steps ?? 0));
+    if (el("summaryTotalLayers")) el("summaryTotalLayers").textContent = String(state.totalLayers);
+  }
+
+  function clearUploadDisplays() {
+    // preview boxes removed — no-op
+  }
+
+  function revokePreviewObjectUrl() {
+    if (state.uploadedPreviewObjectUrl) {
+      URL.revokeObjectURL(state.uploadedPreviewObjectUrl);
+      state.uploadedPreviewObjectUrl = null;
+    }
+  }
+
+  function displayUploadedImage(url) {
+    // preview boxes removed — no-op
+  }
+
+  function displayLocalPreview(file) {
+    if (!file) {
+      state.uploadedImageUrl = null;
+      revokePreviewObjectUrl();
+      return;
+    }
+    revokePreviewObjectUrl();
+    const objectUrl = URL.createObjectURL(file);
+    state.uploadedPreviewObjectUrl = objectUrl;
+    state.uploadedImageUrl = objectUrl;
+    addLog(`Image ready: ${file.name}`, "Upload");
+  }
+
+  async function fetchJson(path, options = {}) {
+    const res = await fetch(path, options);
+    let payload = {};
+    try {
+      payload = await res.json();
+    } catch (_) {
+      throw new Error(`Expected JSON response from ${path}`);
+    }
+    if (!res.ok || payload.ok === false) {
+      throw new Error(payload?.error?.message || payload?.error || payload?.message || `Request failed with ${res.status}`);
+    }
+    return payload;
+  }
+
+  async function healthCheck() {
+    setStatus("loading", "Checking XYZ builder health...");
+    try {
+      const data = await fetchJson(`${XYZ_API}/health`);
+      setConnection(true, "XYZ builder health check passed.");
+      setStatus("success", data.message || "XYZ builder healthy.");
+      return data;
+    } catch (error) {
+      setConnection(false, "XYZ builder health check failed.");
+      setStatus("offline", error.message || "XYZ builder unavailable.");
+      throw error;
+    }
+  }
+
+  function readNum(id, fallback) {
+    const node = el(id);
+    const value = Number(node?.value);
+    return Number.isFinite(value) ? value : fallback;
+  }
+
+  function syncPair(rangeId, inputId, fallback) {
+    const range = el(rangeId);
+    const input = el(inputId);
+    if (!range || !input) return;
+
+    const apply = (value) => {
+      let num = Number(value);
+      if (!Number.isFinite(num)) num = fallback;
+      range.value = String(num);
+      input.value = String(num);
+
+      if (inputId === "widthInput") state.width = num;
+      if (inputId === "heightInput") state.height = num;
+      if (inputId === "depthInput") state.depth = num;
+      if (inputId === "scaleInput") state.scale = num;
+      if (inputId === "thicknessInput") state.thickness = num;
+
+      updateDimensionsUI();
+      updateFabricationSizing();
+      requestRender();
     };
 
-    /* === PREVIEW-ONLY UPLOAD STATE (no persistence after refresh) === */
+    range.addEventListener("input", () => apply(range.value));
+    input.addEventListener("input", () => apply(input.value));
+  }
 
-    function clearUploadDisplays() {
-      const uploadPreview = el("uploadPreview");
-      const uploadedImageDisplay = el("uploadedImageDisplay");
+  function buildInputData() {
+    let width = readNum("widthInput", 1.2);
+    let height = readNum("heightInput", 1.05);
+    let depth = readNum("depthInput", 0.35);
 
-      if (uploadPreview) {
-        uploadPreview.innerHTML = "No image selected";
+    if (state.snap) {
+      width = Math.round(width * 10) / 10;
+      height = Math.round(height * 10) / 10;
+      depth = Math.round(depth * 10) / 10;
+    }
+
+    state.width = width;
+    state.height = height;
+    state.depth = depth;
+    state.scale = readNum("scaleInput", 1.0);
+    state.thickness = readNum("thicknessInput", 0.2);
+    state.orientation = el("orientationSelect")?.value || "front";
+
+    updateDimensionsUI();
+
+    return {
+      build_mode: el("buildMode")?.value || "xyz_construct",
+      template: el("template")?.value || "box_block",
+      dimensions: { width, height, depth },
+      material: el("material")?.value || "default_shell",
+      layer_height: readNum("layerHeight", 0.05),
+      path_strategy: el("pathStrategy")?.value || "layer_fill",
+      origin: {
+        x: readNum("originX", 0),
+        y: readNum("originY", 0),
+        z: readNum("originZ", 0)
       }
+    };
+  }
 
-      if (uploadedImageDisplay) {
-        uploadedImageDisplay.innerHTML = "No image uploaded yet";
+  async function previewBuild(input_data) {
+    const payload = {
+      company: "5xLiving",
+      project: "Workstation",
+      module: "3DModelMaker",
+      action: "preview",
+      input_data,
+      requested_by: "local-user"
+    };
+
+    return fetchJson(`${XYZ_API}/jobs/preview`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async function getJob(jobId) {
+    return fetchJson(`${XYZ_API}/jobs/${jobId}`);
+  }
+
+  function renderStepsList() {
+    const list = el("stepsList");
+    if (!list) return;
+    list.innerHTML = "";
+
+    if (!state.steps.length) {
+      list.innerHTML = `<div class="step-entry"><strong>No steps</strong><br>Run Preview Build to load construction sequence.</div>`;
+      return;
+    }
+
+    const activeIdx = Math.max(0, state.currentStep - 1);
+    state.steps.forEach((step, idx) => {
+      const node = document.createElement("div");
+      node.className = `step-entry ${idx === activeIdx ? "active" : ""}`;
+      const pos = step.position || {};
+      node.innerHTML = `
+        <strong>Step ${step.step_index} · ${step.kind}</strong><br>
+        Layer: ${step.layer_index || 0}<br>
+        X: ${Number(pos.x || 0).toFixed(2)} |
+        Y: ${Number(pos.y || 0).toFixed(2)} |
+        Z: ${Number(pos.z || 0).toFixed(2)}
+      `;
+      list.appendChild(node);
+    });
+  }
+
+  function setActiveTool(tool, label, hint) {
+    state.activeTool = tool;
+    if (el("activeToolLabel")) el("activeToolLabel").textContent = label;
+    if (el("modeGuidance")) el("modeGuidance").textContent = hint;
+
+    document.querySelectorAll(".tool-chip, .tool-chip-sm").forEach((node) => node.classList.remove("active"));
+    if (tool === "pushpull") el("toolPushPull")?.classList.add("active");
+    if (tool === "cut") el("toolCut")?.classList.add("active");
+    if (tool === "pencil") el("toolPencil")?.classList.add("active");
+    if (tool === "arc") el("toolArc")?.classList.add("active");
+
+    addLog(`Modular tool changed to ${label}.`, "Tool");
+  }
+
+  // =========================
+  // THREE.JS SCENE
+  // =========================
+  const canvas = el("viewportCanvas");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.localClippingEnabled = true;
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x08111f, 0.028);
+
+  const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
+  camera.position.set(4.2, 4.8, 6.8);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.09;
+  controls.minDistance = 3;
+  controls.maxDistance = 16;
+  controls.maxPolarAngle = Math.PI * 0.86;
+  controls.target.set(0, 1.0, 0);
+
+  renderer.domElement.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
+
+  const ambient = new THREE.AmbientLight(0xb8cbff, 0.52);
+  scene.add(ambient);
+
+  const key = new THREE.DirectionalLight(0xffffff, 1.0);
+  key.position.set(4, 8, 5);
+  scene.add(key);
+
+  const rim = new THREE.DirectionalLight(0x6eeaff, 0.65);
+  rim.position.set(-6, 4, -5);
+  scene.add(rim);
+
+  const underGlow = new THREE.PointLight(0x94f3de, 0.45, 12);
+  underGlow.position.set(0, 0.35, 0);
+  scene.add(underGlow);
+
+  const grid = new THREE.GridHelper(40, 40, 0x1a3352, 0x0c1a2e);
+  grid.material.opacity = 0.25;
+  grid.material.transparent = true;
+  scene.add(grid);
+
+  const axesHelper = new THREE.AxesHelper(1.5);
+  axesHelper.position.set(0, 0.02, 0);
+  scene.add(axesHelper);
+
+  const floor = new THREE.Mesh(
+    new THREE.CircleGeometry(6, 64),
+    new THREE.MeshStandardMaterial({ color: 0x080e1a, transparent: true, opacity: 0.92 })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = 0.01;
+  scene.add(floor);
+
+  const chamberPlatform = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.0, 2.15, 0.10, 64),
+    new THREE.MeshStandardMaterial({ color: 0x0d1e36, metalness: 0.85, roughness: 0.2, transparent: true, opacity: 0.97 })
+  );
+  chamberPlatform.position.set(0, 0.06, 0);
+  scene.add(chamberPlatform);
+
+  const chamberRings = [];
+  [0.6, 1.1, 1.6, 2.05].forEach((r, i) => {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(r, 0.018, 8, 120),
+      new THREE.MeshBasicMaterial({
+        color: i < 2 ? 0x94f3de : 0x5ac8ff,
+        transparent: true,
+        opacity: 0.24 + (i % 2) * 0.12
+      })
+    );
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = 0.12;
+    scene.add(ring);
+    chamberRings.push(ring);
+  });
+
+  // Emitters
+  const emitterGroup = new THREE.Group();
+  scene.add(emitterGroup);
+
+  const emitterHeight = 3.8;
+  const emitterRadius = 2.45;
+  const emitterTips = [];
+  const emitterColors = [0x94f3de, 0x7abaff, 0xc9a0ff];
+
+  for (let i = 0; i < 3; i++) {
+    const angle = (i * Math.PI * 2) / 3 - Math.PI / 2;
+    const x = Math.cos(angle) * emitterRadius;
+    const z = Math.sin(angle) * emitterRadius;
+
+    const shaft = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.035, 0.055, emitterHeight, 12),
+      new THREE.MeshStandardMaterial({ color: 0x1a3050, metalness: 0.9, roughness: 0.15 })
+    );
+    shaft.position.set(x, emitterHeight / 2, z);
+    emitterGroup.add(shaft);
+
+    const strip = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.012, emitterHeight * 0.85, 8),
+      new THREE.MeshBasicMaterial({ color: emitterColors[i], transparent: true, opacity: 0.28 })
+    );
+    strip.position.set(x, emitterHeight * 0.48, z);
+    emitterGroup.add(strip);
+
+    const tip = new THREE.Mesh(
+      new THREE.SphereGeometry(0.10, 20, 20),
+      new THREE.MeshBasicMaterial({ color: emitterColors[i], transparent: true, opacity: 0.92 })
+    );
+    tip.position.set(x, emitterHeight, z);
+    emitterGroup.add(tip);
+    emitterTips.push(tip);
+
+    const baseRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.12, 0.012, 8, 32),
+      new THREE.MeshBasicMaterial({ color: emitterColors[i], transparent: true, opacity: 0.42 })
+    );
+    baseRing.rotation.x = Math.PI / 2;
+    baseRing.position.set(x, 0.12, z);
+    emitterGroup.add(baseRing);
+  }
+
+  // Beams
+  const beamLines = [];
+  for (let i = 0; i < 3; i++) {
+    const pts = [emitterTips[i].position.clone(), new THREE.Vector3(0, 0.8, 0)];
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color: emitterColors[i], transparent: true, opacity: 0.58 });
+    const beam = new THREE.Line(geo, mat);
+    scene.add(beam);
+    beamLines.push(beam);
+  }
+
+  function updateBeamTargets(target) {
+    beamLines.forEach((beam, idx) => {
+      const pos = beam.geometry.attributes.position.array;
+      pos[0] = emitterTips[idx].position.x;
+      pos[1] = emitterTips[idx].position.y;
+      pos[2] = emitterTips[idx].position.z;
+      pos[3] = target.x;
+      pos[4] = target.y;
+      pos[5] = target.z;
+      beam.geometry.attributes.position.needsUpdate = true;
+    });
+    requestRender();
+  }
+
+  // Preview/build groups
+  const previewGroup = new THREE.Group();
+  scene.add(previewGroup);
+
+  const pathGroup = new THREE.Group();
+  previewGroup.add(pathGroup);
+
+  const fabricationGroup = new THREE.Group();
+  previewGroup.add(fabricationGroup);
+
+  const scaffoldGroup = new THREE.Group();
+  fabricationGroup.add(scaffoldGroup);
+
+  const skinGroup = new THREE.Group();
+  fabricationGroup.add(skinGroup);
+
+  // Focal head
+  const toolhead = new THREE.Mesh(
+    new THREE.SphereGeometry(0.09, 24, 24),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.88 })
+  );
+  const halo = new THREE.Mesh(
+    new THREE.SphereGeometry(0.22, 24, 24),
+    new THREE.MeshBasicMaterial({ color: 0x94f3de, transparent: true, opacity: 0.12 })
+  );
+  toolhead.add(halo);
+  previewGroup.add(toolhead);
+
+  // Rising ring — main surface former
+  const skinRingGeo = new THREE.TorusGeometry(1.2, 0.05, 20, 120);
+  const skinRing = new THREE.Mesh(
+    skinRingGeo,
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 })
+  );
+  skinRing.rotation.x = Math.PI / 2;
+  skinRing.position.y = 0.15;
+  skinRing.visible = false;
+  scene.add(skinRing);
+
+  // Inner bright halo
+  const skinHalo = new THREE.Mesh(
+    new THREE.TorusGeometry(1.2, 0.16, 12, 80),
+    new THREE.MeshBasicMaterial({ color: 0x94f3de, transparent: true, opacity: 0.22 })
+  );
+  skinHalo.rotation.x = Math.PI / 2;
+  skinRing.add(skinHalo);
+
+  // Outer energy flare
+  const skinFlare = new THREE.Mesh(
+    new THREE.TorusGeometry(1.2, 0.32, 8, 64),
+    new THREE.MeshBasicMaterial({ color: 0x5ac8ff, transparent: true, opacity: 0.08 })
+  );
+  skinFlare.rotation.x = Math.PI / 2;
+  skinRing.add(skinFlare);
+
+  // Trailing wake ring (slightly below main ring)
+  const wakeRing = new THREE.Mesh(
+    new THREE.TorusGeometry(1.2, 0.025, 12, 80),
+    new THREE.MeshBasicMaterial({ color: 0x94f3de, transparent: true, opacity: 0.35 })
+  );
+  wakeRing.rotation.x = Math.PI / 2;
+  wakeRing.position.y = 0.15;
+  wakeRing.visible = false;
+  scene.add(wakeRing);
+
+  // Chamber particles
+  const particleCount = 180;
+  const particleGeo = new THREE.BufferGeometry();
+  const positions = new Float32Array(particleCount * 3);
+  const speeds = new Float32Array(particleCount);
+  for (let i = 0; i < particleCount; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const r = 0.4 + Math.random() * 2.8;
+    positions[i * 3] = Math.cos(a) * r;
+    positions[i * 3 + 1] = Math.random() * emitterHeight;
+    positions[i * 3 + 2] = Math.sin(a) * r;
+    speeds[i] = 0.001 + Math.random() * 0.006;
+  }
+  particleGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  const chamberParticles = new THREE.Points(
+    particleGeo,
+    new THREE.PointsMaterial({ color: 0x94f3de, size: 0.025, transparent: true, opacity: 0.42, sizeAttenuation: true })
+  );
+  scene.add(chamberParticles);
+
+  function resize() {
+    const w = canvas.clientWidth || canvas.parentElement.clientWidth || 800;
+    const h = canvas.clientHeight || canvas.parentElement.clientHeight || 500;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    requestRender();
+  }
+
+  function fitView() {
+    controls.target.set(0, Math.max(1.0, state.height * 0.52), 0);
+    camera.position.set(4.2, Math.max(4.2, state.height * 2.6), 6.8);
+    controls.update();
+    requestRender();
+  }
+
+  function resetToolhead() {
+    toolhead.position.set(0, 0.82, 0);
+    updateBeamTargets(toolhead.position);
+  }
+
+  function disposeGroup(group) {
+    while (group.children.length) {
+      const child = group.children.pop();
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) {
+        if (Array.isArray(child.material)) child.material.forEach((m) => m.dispose());
+        else child.material.dispose();
       }
     }
+  }
 
-    function revokePreviewObjectUrl() {
-      if (state.uploadedPreviewObjectUrl) {
-        URL.revokeObjectURL(state.uploadedPreviewObjectUrl);
-        state.uploadedPreviewObjectUrl = null;
-      }
+  function chooseGeometry(template, w, h, d) {
+    if (template === "cylinder_block") {
+      return new THREE.CylinderGeometry(w / 2, w / 2, h, 48, 1, false);
     }
+    return new THREE.BoxGeometry(w, h, d);
+  }
 
-    function displayUploadedImage(url) {
-      const uploadedImageDisplay = el("uploadedImageDisplay");
-      if (uploadedImageDisplay) {
-        uploadedImageDisplay.innerHTML = `<img src="${url}" alt="Uploaded preview" style="max-width:100%;max-height:200px;object-fit:contain;">`;
-      }
-    }
+  let scaffoldWire = null;
+  let scaffoldEnergy = null;
+  let skinMesh = null;
+  let clipPlane = null;
 
-    function displayLocalPreview(file) {
-      if (!file) {
-        clearUploadDisplays();
-        state.uploadedImageUrl = null;
-        revokePreviewObjectUrl();
-        return;
-      }
+  function clearConstructionObject() {
+    disposeGroup(scaffoldGroup);
+    disposeGroup(skinGroup);
+    scaffoldWire = null;
+    scaffoldEnergy = null;
+    skinMesh = null;
+    clipPlane = null;
+    state.constructionProgress = 0;
+    state.scaffoldSpin = 0;
+    requestRender();
+  }
 
-      revokePreviewObjectUrl();
+  function updateFabricationSizing() {
+    const radius = Math.max(state.width, state.depth) * 0.55 + 0.05;
+    skinRing.scale.set(radius, radius, 1);
+    wakeRing.scale.set(radius * 0.98, radius * 0.98, 1);
+    requestRender();
+  }
 
-      const objectUrl = URL.createObjectURL(file);
-      state.uploadedPreviewObjectUrl = objectUrl;
-      state.uploadedImageUrl = objectUrl;
+  function spawnConstructionObject() {
+    clearConstructionObject();
 
-      const uploadPreview = el("uploadPreview");
-      if (uploadPreview) {
-        uploadPreview.innerHTML = `<img src="${objectUrl}" alt="Local preview" style="max-width:100%;max-height:180px;object-fit:contain;">`;
-      }
+    const w = state.width;
+    const h = state.height;
+    const d = state.depth;
+    const tmpl = el("template")?.value || "box_block";
+    const objY = 0.15 + h / 2;
 
-      displayUploadedImage(objectUrl);
-    }
+    const scaffoldGeo = chooseGeometry(tmpl, w, h, d);
 
-    function addLog(message, accent = "") {
-      const logNode = el("activityLog");
-      const entry = document.createElement("div");
-      entry.className = "log-entry";
-      const stamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const prefix = accent ? `<strong>${accent}</strong><br>` : "";
-      entry.innerHTML = `${prefix}[${stamp}] ${message}`;
-      logNode.prepend(entry);
-    }
-
-    function setStatus(stateName, message) {
-      const badge = el("statusBadge");
-      const map = {
-        idle: "is-idle",
-        loading: "is-loading",
-        success: "is-success",
-        fail: "is-fail",
-        offline: "is-offline"
-      };
-      badge.className = `status-badge ${map[stateName] || "is-idle"}`;
-      badge.textContent = stateName === "offline"
-        ? "Offline"
-        : stateName.charAt(0).toUpperCase() + stateName.slice(1);
-      el("statusMessage").textContent = message;
-    }
-
-    function setConnection(connected, text) {
-      state.backendConnected = connected;
-      el("connectionState").textContent = connected ? "Connected" : "Offline";
-      if (text) addLog(text, "Runtime");
-    }
-
-    function hasLoadedSteps() {
-      return Array.isArray(state.steps) && state.steps.length > 0;
-    }
-
-    function setPlaybackState(nextState) {
-      state.playbackState = nextState;
-      const previewMap = {
-        idle: "Idle",
-        ready: "Ready",
-        playing: "Building",
-        paused: "Paused",
-        completed: "Complete"
-      };
-      el("previewState").textContent = previewMap[nextState] || "Idle";
-    }
-
-    function relabelPlaybackUi() {
-      const layerLabel = el("layerDisplay")?.previousElementSibling;
-      if (layerLabel) layerLabel.textContent = "Current Layer";
-    }
-
-    function updateDimensionsUI() {
-      el("dimensionWidth").textContent = state.width.toFixed(2);
-      el("dimensionHeight").textContent = state.height.toFixed(2);
-      el("dimensionDepth").textContent = state.depth.toFixed(2);
-      el("layerDisplay").textContent = String(state.currentLayer);
-      el("snapState").textContent = state.snap ? "On" : "Off";
-      el("currentStepDisplay").textContent = String(state.currentStep);
-      el("stepCount").textContent = String(state.totalSteps || state.steps.length || 0);
-    }
-
-    async function fetchJson(path, options = {}) {
-      const response = await fetch(path, options);
-      let payload;
-      try {
-        payload = await response.json();
-      } catch (_) {
-        throw new Error(`Expected JSON response from ${path}`);
-      }
-      if (!response.ok || payload.ok === false) {
-        const message = payload?.error?.message || `Request failed with ${response.status}`;
-        throw new Error(message);
-      }
-      return payload;
-    }
-
-    async function healthCheck() {
-      setStatus("loading", "Checking XYZ builder health...");
-      try {
-        const data = await fetchJson(`${XYZ_API}/health`);
-        setConnection(true, "XYZ builder health check passed.");
-        setStatus("success", data.status || "XYZ builder healthy.");
-        return data;
-      } catch (error) {
-        setConnection(false, "XYZ builder health check failed.");
-        setStatus("offline", error.message || "XYZ builder unavailable.");
-        throw error;
-      }
-    }
-
-    function buildInputData() {
-      const read = (id, fallback) => {
-        const value = Number(el(id).value);
-        return Number.isFinite(value) ? value : fallback;
-      };
-
-      let width = read("widthInput", 1.2);
-      let height = read("heightInput", 1.05);
-      let depth = read("depthInput", 0.35);
-
-      if (state.activeTool === "pushpull") {
-        depth = Math.max(0.10, depth);
-      }
-
-      if (state.snap) {
-        width = Math.round(width * 10) / 10;
-        height = Math.round(height * 10) / 10;
-        depth = Math.round(depth * 10) / 10;
-      }
-
-      state.width = width;
-      state.height = height;
-      state.depth = depth;
-      updateDimensionsUI();
-
-      return {
-        build_mode: el("buildMode").value,
-        template: el("template").value,
-        dimensions: {
-          width,
-          height,
-          depth
-        },
-        material: el("material").value || "default_shell",
-        layer_height: read("layerHeight", 0.05),
-        path_strategy: el("pathStrategy").value,
-        origin: {
-          x: read("originX", 0),
-          y: read("originY", 0),
-          z: read("originZ", 0)
-        }
-      };
-    }
-
-    async function previewBuild(input_data) {
-      const payload = {
-        company: "5xLiving",
-        project: "Workstation",
-        module: "3DModelMaker",
-        action: "preview",
-        input_data,
-        requested_by: "local-user"
-      };
-
-      return fetchJson(`${XYZ_API}/jobs/preview`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-    }
-
-    async function getJob(jobId) {
-      return fetchJson(`${XYZ_API}/jobs/${jobId}`);
-    }
-
-    function renderStepsList() {
-      const list = el("stepsList");
-      list.innerHTML = "";
-
-      if (!state.steps.length) {
-        list.innerHTML = `<div class="step-entry"><strong>No steps</strong><br>Run Preview Build to load construction sequence.</div>`;
-        return;
-      }
-
-      const activeIdx = state.currentStep - 1; // currentStep is 1-indexed after advance
-      state.steps.forEach((step, index) => {
-        const node = document.createElement("div");
-        node.className = `step-entry ${index === activeIdx ? "active" : ""}`;
-        const pos = step.position || {};
-        node.innerHTML = `
-          <strong>Step ${step.step_index} · ${step.kind}</strong><br>
-          Layer: ${step.layer_index || 0}<br>
-          X: ${Number(pos.x || 0).toFixed(2)} |
-          Y: ${Number(pos.y || 0).toFixed(2)} |
-          Z: ${Number(pos.z || 0).toFixed(2)}
-        `;
-        list.appendChild(node);
-      });
-    }
-
-    function applyPathSummary(summary) {
-      state.totalSteps = Number(summary?.total_steps ?? state.steps.length ?? 0);
-      state.totalLayers = Number(summary?.total_layers ?? 0);
-      el("summaryTotalSteps").textContent = state.totalSteps;
-      el("summaryMoveSteps").textContent = Number(summary?.move_steps ?? 0);
-      el("summaryDepositSteps").textContent = Number(summary?.deposit_steps ?? 0);
-      el("summaryTotalLayers").textContent = state.totalLayers;
-    }
-
-    function clearConstructionObject() {
-      while (depositedGroup.children.length) {
-        const child = depositedGroup.children.pop();
-        if (child.geometry) child.geometry.dispose();
-        if (child.material) {
-          if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
-          else child.material.dispose();
-        }
-      }
-      depositedGroup.rotation.y = 0;
-      state.constructionProgress = 0;
-    }
-
-    function resetToolhead() {
-      toolhead.position.set(0, 0.5, 0);
-      updateBeamTargets(toolhead.position);
-    }
-
-    function renderFullPathLines() {
-      while (pathGroup.children.length) {
-        const child = pathGroup.children.pop();
-        if (child.geometry) child.geometry.dispose();
-        if (child.material) child.material.dispose();
-      }
-
-      if (!state.steps.length) return;
-
-      const points = [];
-      state.steps.forEach((step) => {
-        const p = step.position || {};
-        points.push(new THREE.Vector3(
-          Number(p.x || 0),
-          Number(p.z || 0) + 0.15,
-          Number(p.y || 0)
-        ));
-      });
-
-      if (points.length >= 2) {
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        const material = new THREE.LineBasicMaterial({ color: 0x7af0ff, transparent: true, opacity: 0.45 });
-        const line = new THREE.Line(geometry, material);
-        pathGroup.add(line);
-      }
-    }
-
-    function chooseGeometry(template, w, h, d) {
-      if (template === 'cylinder_block') {
-        return new THREE.CylinderGeometry(w / 2, w / 2, h, 36);
-      }
-      return new THREE.BoxGeometry(w, h, d);
-    }
-
-    function spawnConstructionObject() {
-      clearConstructionObject();
-
-      const w = state.width;
-      const h = state.height;
-      const d = state.depth;
-      const tmpl = el('template').value;
-      const objY = 0.15 + h / 2;
-
-      // Wireframe scaffold (visible immediately as blueprint)
-      const wireGeo = chooseGeometry(tmpl, w, h, d);
-      const wireMat = new THREE.MeshBasicMaterial({
+    // Primary wireframe scaffold — visible structure lattice
+    scaffoldWire = new THREE.Mesh(
+      scaffoldGeo,
+      new THREE.MeshBasicMaterial({
         color: 0x94f3de,
         wireframe: true,
         transparent: true,
-        opacity: 0.35
-      });
-      const wireMesh = new THREE.Mesh(wireGeo, wireMat);
-      wireMesh.position.y = objY;
-      wireMesh.userData.role = 'scaffold';
-      depositedGroup.add(wireMesh);
+        opacity: 0.52
+      })
+    );
+    scaffoldWire.position.y = objY;
+    scaffoldWire.userData.role = "scaffoldWire";
+    scaffoldGroup.add(scaffoldWire);
 
-      // Solid surface (clipped — starts fully hidden below platform)
-      const solidGeo = chooseGeometry(tmpl, w * 0.998, h * 0.998, d * 0.998);
-      const clipPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.15);
-      const solidMat = new THREE.MeshStandardMaterial({
+    // Secondary energy lattice — counter-rotating inner glow
+    scaffoldEnergy = new THREE.Mesh(
+      chooseGeometry(tmpl, w * 1.008, h * 1.008, d * 1.008),
+      new THREE.MeshBasicMaterial({
+        color: 0x7af0ff,
+        transparent: true,
+        opacity: 0.08,
+        wireframe: true
+      })
+    );
+    scaffoldEnergy.position.y = objY;
+    scaffoldEnergy.userData.role = "scaffoldEnergy";
+    scaffoldGroup.add(scaffoldEnergy);
+
+    // Tertiary outline edges — structural edge glow
+    const edgeGeo = new THREE.EdgesGeometry(chooseGeometry(tmpl, w * 0.999, h * 0.999, d * 0.999));
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0xb8fff0, transparent: true, opacity: 0.28 });
+    const edgeLine = new THREE.LineSegments(edgeGeo, edgeMat);
+    edgeLine.position.y = objY;
+    edgeLine.userData.role = "scaffoldEdge";
+    scaffoldGroup.add(edgeLine);
+
+    clipPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.15);
+
+    skinMesh = new THREE.Mesh(
+      chooseGeometry(tmpl, w * 0.998, h * 0.998, d * 0.998),
+      new THREE.MeshStandardMaterial({
         color: 0x94f3de,
         emissive: 0x2a8a7a,
-        emissiveIntensity: 0.3,
-        roughness: 0.18,
-        metalness: 0.55,
+        emissiveIntensity: 0.45,
+        roughness: 0.14,
+        metalness: 0.62,
         transparent: true,
-        opacity: 0.88,
+        opacity: 0.02,
         clippingPlanes: [clipPlane],
         clipShadows: true
-      });
-      const solidMesh = new THREE.Mesh(solidGeo, solidMat);
-      solidMesh.position.y = objY;
-      solidMesh.userData.role = 'solid';
-      solidMesh.userData.clipPlane = clipPlane;
-      depositedGroup.add(solidMesh);
+      })
+    );
+    skinMesh.position.y = objY;
+    skinMesh.userData.role = "skin";
+    skinGroup.add(skinMesh);
 
-      // DO NOT set constructing/playing here — that is Play's job
-      state.constructionProgress = 0;
-      renderer.localClippingEnabled = true;
+    skinRing.visible = false;
+    skinRing.position.y = 0.15;
+    wakeRing.visible = false;
+    wakeRing.position.y = 0.15;
+
+    updateFabricationSizing();
+    requestRender();
+  }
+
+  function applyGeometryState(geometryState) {
+    if (!geometryState?.dimensions) return;
+    state.width = Number(geometryState.dimensions.width || state.width);
+    state.height = Number(geometryState.dimensions.height || state.height);
+    state.depth = Number(geometryState.dimensions.depth || state.depth);
+
+    if (el("widthInput")) el("widthInput").value = String(state.width);
+    if (el("heightInput")) el("heightInput").value = String(state.height);
+    if (el("depthInput")) el("depthInput").value = String(state.depth);
+    if (el("widthRange")) el("widthRange").value = String(state.width);
+    if (el("heightRange")) el("heightRange").value = String(state.height);
+    if (el("depthRange")) el("depthRange").value = String(state.depth);
+
+    updateDimensionsUI();
+  }
+
+  function renderFullPathLines() {
+    disposeGroup(pathGroup);
+    if (!state.steps.length) return;
+
+    const points = state.steps.map((step) => {
+      const p = step.position || {};
+      return new THREE.Vector3(
+        Number(p.x || 0),
+        Number(p.z || 0) + 0.18,
+        Number(p.y || 0)
+      );
+    });
+
+    if (points.length >= 2) {
+      const line = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(points),
+        new THREE.LineBasicMaterial({
+          color: 0x7af0ff,
+          transparent: true,
+          opacity: 0.36
+        })
+      );
+      pathGroup.add(line);
+    }
+    requestRender();
+  }
+
+  function applyVisualProgress(progress) {
+    progress = THREE.MathUtils.clamp(progress, 0, 1);
+    state.constructionProgress = progress;
+    state.builtHeight = state.height * progress;
+
+    const baseY = 0.15;
+    const ringY = baseY + state.height * progress;
+    const ringRadius = Math.max(state.width, state.depth) * 0.55 + 0.05;
+
+    // Main skin-forming ring
+    skinRing.visible = progress > 0.01 && progress < 0.995;
+    skinRing.position.y = ringY;
+    skinRing.scale.set(ringRadius, ringRadius, 1);
+    skinRing.material.opacity = 0.88;
+
+    // Trailing wake ring (follows slightly behind)
+    const wakeDelay = Math.max(0, progress - 0.04);
+    const wakeY = baseY + state.height * wakeDelay;
+    wakeRing.visible = progress > 0.05 && progress < 0.995;
+    wakeRing.position.y = wakeY;
+    wakeRing.scale.set(ringRadius * 0.98, ringRadius * 0.98, 1);
+    wakeRing.material.opacity = 0.25 + progress * 0.15;
+
+    if (clipPlane) {
+      clipPlane.constant = ringY;
     }
 
-    function applyGeometryState(geometryState) {
-      if (!geometryState) return;
-
-      if (geometryState.dimensions) {
-        state.width = Number(geometryState.dimensions.width || state.width);
-        state.height = Number(geometryState.dimensions.height || state.height);
-        state.depth = Number(geometryState.dimensions.depth || state.depth);
+    // Scaffold fades as skin forms
+    if (scaffoldWire?.material) {
+      scaffoldWire.material.opacity = 0.55 - progress * 0.45;
+    }
+    if (scaffoldEnergy?.material) {
+      scaffoldEnergy.material.opacity = 0.22 - progress * 0.18;
+    }
+    // Edge glow fades with scaffold
+    scaffoldGroup.children.forEach((child) => {
+      if (child.userData.role === "scaffoldEdge" && child.material) {
+        child.material.opacity = 0.28 - progress * 0.24;
       }
-      // Do NOT auto-populate builtHeight/builtLayers — those come from playback
-      updateDimensionsUI();
+    });
+
+    if (skinMesh?.material) {
+      const skinReveal = Math.max(0, (progress - 0.05) / 0.95);
+      skinMesh.material.opacity = 0.02 + skinReveal * 0.92;
+      skinMesh.material.emissiveIntensity = 0.8 - skinReveal * 0.65;
     }
 
-    /**
-     * applyJobResult — load backend data into state.
-     * DOES NOT start construction. Only populates data + shows scaffold blueprint.
-     */
-    function applyJobResult(data, modeLabel) {
-      stopPlayback();
+    const headY = 0.35 + state.height * progress;
+    toolhead.position.set(0, headY + 0.18, 0);
+    updateBeamTargets(toolhead.position);
 
-      const job = data?.job || null;
-      const result = data?.result || {};
+    requestRender();
+  }
 
-      state.latestJob = job;
-      state.latestResult = result;
-      state.latestJobId = job?.job_id || "";
-      state.steps = Array.isArray(result.steps) ? result.steps : [];
+  function completeConstructionVisual() {
+    if (skinMesh?.material) {
+      skinMesh.material.clippingPlanes = [];
+      skinMesh.material.opacity = 0.98;
+      skinMesh.material.emissiveIntensity = 0.06;
+      skinMesh.material.roughness = 0.10;
+      skinMesh.material.metalness = 0.72;
+      skinMesh.material.transparent = true;
+      skinMesh.material.needsUpdate = true;
+    }
+    if (scaffoldWire?.material) {
+      scaffoldWire.material.opacity = 0.04;
+    }
+    if (scaffoldEnergy?.material) {
+      scaffoldEnergy.material.opacity = 0.01;
+    }
+    scaffoldGroup.children.forEach((child) => {
+      if (child.userData.role === "scaffoldEdge" && child.material) {
+        child.material.opacity = 0.03;
+      }
+    });
+    skinRing.visible = false;
+    wakeRing.visible = false;
+    resetToolhead();
+    requestRender();
+  }
 
-      state.currentStep = 0;
-      state.currentPhase = 0;
-      state.currentLayer = 0;
-      state.builtHeight = 0;
-      state.builtLayers = 0;
-      state.constructionProgress = 0;
+  function applyJobResult(data, label) {
+    stopPlayback();
 
-      applyPathSummary(result.path_summary || {});
-      if (!state.totalSteps) state.totalSteps = state.steps.length;
-      setPlaybackState(hasLoadedSteps() ? "ready" : "idle");
+    const job = data?.job || null;
+    const result = data?.result || data || {};
 
-      el("latestJobId").textContent = state.latestJobId || "None";
-      el("jobState").textContent = job?.status || "None";
-      setStatus("success", result?.summary || `${modeLabel} loaded.`);
-      addLog(result?.summary || `${modeLabel} loaded — press Play to build.`, "Core CTR");
+    state.latestJob = job;
+    state.latestResult = result;
+    state.latestJobId = job?.job_id || data?.job_id || result?.job_id || "";
+    state.steps = Array.isArray(result.steps) ? result.steps : [];
+    state.currentStep = 0;
+    state.currentLayer = 0;
+    state.currentPhase = 0;
+    state.builtHeight = 0;
+    state.builtLayers = 0;
+    state.constructionProgress = 0;
+    state.scaffoldSpin = 0;
 
-      applyGeometryState(result.geometry_state || null);
-      renderStepsList();
+    applySummary(result.path_summary || {});
+    if (!state.totalSteps) state.totalSteps = state.steps.length;
+    setPlaybackState(state.steps.length ? "ready" : "idle");
 
+    if (el("latestJobId")) el("latestJobId").textContent = state.latestJobId || "None";
+    if (el("jobState")) el("jobState").textContent = job?.status || data?.status || "Loaded";
+
+    setStatus("success", result?.summary || `${label} loaded.`);
+    addLog(result?.summary || `${label} loaded — press Play to fabricate.`, "Fabrication");
+
+    applyGeometryState(result.geometry_state || null);
+    renderStepsList();
+    spawnConstructionObject();
+    renderFullPathLines();
+    applyVisualProgress(0);
+
+    if (el("selectionMessage")) {
+      el("selectionMessage").textContent = state.steps.length
+        ? "Scaffold acquired. Press Play to begin spatial fabrication."
+        : "Preview returned no construction steps.";
+    }
+
+    updateDimensionsUI();
+    fitView();
+    requestRender();
+  }
+
+  function hasLoadedSteps() {
+    return Array.isArray(state.steps) && state.steps.length > 0;
+  }
+
+  function stepForward() {
+    if (!hasLoadedSteps()) {
+      addLog("No steps loaded. Run Preview Build first.", "Chamber");
+      return false;
+    }
+    if (state.playbackState === "idle" || state.playbackState === "completed") {
+      return false;
+    }
+    if (state.playbackState === "ready") {
+      setPlaybackState("paused");
+    }
+    if (state.currentStep >= state.steps.length) {
+      completeConstruction();
+      return false;
+    }
+
+    const step = state.steps[state.currentStep];
+    const nextStepNumber = state.currentStep + 1;
+    const stepLayer = Number(step?.layer_index ?? state.currentLayer ?? 0);
+
+    state.currentStep = nextStepNumber;
+    state.currentPhase = stepLayer;
+    state.currentLayer = stepLayer;
+
+    if (step?.kind === "deposit") {
+      state.builtLayers = Math.max(state.builtLayers, stepLayer);
+    }
+
+    const progress = state.currentStep / Math.max(1, state.steps.length);
+    applyVisualProgress(progress);
+
+    if (step?.position) {
+      toolhead.position.x = Number(step.position.x || 0);
+      toolhead.position.z = Number(step.position.y || 0);
+      updateBeamTargets(toolhead.position);
+    }
+
+    if (el("selectionMessage")) {
+      el("selectionMessage").textContent =
+        step?.kind === "deposit"
+          ? `Skin ring rising · layer ${state.currentLayer} · step ${state.currentStep}/${state.totalSteps}.`
+          : `Emitter lock maintained · layer ${state.currentLayer} · step ${state.currentStep}/${state.totalSteps}.`;
+    }
+
+    if (state.playbackState !== "playing") {
+      setPlaybackState("paused");
+    }
+
+    updateDimensionsUI();
+    renderStepsList();
+    requestRender();
+
+    if (state.currentStep >= state.steps.length) {
+      completeConstruction();
+      return false;
+    }
+
+    return true;
+  }
+
+  function stopPlayback() {
+    if (state.playTimer) {
+      window.clearInterval(state.playTimer);
+      state.playTimer = null;
+    }
+    if (state.playbackState === "playing") {
+      setPlaybackState("paused");
+    }
+  }
+
+  function playSteps() {
+    stopPlayback();
+
+    if (!hasLoadedSteps()) {
+      addLog("No steps loaded. Run Preview Build first.", "Chamber");
+      return;
+    }
+    if (state.playbackState === "completed") {
+      addLog("Fabrication already complete. Reset to replay.", "Chamber");
+      return;
+    }
+    if (state.playbackState === "idle") {
+      addLog("No job loaded. Run Preview Build first.", "Chamber");
+      return;
+    }
+
+    setPlaybackState("playing");
+    addLog("Spatial fabrication sequence started.", "Chamber");
+
+    state.playTimer = window.setInterval(() => {
+      const advanced = stepForward();
+      if (!advanced) stopPlayback();
+    }, 280);
+  }
+
+  function completeConstruction() {
+    stopPlayback();
+    setPlaybackState("completed");
+    state.currentStep = state.steps.length;
+    if (!state.currentLayer && state.totalLayers) {
+      state.currentLayer = state.totalLayers;
+    }
+    applyVisualProgress(1);
+    completeConstructionVisual();
+
+    if (el("selectionMessage")) {
+      el("selectionMessage").textContent =
+        "Spatial fabrication complete. Scaffold resolved into final model.";
+    }
+
+    addLog("Spatial fabrication complete.", "Chamber");
+    updateDimensionsUI();
+    renderStepsList();
+    requestRender();
+  }
+
+  function resetPlayback() {
+    stopPlayback();
+
+    state.currentStep = 0;
+    state.currentPhase = 0;
+    state.currentLayer = 0;
+    state.builtHeight = 0;
+    state.builtLayers = 0;
+    state.constructionProgress = 0;
+    state.scaffoldSpin = 0;
+
+    setPlaybackState(hasLoadedSteps() ? "ready" : "idle");
+
+    clearConstructionObject();
+    if (hasLoadedSteps()) {
       spawnConstructionObject();
       renderFullPathLines();
-      resetToolhead();
-      skinRing.visible = false;
-      skinRing.position.y = 0.15;
-      el("selectionMessage").textContent = hasLoadedSteps()
-        ? "Job loaded. Scaffold blueprint visible — press Play to begin construction."
-        : "Preview returned no construction steps.";
-      updateDimensionsUI();
-      renderOnce();
-    }
-
-    /**
-     * Advance exactly one path step.
-     * Updates current step and current layer separately.
-     * Returns true if the step was applied, false if at end.
-     */
-    function stepForward() {
-      if (!hasLoadedSteps()) {
-        addLog("No steps loaded. Run Preview Build first.", "Chamber");
-        return false;
-      }
-      if (state.playbackState === "idle") return false;
-      if (state.playbackState === "completed") return false;
-
-      if (state.playbackState === "ready") {
-        setPlaybackState("paused");
-      }
-
-      if (state.currentStep >= state.steps.length) {
-        completeConstruction();
-        return false;
-      }
-
-      const step = state.steps[state.currentStep];
-      const nextStepNumber = state.currentStep + 1;
-      const stepLayer = Number(step?.layer_index ?? state.currentLayer ?? 0);
-
-      state.currentStep = nextStepNumber;
-      state.currentPhase = stepLayer;
-      state.currentLayer = stepLayer;
-
-      if (step?.kind === "deposit") {
-        state.builtHeight = Number(step.position?.z || state.builtHeight);
-        state.builtLayers = Math.max(state.builtLayers, stepLayer);
-      }
-
-      state.constructionProgress = state.currentStep / state.steps.length;
-      const progress = state.constructionProgress;
-
-      if (step?.position) {
-        const ty = Number(step.position.z || 0) + 0.20;
-        toolhead.position.set(
-          Number(step.position.x || 0),
-          ty,
-          Number(step.position.y || 0)
-        );
-        updateBeamTargets(toolhead.position);
-      }
-
-      const objBaseY = 0.15;
-      const ringY = objBaseY + progress * state.height;
-      skinRing.visible = true;
-      skinRing.position.y = ringY;
-      const ringRadius = Math.max(state.width, state.depth) * 0.55 + 0.05;
-      skinRing.scale.set(ringRadius, ringRadius, 1);
-
-      depositedGroup.children.forEach((child) => {
-        if (child.userData.role === "solid" && child.userData.clipPlane) {
-          child.userData.clipPlane.constant = ringY;
-        }
-        if (child.userData.role === "scaffold") {
-          child.material.opacity = 0.35 * (1.0 - progress * 0.7);
-        }
-      });
-
-      if (step?.kind === "deposit") {
-        el("selectionMessage").textContent =
-          `Constructing layer ${state.currentLayer} · step ${state.currentStep}/${state.totalSteps} — beam convergence at Z ${Number(step.position?.z || 0).toFixed(2)}.`;
-      } else {
-        el("selectionMessage").textContent =
-          `Tracing layer ${state.currentLayer} · step ${state.currentStep}/${state.totalSteps}.`;
-      }
-
-      if (state.playbackState !== "playing") {
-        setPlaybackState("paused");
-      } else {
-        setPlaybackState("playing");
-      }
-
-      updateDimensionsUI();
-      renderStepsList();
-      renderOnce();
-
-      if (state.currentStep >= state.steps.length) {
-        completeConstruction();
-        return false;
-      }
-      return true;
-    }
-
-    /** Mark construction as completed — finalize visuals. */
-    function completeConstruction() {
-      stopPlayback();
-      setPlaybackState("completed");
-      state.currentStep = state.steps.length;
-      if (!state.currentLayer && state.totalLayers) {
-        state.currentLayer = state.totalLayers;
-      }
-      skinRing.visible = false;
-
-      depositedGroup.children.forEach((child) => {
-        if (child.userData.role === "scaffold") {
-          child.material.opacity = 0.06;
-        }
-        if (child.userData.role === "solid") {
-          child.material.opacity = 0.92;
-          child.material.emissiveIntensity = 0.15;
-          child.material.clippingPlanes = [];
-          child.material.needsUpdate = true;
-        }
-      });
-
-      el("selectionMessage").textContent = "Construction complete. Object fabricated.";
-      addLog("Spatial construction sequence complete.", "Chamber");
-      resetToolhead();
-      updateDimensionsUI();
-      renderStepsList();
-      renderOnce();
-    }
-
-    /** Full reset — clear build, go back to step 0. */
-    function resetPlayback() {
-      stopPlayback();
-
-      state.currentStep = 0;
-      state.currentPhase = 0;
-      state.currentLayer = 0;
-      state.builtHeight = 0;
-      state.builtLayers = 0;
-      state.constructionProgress = 0;
-
-      setPlaybackState(hasLoadedSteps() ? "ready" : "idle");
-
-      el("selectionMessage").textContent = hasLoadedSteps()
-        ? "Chamber reset. Press Play to begin construction."
-        : "Chamber reset. Ready for spatial construction.";
-
-      clearConstructionObject();
-      skinRing.visible = false;
-      skinRing.position.y = 0.15;
-      resetToolhead();
-
-      if (hasLoadedSteps()) {
-        spawnConstructionObject();
-        renderFullPathLines();
-      }
-
-      updateDimensionsUI();
-      renderStepsList();
-      renderOnce();
-    }
-
-    /** Play — animate from current step forward. Only button that auto-advances. */
-    function playSteps() {
-      stopPlayback();
-
-      if (!hasLoadedSteps()) {
-        addLog("No steps loaded. Run Preview Build first.", "Chamber");
-        return;
-      }
-      if (state.playbackState === "completed") {
-        addLog("Construction already complete. Reset to replay.", "Chamber");
-        return;
-      }
-      if (state.playbackState === "idle") {
-        addLog("No job loaded. Run Preview Build first.", "Chamber");
-        return;
-      }
-
-      setPlaybackState("playing");
-      addLog("Construction sequence started.", "Chamber");
-
-      state.playTimer = window.setInterval(() => {
-        const advanced = stepForward();
-        if (!advanced) {
-          stopPlayback();
-        }
-      }, 350);
-    }
-
-    /** Pause — stop timer, keep current state. */
-    function stopPlayback() {
-      if (state.playTimer) {
-        window.clearInterval(state.playTimer);
-        state.playTimer = null;
-      }
-      if (state.playbackState === "playing") {
-        setPlaybackState("paused");
-      }
-    }
-
-    function setActiveTool(tool, label, hint) {
-      state.activeTool = tool;
-      el("activeToolLabel").textContent = label;
-      el("modeGuidance").textContent = hint;
-      document.querySelectorAll(".tool-chip, .tool-chip-sm").forEach((node) => node.classList.remove("active"));
-      if (tool === "pushpull") el("toolPushPull").classList.add("active");
-      if (tool === "cut") el("toolCut").classList.add("active");
-      if (tool === "pencil") el("toolPencil").classList.add("active");
-      if (tool === "arc") el("toolArc").classList.add("active");
-      addLog(`Modular tool changed to ${label}.`, "Tool");
-    }
-
-    el("toolPushPull").addEventListener("click", () => {
-      setActiveTool("pushpull", "Push / Pull", "Push / Pull controls spatial extrusion and shape construction via tri-pointer beams.");
-    });
-
-    el("toolCut").addEventListener("click", () => {
-      setActiveTool("cut", "Scissors", "Scissors — beam-guided cut and split operations (future phase).");
-    });
-
-    el("toolPencil").addEventListener("click", () => {
-      setActiveTool("pencil", "Pencil", "Pencil defines spatial line guides and edge traces within the chamber.");
-    });
-
-    el("toolArc").addEventListener("click", () => {
-      setActiveTool("arc", "Arc Pencil", "Arc Pencil defines curved spatial guides and orbital traces.");
-    });
-
-    el("toggleGrid").addEventListener("click", () => {
-      state.showGrid = !state.showGrid;
-      grid.visible = state.showGrid;
-      el("toggleGrid").classList.toggle("active", state.showGrid);
-      renderOnce();
-    });
-
-    el("toggleAxis").addEventListener("click", () => {
-      state.showAxis = !state.showAxis;
-      axesHelper.visible = state.showAxis;
-      el("toggleAxis").classList.toggle("active", state.showAxis);
-      renderOnce();
-    });
-
-    el("toggleWire").addEventListener("click", () => {
-      state.showWire = !state.showWire;
-      el("toggleWire").classList.toggle("active", state.showWire);
-
-      depositedGroup.children.forEach((mesh) => {
-        if (mesh.material && mesh.userData.role === 'solid') {
-          mesh.material.wireframe = state.showWire;
-          mesh.material.opacity = state.showWire ? 0.30 : 0.88;
-          mesh.material.needsUpdate = true;
-        }
-      });
-
-      renderOnce();
-    });
-
-    el("toggleSnap").addEventListener("click", () => {
-      state.snap = !state.snap;
-      el("toggleSnap").classList.toggle("active", state.snap);
-      updateDimensionsUI();
-    });
-
-    el("btnPreviewBuild").addEventListener("click", async () => {
-      setStatus("loading", "Generating XYZ preview...");
-      try {
-        const data = await previewBuild(buildInputData());
-        applyJobResult(data, "Preview");
-      } catch (error) {
-        setStatus("fail", error.message || "Preview failed.");
-        addLog(error.message || "Preview failed.", "Error");
-      }
-    });
-
-    el("btnRefreshJob").addEventListener("click", async () => {
-      if (!state.latestJobId) {
-        setStatus("idle", "No job to refresh yet.");
-        return;
-      }
-      setStatus("loading", "Refreshing job...");
-      try {
-        const data = await getJob(state.latestJobId);
-        applyJobResult(data, "Refreshed");
-      } catch (error) {
-        setStatus("fail", error.message || "Refresh failed.");
-        addLog(error.message || "Refresh failed.", "Error");
-      }
-    });
-
-    el("btnPlay").addEventListener("click", playSteps);
-    el("btnPause").addEventListener("click", stopPlayback);
-    el("btnStep").addEventListener("click", stepForward);
-    el("btnReset").addEventListener("click", resetPlayback);
-
-    // Declare Three.js objects at top-level scope
-    let renderer, scene, camera, orbitTarget, controls;
-    let orbitRadius = 6.4;
-    let orbitTheta = Math.PI / 4;
-    let orbitPhi = 1.05;
-
-    const canvas = el("viewportCanvas");
-    if (!canvas) {
-      console.error('Canvas element not found!');
+      applyVisualProgress(0);
     } else {
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-
-      scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x08111f, 0.03);
-
-      camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
-
-      orbitTarget = new THREE.Vector3(0, 0.8, 0);
-
-      controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.12;
-      controls.enablePan = true;
-      controls.panSpeed = 0.5;
-      controls.minDistance = 2.5;
-      controls.maxDistance = 16;
-      controls.zoomSpeed = 0.5;
-      controls.rotateSpeed = 0.6;
-      controls.maxPolarAngle = Math.PI * 0.85;
-      controls.target.copy(orbitTarget);
-
-      // Prevent page scroll when wheeling inside the canvas
-      renderer.domElement.addEventListener('wheel', (e) => { e.preventDefault(); }, { passive: false });
-      window.addEventListener('resize', () => resize());
-      // ...existing code continues, all rendering logic inside this else block...
+      skinRing.visible = false;
+      wakeRing.visible = false;
+      resetToolhead();
     }
 
-    // === LIGHTING ===
-    const ambient = new THREE.AmbientLight(0xb0c4ff, 0.5);
-    scene.add(ambient);
-
-    const key = new THREE.DirectionalLight(0xffffff, 0.9);
-    key.position.set(4, 8, 5);
-    scene.add(key);
-
-    const rim = new THREE.DirectionalLight(0x6eeaff, 0.6);
-    rim.position.set(-6, 4, -5);
-    scene.add(rim);
-
-    const underGlow = new THREE.PointLight(0x94f3de, 0.4, 8);
-    underGlow.position.set(0, 0.3, 0);
-    scene.add(underGlow);
-
-    // === GRID + AXES ===
-    const grid = new THREE.GridHelper(40, 40, 0x1a3352, 0x0c1a2e);
-    grid.material.opacity = 0.25;
-    grid.material.transparent = true;
-    scene.add(grid);
-
-    const axesHelper = new THREE.AxesHelper(1.4);
-    axesHelper.position.set(0, 0.02, 0);
-    scene.add(axesHelper);
-
-    // === CONSTRUCTION CHAMBER PLATFORM ===
-    const floorGeo = new THREE.CircleGeometry(6, 64);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x080e1a, transparent: true, opacity: 0.92 });
-    const floor = new THREE.Mesh(floorGeo, floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = 0.01;
-    scene.add(floor);
-
-    const platformGeo = new THREE.CylinderGeometry(2.0, 2.15, 0.10, 64);
-    const platformMat = new THREE.MeshStandardMaterial({ color: 0x0d1e36, metalness: 0.85, roughness: 0.2, transparent: true, opacity: 0.96 });
-    const chamberPlatform = new THREE.Mesh(platformGeo, platformMat);
-    chamberPlatform.position.set(0, 0.06, 0);
-    scene.add(chamberPlatform);
-
-    // Concentric energy rings
-    const chamberRings = [];
-    const ringRadii = [0.6, 1.1, 1.6, 2.05];
-    ringRadii.forEach((r, i) => {
-      const geo = new THREE.TorusGeometry(r, 0.018, 8, 120);
-      const mat = new THREE.MeshBasicMaterial({ color: i < 2 ? 0x94f3de : 0x5ac8ff, transparent: true, opacity: 0.28 + (i % 2) * 0.12 });
-      const ring = new THREE.Mesh(geo, mat);
-      ring.rotation.x = Math.PI / 2;
-      ring.position.y = 0.12;
-      scene.add(ring);
-      chamberRings.push(ring);
-    });
-
-    // === TRI-POINTER EMITTER PYLONS ===
-    const emitterHeight = 3.8;
-    const emitterRadius = 2.4;
-    const emitterGroup = new THREE.Group();
-    scene.add(emitterGroup);
-
-    const emitterTips = [];
-    const emitterColors = [0x94f3de, 0x7abaff, 0xc9a0ff];
-
-    for (let i = 0; i < 3; i++) {
-      const angle = (i * Math.PI * 2) / 3 - Math.PI / 2;
-      const x = Math.cos(angle) * emitterRadius;
-      const z = Math.sin(angle) * emitterRadius;
-
-      // Pylon shaft
-      const shaftGeo = new THREE.CylinderGeometry(0.035, 0.055, emitterHeight, 12);
-      const shaftMat = new THREE.MeshStandardMaterial({ color: 0x1a3050, metalness: 0.9, roughness: 0.15 });
-      const shaft = new THREE.Mesh(shaftGeo, shaftMat);
-      shaft.position.set(x, emitterHeight / 2, z);
-      emitterGroup.add(shaft);
-
-      // Pylon glow strip
-      const stripGeo = new THREE.CylinderGeometry(0.012, 0.012, emitterHeight * 0.85, 8);
-      const stripMat = new THREE.MeshBasicMaterial({ color: emitterColors[i], transparent: true, opacity: 0.25 });
-      const strip = new THREE.Mesh(stripGeo, stripMat);
-      strip.position.set(x, emitterHeight * 0.48, z);
-      emitterGroup.add(strip);
-
-      // Emitter tip
-      const tipGeo = new THREE.SphereGeometry(0.10, 20, 20);
-      const tipMat = new THREE.MeshBasicMaterial({ color: emitterColors[i], transparent: true, opacity: 0.9 });
-      const tip = new THREE.Mesh(tipGeo, tipMat);
-      tip.position.set(x, emitterHeight, z);
-      emitterGroup.add(tip);
-      emitterTips.push(tip);
-
-      // Base ring at pylon foot
-      const baseGeo = new THREE.TorusGeometry(0.12, 0.012, 8, 32);
-      const baseMat = new THREE.MeshBasicMaterial({ color: emitterColors[i], transparent: true, opacity: 0.4 });
-      const baseRing = new THREE.Mesh(baseGeo, baseMat);
-      baseRing.rotation.x = Math.PI / 2;
-      baseRing.position.set(x, 0.12, z);
-      emitterGroup.add(baseRing);
+    if (el("selectionMessage")) {
+      el("selectionMessage").textContent = hasLoadedSteps()
+        ? "Fabrication reset. Press Play to begin."
+        : "Chamber reset. Ready for spatial construction.";
     }
 
-    // === BUILD BEAMS (emitter tips → focal point) ===
-    const beamLines = [];
-    for (let i = 0; i < 3; i++) {
-      const tip = emitterTips[i];
-      const pts = [tip.position.clone(), new THREE.Vector3(0, 0.5, 0)];
-      const geo = new THREE.BufferGeometry().setFromPoints(pts);
-      const mat = new THREE.LineBasicMaterial({ color: emitterColors[i], transparent: true, opacity: 0.55 });
-      const beam = new THREE.Line(geo, mat);
-      scene.add(beam);
-      beamLines.push(beam);
-    }
-
-    function updateBeamTargets(target) {
-      beamLines.forEach((beam) => {
-        const pos = beam.geometry.attributes.position.array;
-        pos[3] = target.x;
-        pos[4] = target.y;
-        pos[5] = target.z;
-        beam.geometry.attributes.position.needsUpdate = true;
-      });
-    }
-
-    // === FOCAL CONVERGENCE POINT (construction head) ===
-    const previewGroup = new THREE.Group();
-    scene.add(previewGroup);
-
-    const pathGroup = new THREE.Group();
-    previewGroup.add(pathGroup);
-
-    const depositedGroup = new THREE.Group();
-    previewGroup.add(depositedGroup);
-
-    const toolheadGeo = new THREE.SphereGeometry(0.09, 24, 24);
-    const toolheadMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
-    const toolhead = new THREE.Mesh(toolheadGeo, toolheadMat);
-
-    const haloGeo = new THREE.SphereGeometry(0.22, 24, 24);
-    const haloMat = new THREE.MeshBasicMaterial({ color: 0x94f3de, transparent: true, opacity: 0.12 });
-    const halo = new THREE.Mesh(haloGeo, haloMat);
-    toolhead.add(halo);
-
-    previewGroup.add(toolhead);
-    resetToolhead();
-
-    // === CONSTRUCTION SKIN RING ===
-    const skinRingGeo = new THREE.TorusGeometry(1.2, 0.04, 16, 100);
-    const skinRingMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
-    const skinRing = new THREE.Mesh(skinRingGeo, skinRingMat);
-    skinRing.rotation.x = Math.PI / 2;
-    skinRing.position.y = 0.15;
-    skinRing.visible = false;
-    scene.add(skinRing);
-
-    // Glow halo around the skin ring
-    const skinHaloGeo = new THREE.TorusGeometry(1.2, 0.14, 12, 80);
-    const skinHaloMat = new THREE.MeshBasicMaterial({ color: 0x94f3de, transparent: true, opacity: 0.18 });
-    const skinHalo = new THREE.Mesh(skinHaloGeo, skinHaloMat);
-    skinHalo.rotation.x = Math.PI / 2;
-    skinRing.add(skinHalo);
-
-    // === AMBIENT CHAMBER PARTICLES ===
-    const particleCount = 180;
-    const particleGeo = new THREE.BufferGeometry();
-    const pPositions = new Float32Array(particleCount * 3);
-    const pSpeeds = new Float32Array(particleCount);
-    for (let i = 0; i < particleCount; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const r = 0.4 + Math.random() * 2.8;
-      pPositions[i * 3]     = Math.cos(a) * r;
-      pPositions[i * 3 + 1] = Math.random() * emitterHeight;
-      pPositions[i * 3 + 2] = Math.sin(a) * r;
-      pSpeeds[i] = 0.001 + Math.random() * 0.006;
-    }
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-    const particleMat = new THREE.PointsMaterial({ color: 0x94f3de, size: 0.025, transparent: true, opacity: 0.4, sizeAttenuation: true });
-    const chamberParticles = new THREE.Points(particleGeo, particleMat);
-    scene.add(chamberParticles);
-
-    // === CAMERA + VIEW ===
-    function updateCamera() {
-      const sinPhi = Math.sin(orbitPhi);
-      camera.position.set(
-        orbitTarget.x + orbitRadius * sinPhi * Math.sin(orbitTheta),
-        orbitTarget.y + orbitRadius * Math.cos(orbitPhi),
-        orbitTarget.z + orbitRadius * sinPhi * Math.cos(orbitTheta)
-      );
-      camera.lookAt(orbitTarget);
-    }
-
-    function resize() {
-      const w = canvas.clientWidth || canvas.parentElement.clientWidth || 800;
-      const h = canvas.clientHeight || canvas.parentElement.clientHeight || 500;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderOnce();
-    }
-
-    function fitView() {
-      orbitTarget.set(0, Math.max(1.0, state.height * 0.5), 0);
-      orbitRadius = 7.0;
-      orbitTheta = Math.PI / 4;
-      orbitPhi = 1.0;
-      updateCamera();
-      controls.target.copy(orbitTarget);
-      controls.update();
-      renderOnce();
-      addLog("Chamber view fitted.", "View");
-    }
-
-    function renderOnce() {
-      renderer.render(scene, camera);
-    }
-
-    function takeShot() {
-      renderOnce();
-      const link = document.createElement("a");
-      link.download = "xyz-construction.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-      addLog("Chamber screenshot captured.", "View");
-    }
-
-    el("viewportCanvas").addEventListener("pointerdown", () => {
-      canvas.classList.add("dragging");
-    });
-
-    window.addEventListener("pointerup", () => {
-      canvas.classList.remove("dragging");
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (state.activeTool === "pushpull") {
-        if (event.key === "]") {
-          const next = Number(el("depthInput").value || 0.35) + 0.05;
-          el("depthInput").value = next.toFixed(2);
-        }
-        if (event.key === "[") {
-          const next = Math.max(0.10, Number(el("depthInput").value || 0.35) - 0.05);
-          el("depthInput").value = next.toFixed(2);
-        }
-      }
-    });
-
-    el("toolShot")?.addEventListener("click", takeShot);
-
-    /* === UPLOAD HANDLERS (preview only, no localStorage, no backend save) === */
-    el("uploadFile")?.addEventListener("change", (event) => {
-      const input = event.target;
-      const file = input?.files && input.files[0] ? input.files[0] : null;
-
-      if (!file) {
-        clearUploadDisplays();
-        state.uploadedImageUrl = null;
-        return;
-      }
-
-      if (!file.type || !file.type.startsWith("image/")) {
-        addLog("Selected file is not an image.", "Upload");
-        input.value = "";
-        clearUploadDisplays();
-        state.uploadedImageUrl = null;
-        return;
-      }
-
-      displayLocalPreview(file);
-      addLog(`Loaded local image preview: ${file.name}`, "Upload");
-      renderOnce();
-    });
-
-    el("btnClearUpload")?.addEventListener("click", () => {
-      const input = el("uploadFile");
-      if (input) input.value = "";
-
-      revokePreviewObjectUrl();
-      state.uploadedImageUrl = null;
-      clearUploadDisplays();
-
-      addLog("Upload preview cleared.", "Upload");
-      renderOnce();
-    });
-
-    el("btnGenerateImage").addEventListener("click", () => {
-      const prompt = el("aiPrompt").value.trim();
-      const style = el("aiStyle").value;
-      if (!prompt) {
-        addLog("Enter a prompt before generating.", "AI");
-        return;
-      }
-      addLog(`Generate requested — style: ${style}, prompt: "${prompt.slice(0, 60)}…"`, "AI");
-      el("uploadPreview").innerHTML = `<span style="padding:12px;text-align:center">Generating… (placeholder — backend not connected)</span>`;
-    });
-
-    // === DIMENSION SLIDER ↔ INPUT SYNC ===
-    function syncDimPair(rangeId, inputId, stateKey) {
-      const range = el(rangeId);
-      const input = el(inputId);
-      range.addEventListener("input", () => {
-        const v = parseFloat(range.value);
-        input.value = v.toFixed(2);
-        state[stateKey] = v;
-        updateDimensionsUI();
-      });
-      input.addEventListener("input", () => {
-        const v = parseFloat(input.value);
-        if (Number.isFinite(v)) {
-          range.value = v;
-          state[stateKey] = v;
-          updateDimensionsUI();
-        }
-      });
-    }
-    syncDimPair("widthRange",     "widthInput",     "width");
-    syncDimPair("heightRange",    "heightInput",    "height");
-    syncDimPair("depthRange",     "depthInput",     "depth");
-    syncDimPair("scaleRange",     "scaleInput",     "scale");
-    syncDimPair("thicknessRange", "thicknessInput", "thickness");
-
-    // === ORIENTATION HANDLER ===
-    el("orientationSelect").addEventListener("change", () => {
-      state.orientation = el("orientationSelect").value;
-      addLog(`Orientation set to ${state.orientation}.`, "View");
-      const presets = {
-        front:   { theta: 0,              phi: Math.PI / 2.2 },
-        quarter: { theta: Math.PI / 4,    phi: 1.05 },
-        side:    { theta: Math.PI / 2,    phi: Math.PI / 2.2 },
-        back:    { theta: Math.PI,         phi: Math.PI / 2.2 },
-        top:     { theta: 0,              phi: 0.15 }
-      };
-      const p = presets[state.orientation] || presets.quarter;
-      orbitTheta = p.theta;
-      orbitPhi   = p.phi;
-      updateCamera();
-      controls.target.copy(orbitTarget);
-      controls.update();
-      renderOnce();
-    });
-
-    // === SKETCHUP TOOL CHIP STYLE (support new .tool-chip-sm) ===
-    function refreshToolChips() {
-      document.querySelectorAll(".tool-chip, .tool-chip-sm").forEach(n => n.classList.remove("active"));
-      if (state.activeTool === "pushpull") el("toolPushPull").classList.add("active");
-      if (state.activeTool === "cut")      el("toolCut").classList.add("active");
-      if (state.activeTool === "pencil")   el("toolPencil").classList.add("active");
-      if (state.activeTool === "arc")      el("toolArc").classList.add("active");
-    }
-
-    // === ANIMATE (chamber life + construction sequence) ===
-    function animate() {
-      requestAnimationFrame(animate);
-      const t = performance.now() * 0.001;
-
-      // Rotate chamber rings at different speeds
-      chamberRings.forEach((ring, i) => {
-        ring.rotation.z = t * (0.08 + i * 0.04) * (i % 2 === 0 ? 1 : -1);
-      });
-
-      // Pulse beam opacity — intensify during construction
-      const beamBoost = state.playbackState === "playing" ? 0.30 : 0;
-      beamLines.forEach((beam, i) => {
-        beam.material.opacity = 0.25 + beamBoost + 0.35 * Math.sin(t * 2.5 + i * 2.094);
-      });
-
-      // Pulse emitter tips
-      emitterTips.forEach((tip, i) => {
-        const s = 1.0 + 0.25 * Math.sin(t * 4.0 + i * 2.094);
-        tip.scale.setScalar(s);
-      });
-
-      // Pulse focal glow
-      const glowScale = 1.0 + 0.35 * Math.sin(t * 3.5);
-      halo.scale.setScalar(glowScale);
-      toolheadMat.opacity = 0.55 + 0.35 * Math.sin(t * 4.2);
-
-      // Drift chamber particles (upward spiral)
-      const positions = particleGeo.attributes.position.array;
-      for (let i = 0; i < particleCount; i++) {
-        const idx = i * 3;
-        positions[idx + 1] += pSpeeds[i];
-        if (positions[idx + 1] > emitterHeight + 0.3) positions[idx + 1] = 0.1;
-        const px = positions[idx], pz = positions[idx + 2];
-        const angle = Math.atan2(pz, px) + 0.0015;
-        const r = Math.sqrt(px * px + pz * pz);
-        positions[idx]     = Math.cos(angle) * r;
-        positions[idx + 2] = Math.sin(angle) * r;
-      }
-      particleGeo.attributes.position.needsUpdate = true;
-
-      // === CONSTRUCTION VISUAL FX (driven by playback state, NOT auto-advancing) ===
-      const isBuilding = state.playbackState === "playing" || state.playbackState === "paused";
-
-      if (isBuilding && skinRing.visible) {
-        // Spin the ring energy effect
-        skinRingMat.opacity = 0.6 + 0.35 * Math.sin(t * 8);
-        skinHaloMat.opacity = 0.12 + 0.1 * Math.sin(t * 6);
-        // Gentle rotation during construction
-        depositedGroup.rotation.y = t * 0.6;
-      }
-
-      // Slow idle rotation of completed object
-      if (state.playbackState === "completed") {
-        depositedGroup.rotation.y = t * 0.15;
-      }
-
-      controls.update();
-      renderer.render(scene, camera);
-    }
-
-    relabelPlaybackUi();
-    relabelPlaybackUi();
     updateDimensionsUI();
-    resize();
+    renderStepsList();
+    requestRender();
+  }
+
+  // UI bindings
+  syncPair("widthRange", "widthInput", 1.2);
+  syncPair("heightRange", "heightInput", 1.05);
+  syncPair("depthRange", "depthInput", 0.35);
+  syncPair("scaleRange", "scaleInput", 1.0);
+  syncPair("thicknessRange", "thicknessInput", 0.2);
+
+  el("orientationSelect")?.addEventListener("change", () => {
+    state.orientation = el("orientationSelect").value;
+  });
+
+  el("uploadFile")?.addEventListener("change", (event) => {
+    const file = event.target?.files?.[0] || null;
+    if (!file) {
+      clearUploadDisplays();
+      state.uploadedImageUrl = null;
+      return;
+    }
+    if (!file.type || !file.type.startsWith("image/")) {
+      addLog("Selected file is not an image.", "Upload");
+      clearUploadDisplays();
+      return;
+    }
+    displayLocalPreview(file);
+    addLog(`Loaded local image preview: ${file.name}`, "Upload");
+  });
+
+  el("btnClearUpload")?.addEventListener("click", () => {
+    if (el("uploadFile")) el("uploadFile").value = "";
+    revokePreviewObjectUrl();
+    state.uploadedImageUrl = null;
+    clearUploadDisplays();
+    addLog("Upload preview cleared.", "Upload");
+  });
+
+  el("btnGenerateImage")?.addEventListener("click", () => {
+    addLog("Image generation hook not wired yet.", "AI");
+  });
+
+  el("toolPushPull")?.addEventListener("click", () => {
+    setActiveTool("pushpull", "Push / Pull", "Tri-pointers define and energize the object while the scaffold and skin ring fabricate the surface.");
+  });
+  el("toolCut")?.addEventListener("click", () => {
+    setActiveTool("cut", "Scissors", "Future spatial separation mode.");
+  });
+  el("toolPencil")?.addEventListener("click", () => {
+    setActiveTool("pencil", "Pencil", "Future structural guide mode.");
+  });
+  el("toolArc")?.addEventListener("click", () => {
+    setActiveTool("arc", "Arc Pencil", "Future curved guide mode.");
+  });
+
+  el("toggleGrid")?.addEventListener("click", () => {
+    state.showGrid = !state.showGrid;
+    grid.visible = state.showGrid;
+    el("toggleGrid").classList.toggle("active", state.showGrid);
+    requestRender();
+  });
+
+  el("toggleAxis")?.addEventListener("click", () => {
+    state.showAxis = !state.showAxis;
+    axesHelper.visible = state.showAxis;
+    el("toggleAxis").classList.toggle("active", state.showAxis);
+    requestRender();
+  });
+
+  el("toggleWire")?.addEventListener("click", () => {
+    state.showWire = !state.showWire;
+    el("toggleWire").classList.toggle("active", state.showWire);
+    if (skinMesh?.material) {
+      skinMesh.material.wireframe = state.showWire;
+      skinMesh.material.needsUpdate = true;
+    }
+    requestRender();
+  });
+
+  el("toggleSnap")?.addEventListener("click", () => {
+    state.snap = !state.snap;
+    el("toggleSnap").classList.toggle("active", state.snap);
+    updateDimensionsUI();
+  });
+
+  el("btnPreviewBuild")?.addEventListener("click", async () => {
+    setStatus("loading", "Generating XYZ preview...");
+    try {
+      const data = await previewBuild(buildInputData());
+      applyJobResult(data, "Preview");
+    } catch (error) {
+      setStatus("fail", error.message || "Preview failed.");
+      addLog(error.message || "Preview failed.", "Error");
+    }
+  });
+
+  el("btnRefreshJob")?.addEventListener("click", async () => {
+    if (!state.latestJobId) {
+      setStatus("idle", "No job to refresh yet.");
+      return;
+    }
+    setStatus("loading", "Refreshing job...");
+    try {
+      const data = await getJob(state.latestJobId);
+      applyJobResult(data, "Refreshed");
+    } catch (error) {
+      setStatus("fail", error.message || "Refresh failed.");
+      addLog(error.message || "Refresh failed.", "Error");
+    }
+  });
+
+  el("btnPlay")?.addEventListener("click", playSteps);
+  el("btnPause")?.addEventListener("click", stopPlayback);
+  el("btnStep")?.addEventListener("click", stepForward);
+  el("btnReset")?.addEventListener("click", resetPlayback);
+
+  // Animation loop
+  function animate(now = 0) {
+    requestAnimationFrame(animate);
+
+    const t = now * 0.001;
+    state.chamberTime = t;
+
+    // subtle chamber motion
+    chamberRings.forEach((ring, i) => {
+      ring.rotation.z = t * (0.12 + i * 0.05) * (i % 2 === 0 ? 1 : -1);
+      ring.material.opacity = 0.20 + Math.sin(t * 1.8 + i) * 0.04 + (i % 2) * 0.06;
+    });
+
+    const pos = chamberParticles.geometry.attributes.position.array;
+    for (let i = 0; i < particleCount; i++) {
+      pos[i * 3 + 1] += speeds[i];
+      if (pos[i * 3 + 1] > emitterHeight) pos[i * 3 + 1] = 0.15;
+    }
+    chamberParticles.geometry.attributes.position.needsUpdate = true;
+
+    // spinning scaffold + skin during fabrication
+    if (fabricationGroup && state.playbackState !== "idle") {
+      const spinBoost = state.playbackState === "playing" ? 0.038 : 0.012;
+      state.scaffoldSpin += spinBoost;
+      fabricationGroup.rotation.y = state.scaffoldSpin;
+      if (scaffoldEnergy) {
+        scaffoldEnergy.rotation.y = -state.scaffoldSpin * 0.7;
+      }
+      // Edge glow counter-rotates for energy feel
+      scaffoldGroup.children.forEach((child) => {
+        if (child.userData.role === "scaffoldEdge") {
+          child.rotation.y = state.scaffoldSpin * 0.3;
+        }
+      });
+    }
+
+    // ring energy pulse + self-spin
+    if (skinRing.visible) {
+      const pulse = 1 + Math.sin(t * 8.5) * 0.04;
+      skinHalo.scale.set(pulse, pulse, 1);
+      skinFlare.scale.set(1 + Math.sin(t * 5.2) * 0.06, 1 + Math.sin(t * 5.2) * 0.06, 1);
+      skinRing.material.opacity = 0.78 + Math.sin(t * 10) * 0.15;
+      skinRing.rotation.z += 0.05;
+    }
+
+    // wake ring subtle spin
+    if (wakeRing.visible) {
+      wakeRing.rotation.z -= 0.025;
+      wakeRing.material.opacity = 0.22 + Math.sin(t * 7) * 0.08;
+    }
+
+    // beam tracking + intensity during construction
+    if (state.playbackState === "playing" || state.playbackState === "paused") {
+      const beamIntensity = state.playbackState === "playing"
+        ? 0.65 + Math.sin(t * 6) * 0.25
+        : 0.40;
+      beamLines.forEach((beam) => {
+        beam.material.opacity = beamIntensity;
+      });
+      updateBeamTargets(toolhead.position);
+    } else if (state.playbackState === "completed") {
+      beamLines.forEach((beam) => {
+        beam.material.opacity = 0.20;
+      });
+    }
+
+    controls.update();
+
+    if (state.needsRender || state.playbackState !== "idle" || skinRing.visible || wakeRing.visible) {
+      renderer.render(scene, camera);
+      state.needsRender = false;
+    }
+  }
+
+  window.addEventListener("resize", resize);
+
+  async function init() {
+    clearUploadDisplays();
+    setActiveTool("pushpull", "Push / Pull", "Tri-pointers define and energize the object while the scaffold and skin ring fabricate the surface.");
+    updateDimensionsUI();
+    spawnConstructionObject();
     fitView();
-    healthCheck().catch(() => {});
+    resize();
+    resetToolhead();
+    requestRender();
     animate();
 
-    // === postMessage bridge (when embedded as iframe by 3d_model_maker) ===
-    window.addEventListener('message', (evt) => {
-      if (!evt.data || typeof evt.data !== 'object') return;
-      const msg = evt.data;
+    try {
+      await healthCheck();
+    } catch (_) {
+      // keep page usable even if backend is offline
+    }
+  }
 
-      if (msg.type === 'setDimensions') {
-        if (msg.width != null)  { state.width  = Number(msg.width);  el('widthInput').value  = state.width.toFixed(2); }
-        if (msg.height != null) { state.height = Number(msg.height); el('heightInput').value = state.height.toFixed(2); }
-        if (msg.depth != null)  { state.depth  = Number(msg.depth);  el('depthInput').value  = state.depth.toFixed(2); }
-        if (msg.layerHeight != null) { el('layerHeight').value = Number(msg.layerHeight).toFixed(2); }
-        updateDimensionsUI();
-      }
-
-      if (msg.type === 'triggerPreview') {
-        el('btnPreviewBuild').click();
-      }
-
-      if (msg.type === 'triggerReset') {
-        resetPlayback();
-      }
-
-      if (msg.type === 'triggerPlay') {
-        playSteps();
-      }
-
-      if (msg.type === 'triggerPause') {
-        stopPlayback();
-      }
-
-      if (msg.type === 'triggerStep') {
-        stepForward();
-      }
-
-      if (msg.type === 'triggerFit') {
-        fitView();
-      }
-
-      if (msg.type === 'triggerShot') {
-        takeShot();
-      }
-    });
-  </script>
+  init();
+</script>
 </body>
 </html>

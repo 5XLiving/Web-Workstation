@@ -44,11 +44,11 @@ def build_xyz_session(job: dict[str, Any]) -> dict[str, Any]:
 
     preview = {
         "placeholder": False,
-        "kind": "xyz_printer_preview",
+        "kind": "xyz_fabrication_preview",
         "template": geometry_state["template"],
         "geometry_state": geometry_state,
-        "printer_state": geometry_state["printer_state"],
-        "message": "XYZ printer preview generated.",
+        "chamber_state": geometry_state["chamber_state"],
+        "message": "XYZ spatial fabrication preview generated.",
     }
 
     return {

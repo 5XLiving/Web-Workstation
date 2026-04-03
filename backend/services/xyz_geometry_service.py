@@ -174,17 +174,17 @@ def build_xyz_geometry_state(
         "total_steps": len(steps),
     }
 
-    printer_state = {
-        "machine_type": "cartesian_xyz",
+    chamber_state = {
+        "machine_type": "spatial_fabrication",
         "axis_map": {
             "x": "width_axis",
             "y": "depth_axis",
             "z": "height_axis",
         },
-        "bed": bed,
+        "platform": bed,
         "build_volume": build_volume,
-        "toolhead": {
-            "kind": "nozzle_head",
+        "emitter": {
+            "kind": "tri_pointer_emitter",
             "position": last_toolhead_position,
             "current_step_index": _int(steps[-1].get("step_index"), len(steps)) if steps else 0,
             "current_layer": current_layer,
@@ -204,12 +204,12 @@ def build_xyz_geometry_state(
         },
         "origin": origin,
         "build_progress": build_progress,
-        "printer_state": printer_state,
-        "preview_object": {
-            "kind": "xyz_printer_preview",
-            "bed": bed,
+        "chamber_state": chamber_state,
+        "fabrication_preview": {
+            "kind": "xyz_fabrication_preview",
+            "platform": bed,
             "build_volume": build_volume,
-            "toolhead": printer_state["toolhead"],
+            "emitter": chamber_state["emitter"],
             "current_layer": current_layer,
             "built_height": built_height,
         },
@@ -237,9 +237,9 @@ def build_xyz_preview_payload(
 
     return {
         "placeholder": False,
-        "kind": "xyz_printer_preview",
+        "kind": "xyz_fabrication_preview",
         "template": geometry_state["template"],
         "geometry_state": geometry_state,
-        "printer_state": geometry_state["printer_state"],
-        "message": "XYZ printer preview generated.",
+        "chamber_state": geometry_state["chamber_state"],
+        "message": "XYZ spatial fabrication preview generated.",
     }
