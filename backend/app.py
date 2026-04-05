@@ -1,3 +1,7 @@
+# Silence Chrome DevTools workspace probe
+@app.route("/.well-known/appspecific/com.chrome.devtools.json")
+def chrome_devtools_json():
+    return jsonify({}), 200
 
 
 
