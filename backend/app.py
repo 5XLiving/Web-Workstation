@@ -1,3 +1,6 @@
+
+
+
 from pathlib import Path
 from flask import Blueprint, Flask, jsonify, make_response, request, send_from_directory
 from flask_cors import CORS
@@ -20,7 +23,6 @@ def serve_3d_model_maker():
     html_path = (BASE_DIR.parent / "3d_model_maker.html").resolve()
     return send_from_directory(html_path.parent, html_path.name)
 
-
 # Serve xyz_modular.html from the root directory
 @app.route("/xyz_modular")
 def serve_xyz_modular():
@@ -38,6 +40,13 @@ def serve_static_images(filename):
 @app.route("/public/images/<path:filename>")
 def serve_public_images(filename):
     return send_from_directory("public/images", filename)
+
+
+# Serve favicon.ico from static/assets/images
+@app.route('/favicon.ico')
+def favicon():
+    favicon_path = (BASE_DIR / 'static' / 'assets' / 'images' / 'favicon.ico').resolve()
+    return send_from_directory(favicon_path.parent, favicon_path.name)
 
 @app.get("/__which_app")
 def which_app():
@@ -91,6 +100,98 @@ def xyz_jobs_get(job_id):
     if not job:
         return jsonify({"ok": False, "error": f"Job not found: {job_id}"}), 404
     return jsonify({"ok": True, **job}), 200
+
+
+# ── Preset classes ────────────────────────────────────────────
+from services.preset_classes import list_presets, DEFAULT_PRESET
+
+# --- Preview service ---
+from services.preview_service import generate_preview
+
+@xyz_bp.route("/presets")
+def xyz_presets():
+    return jsonify({"ok": True, "default": DEFAULT_PRESET, "presets": list_presets()}), 200
+
+
+# Honest preview endpoint (Phase 1)
+@xyz_bp.route("/preview", methods=["POST"])
+def xyz_preview():
+    """Accept masked image + preset class, return honest preview (pointcloud/depth/mesh)."""
+    if "image" not in request.files:
+        return jsonify({"ok": False, "error": "No image file provided"}), 400
+
+    image_file = request.files["image"]
+    image_bytes = image_file.read()
+    if not image_bytes:
+        return jsonify({"ok": False, "error": "Empty image file"}), 400
+
+    mask_bytes = None
+    if "mask" in request.files:
+        mb = request.files["mask"].read()
+        if mb:
+            mask_bytes = mb
+
+    preset_class = request.form.get("preset_class", DEFAULT_PRESET)
+
+    try:
+        result = generate_preview(
+            image_bytes=image_bytes,
+            mask_bytes=mask_bytes,
+            preset=preset_class,
+        )
+        # Ensure standardized schema
+        return jsonify({"ok": True, **result}), 200
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": f"Preview failed: {exc}"}), 500
+
+
+# ── Image-to-3D inference endpoint ───────────────────────────
+from services.inference_service import run_inference
+
+@xyz_bp.route("/infer", methods=["POST"])
+def xyz_infer():
+    """Accept masked image + preset class, return structure + point cloud + steps."""
+    if "image" not in request.files:
+        return jsonify({"ok": False, "error": "No image file provided"}), 400
+
+    image_file = request.files["image"]
+    image_bytes = image_file.read()
+    if not image_bytes:
+        return jsonify({"ok": False, "error": "Empty image file"}), 400
+
+    mask_bytes = None
+    if "mask" in request.files:
+        mb = request.files["mask"].read()
+        if mb:
+            mask_bytes = mb
+
+    preset_class = request.form.get("preset_class", DEFAULT_PRESET)
+
+    # Optional user dimension overrides
+    user_dims = {}
+    for key in ("width", "height", "depth"):
+        raw = request.form.get(key)
+        if raw is not None:
+            try:
+                user_dims[key] = float(raw)
+            except (ValueError, TypeError):
+                pass
+
+    try:
+        result = run_inference(
+            image_bytes=image_bytes,
+            mask_bytes=mask_bytes,
+            preset_class=preset_class,
+            user_dimensions=user_dims if user_dims else None,
+        )
+        return jsonify(result), 200
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": f"Inference failed: {exc}"}), 500
+
 
 app.register_blueprint(xyz_bp)
 

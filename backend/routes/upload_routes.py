@@ -18,17 +18,18 @@ def _allowed_file(filename: str) -> bool:
     return ext in ALLOWED_EXTENSIONS
 
 
+
 def _upload_dir() -> Path:
     configured = current_app.config.get("UPLOAD_IMAGE_DIR")
     if configured:
         return Path(configured).resolve()
+    # default: backend/static/images relative to app root
+    return (Path(current_app.root_path).resolve() / "static" / "images").resolve()
 
-    # default: backend/public/images relative to app root
-    return (Path(current_app.root_path).resolve() / "public" / "images").resolve()
 
 
 def _url_prefix() -> str:
-    return current_app.config.get("UPLOAD_IMAGE_URL_PREFIX", "/public/images")
+    return current_app.config.get("UPLOAD_IMAGE_URL_PREFIX", "/static/images")
 
 
 @upload_bp.route("/image", methods=["POST"])
