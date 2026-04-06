@@ -13,7 +13,7 @@ from api.services.xyz_preview_service import prepare_preview
 
 router = APIRouter()
 
-@router.post("/api/xyz/v1/blueprint/generate")
+@router.post("/blueprint/generate")
 async def generate_blueprint(request: Request):
     """
     Generate a blueprint from profile/mask, bounds, and preset.
@@ -26,7 +26,7 @@ async def generate_blueprint(request: Request):
     blueprint = generate_blueprint_from_profile(profile, bounds, preset)
     return JSONResponse(blueprint)
 
-@router.post("/api/xyz/v1/construct/from-blueprint")
+@router.post("/construct/from-blueprint")
 async def construct_from_blueprint_route(request: Request):
     """
     Construct chamber steps from blueprint.
@@ -37,7 +37,7 @@ async def construct_from_blueprint_route(request: Request):
     result = construct_from_blueprint(blueprint)
     return JSONResponse(result)
 
-@router.post("/api/xyz/v1/preview/render")
+@router.post("/preview/render")
 async def preview_render(request: Request):
     """
     Render a preview for .ply/mesh/point cloud/splat.
