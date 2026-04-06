@@ -5807,16 +5807,6 @@ state.pointSize = 0.16; // Increased point size for bigger 3D object
     updateChamberPreview("Preview", "Honest preview loaded. Chamber visual only.");
     setPlaybackState("ready");
   }
-    } catch (error) {
-      setStatus("fail", error.message || "Generation failed.");
-      addLog(error.message || "Generation failed.", "Error");
-      let chip = document.getElementById("previewDebugChip");
-      if (chip) chip.textContent = `Render Source: backend-preview | Render Type: error`;
-      if (el("maskGuidance")) {
-        el("maskGuidance").textContent = "Generation failed. Try adjusting the selection.";
-      }
-    }
-  }
 
   // Wire Generate button to startGenerateJob
   el("btnGenerateImage")?.addEventListener("click", startGenerateJob);
