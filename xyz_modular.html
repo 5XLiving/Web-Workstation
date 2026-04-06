@@ -805,6 +805,11 @@
       border-top:1px solid rgba(148,243,222,.12);
       backdrop-filter:blur(12px);
     }
+    @media (max-width: 900px) {
+      .mobile-action-bar {
+        display: grid !important;
+      }
+    }
 
     /* Safe area insets for notched phones */
     @supports(padding: env(safe-area-inset-bottom)){
@@ -1032,7 +1037,7 @@
                 <button id="maskBtnClear" class="mask-btn" title="Clear all mask strokes" style="font-size:10px;padding:4px 8px">Clear</button>
               </div>
               <!-- Wand tolerance slider removed; tolerance fixed to 100 -->
-              <div class="mask-guidance" id="maskGuidance">Click Auto Detect to select the subject. Use −Remove / +Keep to refine.</div>
+              <div class="mask-guidance" id="maskGuidance">Click Auto Detect to select the subject. Use −Remove / +Keep to refine. Tolerance is fixed.</div>
             </div>
 
             <!-- Hidden old compare strip (kept for drawMaskPreview compat) -->
@@ -1456,6 +1461,8 @@
   }
 
   function setPlaybackState(next) {
+    // Remove 'preview' state, use 'ready' for preview
+    if (next === 'preview') next = 'ready';
     state.playbackState = next;
     const labelMap = {
       idle: "Idle",
@@ -1466,6 +1473,22 @@
     };
     if (el("previewState")) el("previewState").textContent = labelMap[next] || "Idle";
   }
+// --- Runtime DOM Reference Guard (dev only) ---
+(function runtimeDomGuard() {
+  if (!window.location.search.includes('dev')) return;
+  const referencedIds = [
+    'maskEditorWrap', 'maskEditorImg', 'compareOriginal', 'compareMask', 'scanInfo',
+    'previewState', 'statusMessage', 'activityLog', 'mobileActionBar', 'maskGuidance',
+    'dimensionWidth', 'dimensionHeight', 'dimensionDepth', 'layerDisplay', 'snapState', 'currentStepDisplay',
+    'statusBadge', 'jobState', 'stepCount', 'latestJobId', 'modeGuidance', 'selectionMessage',
+    'btnGenerateImage', 'uploadFile', 'btnClearUpload', 'presetClass', 'aiPrompt',
+  ];
+  referencedIds.forEach(id => {
+    if (!document.getElementById(id)) {
+      console.warn('[xyz_modular] Missing DOM id:', id);
+    }
+  });
+})();
 
   function updateDimensionsUI() {
     if (el("dimensionWidth")) el("dimensionWidth").textContent = pretty(state.width);
@@ -1521,44 +1544,19 @@
   }
 
   function resetProcessPreviews() {
-    const uploadImg = el("uploadPreviewImage");
-    const uploadEmpty = el("uploadPreviewEmpty");
-    if (uploadImg) {
-      uploadImg.removeAttribute("src");
-      uploadImg.style.display = "none";
-    }
-    if (uploadEmpty) uploadEmpty.style.display = "grid";
-    if (el("uploadMeta")) el("uploadMeta").textContent = "Waiting for upload.";
-    if (el("maskMeta")) el("maskMeta").textContent = "Mask not generated yet.";
-    if (el("sliceMeta")) el("sliceMeta").textContent = "Slices not generated yet.";
-    if (el("stepMeta")) el("stepMeta").textContent = "No step path loaded.";
-    if (el("stepPreviewText")) el("stepPreviewText").textContent = "Run Generate";
-    if (el("chamberPreviewText")) el("chamberPreviewText").textContent = "Idle";
-    if (el("chamberMeta")) el("chamberMeta").textContent = "Waiting to play chamber sequence.";
-    if (el("stepProgressFill")) el("stepProgressFill").style.width = "0%";
-    setCanvasPlaceholder("maskPreviewCanvas", "Mask preview");
-    setCanvasPlaceholder("slicePreviewCanvas", "Slice preview");
-    setProcessStage("idle");
+    // Only clear visible UI, no legacy elements
+    if (el('maskEditorImg')) el('maskEditorImg').removeAttribute('src');
+    if (el('compareOriginal')) el('compareOriginal').removeAttribute('src');
+    if (el('scanInfo')) { el('scanInfo').style.display = 'none'; el('scanInfo').innerHTML = ''; }
+    setProcessStage('idle');
   }
 
   function updateStepPreview() {
-    if (el("stepPreviewText")) {
-      el("stepPreviewText").innerHTML = `${state.currentStep}/${state.totalSteps || 0}<br>steps`;
-    }
-    if (el("stepMeta")) {
-      el("stepMeta").textContent = state.totalSteps
-        ? `${state.totalLayers || 0} layers · ${state.totalSteps} path steps loaded.`
-        : "No step path loaded.";
-    }
-    if (el("stepProgressFill")) {
-      const progress = state.totalSteps ? (state.currentStep / state.totalSteps) * 100 : 0;
-      el("stepProgressFill").style.width = `${Math.max(0, Math.min(100, progress))}%`;
-    }
+    // Removed legacy step preview and progress fill updates
   }
 
   function updateChamberPreview(stateLabel, message) {
-    if (el("chamberPreviewText")) el("chamberPreviewText").textContent = stateLabel;
-    if (el("chamberMeta")) el("chamberMeta").textContent = message;
+    // Removed legacy chamber preview/meta updates
   }
 
   function drawMaskPreview(analysis) {
@@ -1613,43 +1611,9 @@
     });
   }
 
-  function drawSlicePreview(analysis) {
-    const canvas = el("slicePreviewCanvas");
-    if (!canvas || !analysis?.rows?.length) return;
-    const ctx = canvas.getContext("2d");
-    const { width, height } = canvas;
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "#06101b";
-    ctx.fillRect(0, 0, width, height);
-    ctx.strokeStyle = "rgba(148,243,222,.18)";
-    ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
-
-    const rows = analysis.rows.filter((row) => row.left !== -1 && row.right !== -1);
-    const sampleCount = Math.min(12, rows.length || 0);
-    const barW = width / Math.max(1, sampleCount * 1.4);
-    const gap = barW * 0.4;
-    const maxWidth = Math.max(1, ...rows.map((row) => row.right - row.left + 1));
-
-    for (let i = 0; i < sampleCount; i++) {
-      const row = rows[Math.floor((i / Math.max(1, sampleCount - 1)) * (rows.length - 1))];
-      const rowWidth = row.right - row.left + 1;
-      const h = 18 + (rowWidth / maxWidth) * (height - 44);
-      const x = 16 + i * (barW + gap);
-      const y = height - 16 - h;
-      ctx.fillStyle = i % 2 === 0 ? "rgba(122,186,255,.88)" : "rgba(148,243,222,.88)";
-      ctx.fillRect(x, y, barW, h);
-    }
-
-    ctx.fillStyle = "rgba(204,255,242,.9)";
-    ctx.font = "11px Inter, sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Layer stack preview", 12, 16);
-
-    if (el("sliceMeta")) {
-      const sliceCount = rows.length;
-      el("sliceMeta").textContent = `${sliceCount} slice layers ready for extrusion.`;
-    }
-  }
+function drawSlicePreview(analysis) {
+  // Removed legacy sliceMeta update and slicePreviewCanvas logic
+}
 
   function applySummary(summary = {}) {
     state.totalSteps = Number(summary.total_steps ?? state.steps.length ?? 0);
@@ -3127,6 +3091,7 @@
     };
   }
 
+  // Unified backend preview API
   async function previewBuild(input_data) {
     const payload = {
       company: "5xLiving",
@@ -3136,12 +3101,7 @@
       input_data,
       requested_by: "local-user"
     };
-
-    return fetchJson(`${XYZ_API}/jobs/preview`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    return fetchBackendPreview(payload);
   }
 
   async function getJob(jobId) {
@@ -5739,6 +5699,114 @@ state.pointSize = 0.16; // Increased point size for bigger 3D object
         addLog(`Unknown preview type: ${result.preview_type}`, "Preview");
       }
       state.honestPreview = result;
+
+      // If backend returns real chamber job data, use applyJobResult. Otherwise, use new preview loader.
+      if (result && Array.isArray(result.steps) && result.steps.length > 0 && result.path_summary && result.geometry_state) {
+        // Real chamber job result, safe to use applyJobResult
+        applyJobResult({ result }, "Preview");
+      } else {
+        // Honest preview only: use dedicated loader
+        loadBackendPreviewIntoChamber(result);
+      }
+    } catch (error) {
+      setStatus("fail", error.message || "Generation failed.");
+      addLog(error.message || "Generation failed.", "Error");
+      let chip = document.getElementById("previewDebugChip");
+      if (chip) chip.textContent = `Render Source: backend-preview | Render Type: error`;
+      if (el("maskGuidance")) {
+        el("maskGuidance").textContent = "Generation failed. Try adjusting the selection.";
+      }
+    }
+  }
+
+  // Dedicated loader for backend preview (no chamber overwrite, no fake job data)
+  // --- Preview Rendering Logic ---
+  function renderBackendPreview(previewResult) {
+    // Clean up previous preview
+    let chip = document.getElementById("previewDebugChip");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.id = "previewDebugChip";
+      chip.className = "chip";
+      chip.style.background = "#0a1a22";
+      chip.style.color = "#94f3de";
+      chip.style.fontWeight = "bold";
+      chip.style.marginLeft = "8px";
+      chip.style.fontSize = "12px";
+      chip.style.border = "1px solid #94f3de";
+      chip.style.display = "inline-block";
+      chip.style.verticalAlign = "middle";
+      document.querySelector(".viewport-bottom .chip-row")?.appendChild(chip);
+    }
+    chip.textContent = `Render Source: backend-preview | Render Type: ${previewResult.preview_type}`;
+
+    // Find or create backendPreviewGroup
+    let backendPreviewGroup = window.backendPreviewGroup;
+    if (!backendPreviewGroup) {
+      backendPreviewGroup = new THREE.Group();
+      backendPreviewGroup.name = "backendPreviewGroup";
+      window.xyzScene.add(backendPreviewGroup);
+      window.backendPreviewGroup = backendPreviewGroup;
+    }
+    // Clear only backendPreviewGroup
+    while (backendPreviewGroup.children.length > 0) {
+      const obj = backendPreviewGroup.children.pop();
+      if (obj.geometry) obj.geometry.dispose?.();
+      if (obj.material) {
+        if (Array.isArray(obj.material)) obj.material.forEach((m) => m.dispose?.());
+        else obj.material.dispose?.();
+      }
+    }
+
+    // Render by preview_type
+    if (previewResult.preview_type === "pointcloud" && previewResult.data) {
+      const points = previewResult.data;
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(points.length * 3);
+      for (let i = 0; i < points.length; i++) {
+        positions[i * 3] = points[i][0];
+        positions[i * 3 + 1] = points[i][1];
+        positions[i * 3 + 2] = points[i][2];
+      }
+      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      const material = new THREE.PointsMaterial({ color: 0x94f3de, size: state.pointSize, sizeAttenuation: true });
+      const pointCloud = new THREE.Points(geometry, material);
+      backendPreviewGroup.add(pointCloud);
+      setStatus("success", "Point cloud preview loaded.");
+      addLog("Preview rendered from backend (pointcloud)", "Preview");
+    } else if (previewResult.preview_type === "mesh" && previewResult.data) {
+      const vertices = previewResult.data.vertices;
+      const faces = previewResult.data.faces;
+      const geometry = new THREE.BufferGeometry();
+      const positionArray = new Float32Array(vertices.length * 3);
+      for (let i = 0; i < vertices.length; i++) {
+        positionArray[i * 3] = vertices[i][0];
+        positionArray[i * 3 + 1] = vertices[i][1];
+        positionArray[i * 3 + 2] = vertices[i][2];
+      }
+      geometry.setAttribute("position", new THREE.BufferAttribute(positionArray, 3));
+      const indexArray = [];
+      for (let i = 0; i < faces.length; i++) {
+        indexArray.push(faces[i][0], faces[i][1], faces[i][2]);
+      }
+      geometry.setIndex(indexArray);
+      geometry.computeVertexNormals();
+      const material = new THREE.MeshStandardMaterial({ color: 0x94f3de, metalness: 0.7, roughness: 0.3 });
+      const mesh = new THREE.Mesh(geometry, material);
+      backendPreviewGroup.add(mesh);
+      setStatus("success", "Mesh preview loaded.");
+      addLog("Preview rendered from backend (mesh)", "Preview");
+    } else if (previewResult.preview_type === "glb" && previewResult.data) {
+      setStatus("fail", "GLB preview not supported in this build.");
+      addLog("GLB preview type not supported.", "Preview");
+    } else {
+      setStatus("fail", `Unknown preview type: ${previewResult.preview_type}`);
+      addLog(`Unknown preview type: ${previewResult.preview_type}`, "Preview");
+    }
+
+    updateChamberPreview("Preview", "Honest preview loaded. Chamber visual only.");
+    setPlaybackState("ready");
+  }
     } catch (error) {
       setStatus("fail", error.message || "Generation failed.");
       addLog(error.message || "Generation failed.", "Error");

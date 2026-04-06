@@ -1,4 +1,16 @@
-# Silence Chrome DevTools workspace probe
+
+
+# ...existing imports...
+from pathlib import Path
+from flask import Blueprint, Flask, jsonify, make_response, request, send_from_directory
+from flask_cors import CORS
+
+BASE_DIR = Path(__file__).resolve().parent
+
+app = Flask(__name__, static_folder="static")
+CORS(app)
+
+# Silence Chrome DevTools workspace probe (must be after app = Flask(...))
 @app.route("/.well-known/appspecific/com.chrome.devtools.json")
 def chrome_devtools_json():
     return jsonify({}), 200
