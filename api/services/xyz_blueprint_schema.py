@@ -1,3 +1,9 @@
+"""
+xyz_blueprint_schema.py
+
+Defines the blueprint schema, presets, validation, and helper builders for XYZ modular construction.
+"""
+
 import enum
 from typing import List, Dict, Any
 
