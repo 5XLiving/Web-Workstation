@@ -1,3 +1,7 @@
+""" xyz_preview_service.py 
+
+Handles preview-only logic for .ply, mesh, point cloud, or splat files. No chamber logic here. """
+
 from typing import Any, Dict
 
 ALLOWED_PREVIEW_TYPES = {"mesh", "ply", "point_cloud", "splat"}
