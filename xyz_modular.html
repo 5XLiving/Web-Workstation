@@ -1,3 +1,5 @@
+        <!-- Removed misplaced fitPreviewGroupIntoChamber stub from outside HTML -->
+    <!-- Removed misplaced renderBackendPreview stub from outside HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1067,6 +1069,165 @@
     import * as THREE from "three";
     import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
+    // Scales and centers the backendPreviewGroup to fit inside the chamber
+    function fitPreviewGroupIntoChamber() {
+      if (!backendPreviewGroup || backendPreviewGroup.children.length === 0) return;
+      // Compute bounding box of all children
+      const box = new THREE.Box3().setFromObject(backendPreviewGroup);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      // Chamber dimensions
+      const chamberW = state.width;
+      const chamberH = state.height;
+      const chamberD = state.depth;
+
+      // Compute scale to fit
+      const scaleX = chamberW / (size.x || 1e-6);
+      const scaleY = chamberH / (size.y || 1e-6);
+      const scaleZ = chamberD / (size.z || 1e-6);
+      const scale = Math.min(scaleX, scaleY, scaleZ, 1.0); // Don't upscale above 1.0
+
+      backendPreviewGroup.scale.set(scale, scale, scale);
+
+      // Center the group at (0, chamberH/2, 0)
+      backendPreviewGroup.position.set(0, 0, 0);
+      backendPreviewGroup.position.sub(center.multiplyScalar(scale));
+      backendPreviewGroup.position.y += chamberH / 2;
+    }
+
+    // Stub for renderBackendPreview to prevent not defined error
+    // --- Real image-to-3D job API ---
+    async function createImageTo3DJob(file, presetClass) {
+      const fd = new FormData();
+      fd.append("image", file);
+      fd.append("prompt", el("aiPrompt").value.trim());
+      fd.append("preset", presetClass);
+      fd.append("width", String(state.width));
+      fd.append("height", String(state.height));
+      fd.append("depth", String(state.depth));
+      fd.append("scale", String(state.scale));
+      fd.append("texture", "false");
+      fd.append("return_format", "json_mesh");
+      fd.append("quality", "draft");
+
+      const resp = await fetch(`${XYZ_API}/image-to-3d/jobs`, {
+        method: "POST",
+        body: fd
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.detail || data.error || `Create job failed (${resp.status})`);
+      }
+      return data;
+    }
+
+    async function pollImageTo3DJob(jobId) {
+      while (true) {
+        const resp = await fetch(`${XYZ_API}/image-to-3d/jobs/${jobId}`);
+        const job = await resp.json();
+
+        if (!resp.ok) {
+          throw new Error(job.detail || job.error || `Poll failed (${resp.status})`);
+        }
+
+        setStatus(
+          job.status === "failed" ? "fail" :
+          job.status === "completed" ? "success" : "loading",
+          `Stage: ${job.stage} (${job.progress}%)`
+        );
+
+        if (job.status === "completed") return job;
+        if (job.status === "failed") throw new Error(job.error || "Job failed");
+
+        await new Promise((r) => setTimeout(r, 1200));
+      }
+    }
+
+    async function fetchJsonMesh(job) {
+      const resp = await fetch(`${XYZ_API}/image-to-3d/jobs/${job.job_id}/mesh`);
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        throw new Error(data.detail || data.error || `Mesh fetch failed (${resp.status})`);
+      }
+
+      return data;
+    }
+
+    // Real mesh renderer for JSON mesh
+    function renderRealMesh(payload) {
+      clearGroup(backendPreviewGroup);
+
+      const meshData = payload?.mesh;
+      if (!meshData?.vertices || !meshData?.indices) {
+        throw new Error("Mesh payload missing vertices or indices.");
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(meshData.vertices, 3)
+      );
+      geometry.setIndex(meshData.indices);
+
+      if (meshData.normals) {
+        geometry.setAttribute(
+          "normal",
+          new THREE.Float32BufferAttribute(meshData.normals, 3)
+        );
+      } else {
+        geometry.computeVertexNormals();
+      }
+
+      if (meshData.uvs) {
+        geometry.setAttribute(
+          "uv",
+          new THREE.Float32BufferAttribute(meshData.uvs, 2)
+        );
+      }
+
+      if (meshData.colors) {
+        geometry.setAttribute(
+          "color",
+          new THREE.Float32BufferAttribute(meshData.colors, 3)
+        );
+      }
+
+      const material = new THREE.MeshStandardMaterial({
+        color: meshData.material?.color || 0x94f3de,
+        metalness: meshData.material?.metalness ?? 0.18,
+        roughness: meshData.material?.roughness ?? 0.62,
+        transparent: !!meshData.material?.transparent,
+        opacity: meshData.material?.opacity ?? 1.0,
+        vertexColors: !!meshData.colors
+      });
+
+      const mesh = new THREE.Mesh(geometry, material);
+      backendPreviewGroup.add(mesh);
+      fitPreviewGroupIntoChamber();
+
+      state.totalSteps = 1;
+      state.totalLayers = 1;
+      state.currentStep = 1;
+      state.currentLayer = 1;
+
+      el("summaryTotalSteps").textContent = "1";
+      el("summaryMoveSteps").textContent = "1";
+      el("summaryTotalLayers").textContent = "1";
+      el("stepCount").textContent = "1";
+      el("currentStepDisplay").textContent = "1";
+      el("layerDisplay").textContent = "1";
+
+      setStatus("success", "Real 3D mesh loaded.");
+      setPlaybackState("ready");
+      el("selectionMessage").textContent = "Real mesh rendered from backend.";
+      requestRender();
+    }
+
     const API_BASE = "http://127.0.0.1:5000";
     const XYZ_API = "http://127.0.0.1:8000/api/xyz/v1";
 
@@ -1230,263 +1391,44 @@
 
     function initThree() {
       const canvas = el("viewportCanvas");
-
-      renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: true,
-        alpha: true
-      });
+      // Set up renderer
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setClearColor(0x030814, 1);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
 
+      // Set up scene
       scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x071221, 0.035);
 
-      camera = new THREE.PerspectiveCamera(
-        50,
-        canvas.clientWidth / Math.max(1, canvas.clientHeight),
-        0.1,
-        100
-      );
+      // Set up camera
+      const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
+      camera = new THREE.PerspectiveCamera(38, aspect, 0.1, 100);
       camera.position.set(4.8, 3.8, 5.8);
 
+      // Set up controls
       controls = new OrbitControls(camera, canvas);
       controls.enableDamping = true;
-      controls.dampingFactor = 0.06;
+      controls.dampingFactor = 0.12;
+      controls.minDistance = 2.2;
+      controls.maxDistance = 12;
       controls.target.set(0, 1.2, 0);
+      controls.update();
 
-      const ambient = new THREE.AmbientLight(0xffffff, 1.0);
-      scene.add(ambient);
-
-      const keyLight = new THREE.DirectionalLight(0xdffcff, 1.45);
-      keyLight.position.set(5, 8, 4);
-      scene.add(keyLight);
-
-      const rimLight = new THREE.DirectionalLight(0x91a8ff, 0.65);
-      rimLight.position.set(-4, 3, -5);
-      scene.add(rimLight);
-
-      gridHelper = new THREE.GridHelper(14, 14, 0x5cf0dc, 0x2e4f66);
-      gridHelper.material.transparent = true;
-      gridHelper.material.opacity = 0.34;
+      // Add helpers
+      gridHelper = new THREE.GridHelper(8, 16, 0x94f3de, 0x223344);
+      gridHelper.position.y = 0;
       scene.add(gridHelper);
 
       axesHelper = new THREE.AxesHelper(2.2);
+      axesHelper.position.y = 0.01;
       scene.add(axesHelper);
 
+      // Chamber group
       chamberGroup = new THREE.Group();
-      chamberGroup.name = "chamberGroup";
       scene.add(chamberGroup);
 
+      // Backend preview group
       backendPreviewGroup = new THREE.Group();
-      backendPreviewGroup.name = "backendPreviewGroup";
       scene.add(backendPreviewGroup);
-
-      buildChamber();
-      requestRender();
-    }
-
-    function buildChamber() {
-      clearGroup(chamberGroup);
-
-      const ringMaterial = new THREE.MeshBasicMaterial({
-        color: 0x94f3de,
-        transparent: true,
-        opacity: 0.26,
-        wireframe: true
-      });
-
-      const baseMaterial = new THREE.MeshStandardMaterial({
-        color: 0x112335,
-        metalness: 0.4,
-        roughness: 0.55
-      });
-
-      const pointerMaterial = new THREE.MeshStandardMaterial({
-        color: 0x9ff7e6,
-        metalness: 0.55,
-        roughness: 0.3,
-        emissive: 0x0b3b36,
-        emissiveIntensity: 0.8
-      });
-
-      const base = new THREE.Mesh(
-        new THREE.CylinderGeometry(2.2, 2.35, 0.24, 48),
-        baseMaterial
-      );
-      base.position.y = -0.12;
-      chamberGroup.add(base);
-
-      const buildRing = new THREE.Mesh(
-        new THREE.TorusGeometry(1.18, 0.03, 12, 64),
-        ringMaterial
-      );
-      buildRing.rotation.x = Math.PI / 2;
-      buildRing.position.y = 0.2;
-      buildRing.name = "buildRing";
-      chamberGroup.add(buildRing);
-
-      const scaffold = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.18, 1.18, 2.25, 24, 18, true),
-        new THREE.MeshBasicMaterial({
-          color: 0x7fdccc,
-          transparent: true,
-          opacity: 0.13,
-          wireframe: true
-        })
-      );
-      scaffold.position.y = 1.05;
-      scaffold.name = "scaffold";
-      chamberGroup.add(scaffold);
-
-      for (let i = 0; i < 3; i++) {
-        const angle = (Math.PI * 2 * i) / 3;
-        const x = Math.cos(angle) * 1.75;
-        const z = Math.sin(angle) * 1.75;
-
-        const pointer = new THREE.Mesh(
-          new THREE.ConeGeometry(0.13, 0.7, 18),
-          pointerMaterial
-        );
-        pointer.position.set(x, 1.85, z);
-        pointer.lookAt(0, 1.0, 0);
-        pointer.name = `pointer_${i}`;
-        chamberGroup.add(pointer);
-
-        const beam = new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(x, 1.55, z),
-            new THREE.Vector3(0, 1.0, 0)
-          ]),
-          new THREE.LineBasicMaterial({
-            color: 0x94f3de,
-            transparent: true,
-            opacity: 0.35
-          })
-        );
-        chamberGroup.add(beam);
-      }
-    }
-
-    function renderBackendPreview(previewResult) {
-      clearGroup(backendPreviewGroup);
-
-      const previewType = previewResult?.preview_type || previewResult?.type;
-      const data = previewResult?.data;
-
-      if (!previewType || !data) {
-        setStatus("fail", "Preview payload missing type or data.");
-        addLog("Preview payload missing type or data.", "Preview");
-        return;
-      }
-
-      if (previewType !== "mesh") {
-        setStatus("fail", `Unsupported preview type for this shell: ${previewType}`);
-        addLog(`Unsupported preview type for this shell: ${previewType}`, "Preview");
-        return;
-      }
-
-      const construct = data;
-      const steps = Array.isArray(construct.steps) ? construct.steps : [];
-      const stepCount = steps.length;
-
-      if (!stepCount) {
-        setStatus("fail", "Mesh preview returned no construct steps.");
-        addLog("Mesh preview returned no construct steps.", "Preview");
-        return;
-      }
-
-      const group = new THREE.Group();
-      group.name = "constructVisualGroup";
-
-      const boxMaterialCore = new THREE.MeshStandardMaterial({
-        color: 0x94f3de,
-        metalness: 0.45,
-        roughness: 0.28,
-        transparent: true,
-        opacity: 0.88,
-        emissive: 0x0d4138,
-        emissiveIntensity: 0.45
-      });
-
-      const boxMaterialLimb = new THREE.MeshStandardMaterial({
-        color: 0x7ea4ff,
-        metalness: 0.42,
-        roughness: 0.32,
-        transparent: true,
-        opacity: 0.84,
-        emissive: 0x1a2751,
-        emissiveIntensity: 0.35
-      });
-
-      const positionMap = {
-        head: [0, 2.55, 0],
-        torso: [0, 1.7, 0],
-        pelvis: [0, 0.95, 0],
-        left_shoulder: [-0.78, 1.8, 0],
-        right_shoulder: [0.78, 1.8, 0],
-        left_hip: [-0.38, 0.7, 0],
-        right_hip: [0.38, 0.7, 0]
-      };
-
-      const partOffsets = {
-        left_upper_arm: [0, -0.28, 0],
-        right_upper_arm: [0, -0.28, 0],
-        left_lower_arm: [0, -0.88, 0],
-        right_lower_arm: [0, -0.88, 0],
-        left_upper_leg: [0, -0.42, 0],
-        right_upper_leg: [0, -0.42, 0],
-        left_lower_leg: [0, -1.08, 0],
-        right_lower_leg: [0, -1.08, 0]
-      };
-
-      steps.forEach((step, index) => {
-        const size = Array.isArray(step.size) ? step.size : [10, 20, 10];
-        const sx = Math.max(0.12, Number(size[0]) / 18);
-        const sy = Math.max(0.12, Number(size[1]) / 18);
-        const sz = Math.max(0.12, Number(size[2]) / 18);
-
-        const geometry = new THREE.BoxGeometry(sx, sy, sz);
-        const material = step.category === "core" ? boxMaterialCore.clone() : boxMaterialLimb.clone();
-        material.opacity = 0.52 + (index / Math.max(1, stepCount)) * 0.35;
-
-        const mesh = new THREE.Mesh(geometry, material);
-        const anchorBase = positionMap[step.anchor] || [0, 1.2, 0];
-        const partOffset = partOffsets[step.part] || [0, 0, 0];
-
-        mesh.position.set(
-          anchorBase[0] + partOffset[0],
-          anchorBase[1] + partOffset[1],
-          anchorBase[2] + partOffset[2]
-        );
-
-        mesh.userData.stepIndex = index;
-        mesh.userData.step = step;
-        group.add(mesh);
-      });
-
-      backendPreviewGroup.add(group);
-
-      state.totalSteps = stepCount;
-      state.totalLayers = Number(construct.total_layers || stepCount || 0);
-      state.currentStep = stepCount;
-      state.currentLayer = state.totalLayers;
-      state.latestConstruct = construct;
-      state.latestPreview = previewResult;
-
-      el("summaryTotalSteps").textContent = String(stepCount);
-      el("summaryMoveSteps").textContent = String(stepCount);
-      el("summaryTotalLayers").textContent = String(state.totalLayers);
-      el("stepCount").textContent = String(stepCount);
-      el("currentStepDisplay").textContent = String(state.currentStep);
-      el("layerDisplay").textContent = String(state.currentLayer);
-
-      setPlaybackState("ready");
-      setStatus("success", "Backend preview loaded.");
-      el("selectionMessage").textContent =
-        "Backend construct steps rendered in the chamber preview.";
-      addLog(`Preview rendered from backend (${previewType}) with ${stepCount} steps.`, "Preview");
-      requestRender();
     }
 
     async function checkBackendHealth() {
@@ -1500,92 +1442,37 @@
       }
     }
 
-    async function requestHonestPreview(imageElement, presetClass) {
-      const iw = Math.max(10, Math.round((imageElement?.naturalWidth || 320) * state.scale));
-      const ih = Math.max(10, Math.round((imageElement?.naturalHeight || 320) * state.scale));
 
-      const mappedPreset = getMappedPreset(presetClass);
-
-      const blueprintResp = await fetch(`${XYZ_API}/blueprint/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          profile: {},
-          bounds: { width: iw, height: ih },
-          preset: mappedPreset
-        })
-      });
-
-      const blueprint = await blueprintResp.json();
-      if (!blueprintResp.ok) {
-        throw new Error(blueprint.detail || blueprint.error || `Blueprint failed (${blueprintResp.status})`);
-      }
-
-      const constructResp = await fetch(`${XYZ_API}/construct/from-blueprint`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ blueprint })
-      });
-
-      const construct = await constructResp.json();
-      if (!constructResp.ok) {
-        throw new Error(construct.detail || construct.error || `Construct failed (${constructResp.status})`);
-      }
-
-      const previewResp = await fetch(`${XYZ_API}/preview/render`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          preview_data: construct,
-          preview_type: "mesh"
-        })
-      });
-
-      const preview = await previewResp.json();
-      if (!previewResp.ok) {
-        throw new Error(preview.detail || preview.error || `Preview failed (${previewResp.status})`);
-      }
-
-      return { blueprint, construct, preview, mappedPreset };
-    }
 
     async function startGenerateJob() {
       try {
-        if (!state.rawUploadedImage) {
-          throw new Error("Upload an image first.");
-        }
+        const file = el("uploadFile").files?.[0];
+        if (!file) throw new Error("Upload an image first.");
 
-        if (!state.autoDetected) {
-          throw new Error("Use Auto Detect first.");
-        }
-
-        setStatus("loading", "Building backend preview...");
+        setStatus("loading", "Creating image-to-3D job...");
         setPlaybackState("playing");
-        el("selectionMessage").textContent = "Sending 3-step JSON flow to FastAPI…";
+        el("selectionMessage").textContent = "Uploading real image to backend...";
 
-        const rawPreset = el("presetClass").value || "humanoid";
-        const result = await requestHonestPreview(state.rawUploadedImage, rawPreset);
+        const rawPreset = el("presetClass").value || "generic_object";
 
-        state.latestBlueprint = result.blueprint;
-        state.latestConstruct = result.construct;
-        state.latestPreview = result.preview;
-        state.latestJobId = `job-${Date.now()}`;
-
+        const createResult = await createImageTo3DJob(file, rawPreset);
+        state.latestJobId = createResult.job_id;
         el("latestJobId").textContent = state.latestJobId;
+        el("jobState").textContent = "Queued";
+
+        const finalJob = await pollImageTo3DJob(createResult.job_id);
         el("jobState").textContent = "Ready";
 
-        renderBackendPreview(result.preview);
+        const meshPayload = await fetchJsonMesh(finalJob);
+        renderRealMesh(meshPayload);
 
-        addLog(
-          `Flow complete: blueprint → construct → preview. Sent preset "${rawPreset}" as "${result.mappedPreset}".`,
-          "Build"
-        );
+        addLog(`Real image-to-3D job completed: ${finalJob.job_id}`, "Build");
       } catch (error) {
-        setStatus("fail", error.message || "Generation failed.");
+        setStatus("fail", error.message || "Image-to-3D failed.");
         setPlaybackState("idle");
         el("jobState").textContent = "Error";
-        el("selectionMessage").textContent = error.message || "Generation failed.";
-        addLog(error.message || "Generation failed.", "Error");
+        el("selectionMessage").textContent = error.message || "Image-to-3D failed.";
+        addLog(error.message || "Image-to-3D failed.", "Error");
       }
     }
 
@@ -1710,19 +1597,8 @@
 
       controls.update();
 
-      const buildRing = chamberGroup.getObjectByName("buildRing");
-      const scaffold = chamberGroup.getObjectByName("scaffold");
-
       if (state.spin && backendPreviewGroup) {
         backendPreviewGroup.rotation.y += dt * 0.42;
-      }
-
-      if (buildRing) {
-        buildRing.position.y = 0.28 + (Math.sin(timeMs * 0.0018) + 1) * 0.65;
-      }
-
-      if (scaffold) {
-        scaffold.rotation.y += dt * 0.25;
       }
 
       if (state.needsRender || state.spin) {

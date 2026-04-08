@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Stats } from '@react-three/drei'
 import Room from './Room'
@@ -8,6 +8,17 @@ import PreviewWall from './PreviewWall'
 
 export default function ThreeScene({ onMonitorClick, sceneRequest, debug }) {
   const [terrain, setTerrain] = useState(null)
+  const canvasRef = useRef(null)
+  // Prevent browser/page wheel behavior over canvas
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const preventWheel = (event) => event.preventDefault();
+    canvas.addEventListener('wheel', preventWheel, { passive: false });
+    return () => {
+      canvas.removeEventListener('wheel', preventWheel);
+    };
+  }, [])
 
   useEffect(() => {
     if (!sceneRequest) return
@@ -46,7 +57,11 @@ export default function ThreeScene({ onMonitorClick, sceneRequest, debug }) {
 
   return (
     <div className="canvas-wrap">
-      <Canvas shadows camera={{ position: [0, 2, 5], fov: 60 }}>
+      <Canvas
+        ref={canvasRef}
+        shadows
+        camera={{ position: [0, 2, 5], fov: 60 }}
+      >
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 10, 5]} intensity={0.8} castShadow />
         <Suspense fallback={null}>
@@ -61,7 +76,18 @@ export default function ThreeScene({ onMonitorClick, sceneRequest, debug }) {
             </mesh>
           )}
         </Suspense>
-        <OrbitControls enableDamping dampingFactor={0.1} rotateSpeed={0.6} />
+        <OrbitControls
+          makeDefault
+          enableDamping
+          dampingFactor={0.06}
+          enablePan={false}
+          enableZoom={true}
+          zoomSpeed={0.6}
+          minDistance={4.2}
+          maxDistance={8.0}
+          minPolarAngle={0.35}
+          maxPolarAngle={Math.PI - 0.35}
+        />
         <Stats />
       </Canvas>
     </div>
