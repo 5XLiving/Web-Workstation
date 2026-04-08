@@ -1,18 +1,12 @@
-"""
-xyz_blueprint_schema.py
-
-Defines the blueprint schema, presets, validation, and helper builders for XYZ modular construction.
-"""
-
 import enum
 from typing import List, Dict, Any
 
-# --- Preset Definitions ---
 
 class Preset(enum.Enum):
     GENERIC_OBJECT = "generic_object"
     HUMANOID = "humanoid"
     ARMORED_MASCOT_BIPED = "armored_mascot_biped"
+
 
 PRESET_DEFINITIONS = {
     Preset.GENERIC_OBJECT.value: {
@@ -56,39 +50,23 @@ PRESET_DEFINITIONS = {
     }
 }
 
-# --- Blueprint Schema ---
-
-BLUEPRINT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "preset": {"type": "string"},
-        "anchors": {"type": "array", "items": {"type": "object"}},
-        "parts": {"type": "array", "items": {"type": "object"}},
-        "build_order": {"type": "array", "items": {"type": "string"}}
-    },
-    "required": ["preset", "anchors", "parts", "build_order"]
-}
-
-# --- Validation ---
-
 
 def validate_blueprint(blueprint: Dict[str, Any]) -> bool:
-    """
-    Validates a blueprint dict against the schema.
-    Returns True if valid, raises ValueError if invalid.
-    """
-    # Top-level keys
-    for key in BLUEPRINT_SCHEMA["required"]:
+    for key in ["preset", "anchors", "parts", "build_order"]:
         if key not in blueprint:
             raise ValueError(f"Missing required blueprint key: {key}")
-    if blueprint["preset"] not in PRESET_DEFINITIONS:
-        raise ValueError(f"Unknown preset: {blueprint['preset']}")
 
-    # Anchors
+    preset = blueprint["preset"]
+    if preset not in PRESET_DEFINITIONS:
+        raise ValueError(f"Unknown preset: {preset}")
+
+    preset_def = PRESET_DEFINITIONS[preset]
+
     anchors = blueprint["anchors"]
     if not isinstance(anchors, list) or not anchors:
         raise ValueError("Anchors must be a non-empty list.")
-    anchor_names = set()
+
+    anchor_names = []
     for a in anchors:
         if not isinstance(a, dict):
             raise ValueError("Each anchor must be an object.")
@@ -99,13 +77,15 @@ def validate_blueprint(blueprint: Dict[str, Any]) -> bool:
         pos = a["position"]
         if not (isinstance(pos, list) and len(pos) == 3 and all(isinstance(x, (int, float)) for x in pos)):
             raise ValueError(f"Anchor '{a['name']}' position must be a list of 3 numbers.")
-        anchor_names.add(a["name"])
+        if a["name"] in anchor_names:
+            raise ValueError(f"Duplicate anchor name: {a['name']}")
+        anchor_names.append(a["name"])
 
-    # Parts
     parts = blueprint["parts"]
     if not isinstance(parts, list) or not parts:
         raise ValueError("Parts must be a non-empty list.")
-    part_names = set()
+
+    part_names = []
     for p in parts:
         if not isinstance(p, dict):
             raise ValueError("Each part must be an object.")
@@ -114,6 +94,8 @@ def validate_blueprint(blueprint: Dict[str, Any]) -> bool:
                 raise ValueError(f"Part missing required field: {field}")
         if not isinstance(p["name"], str):
             raise ValueError("Part 'name' must be a string.")
+        if p["name"] in part_names:
+            raise ValueError(f"Duplicate part name: {p['name']}")
         if not isinstance(p["anchor"], str):
             raise ValueError("Part 'anchor' must be a string.")
         if p["anchor"] not in anchor_names:
@@ -135,50 +117,34 @@ def validate_blueprint(blueprint: Dict[str, Any]) -> bool:
                 raise ValueError(f"Part '{p['name']}' offset must be a list of 3 numbers if present.")
         if "shell_thickness" in p and not isinstance(p["shell_thickness"], (int, float)):
             raise ValueError(f"Part '{p['name']}' shell_thickness must be numeric if present.")
-        part_names.add(p["name"])
+        part_names.append(p["name"])
 
-    # Build order
     build_order = blueprint["build_order"]
     if not isinstance(build_order, list) or not build_order:
         raise ValueError("build_order must be a non-empty list.")
+
+    seen_build = set()
     for part_name in build_order:
         if part_name not in part_names:
             raise ValueError(f"build_order references missing part: {part_name}")
+        if part_name in seen_build:
+            raise ValueError(f"Duplicate entry in build_order: {part_name}")
+        seen_build.add(part_name)
+
+    if set(build_order) != set(part_names):
+        missing = set(part_names) - set(build_order)
+        extra = set(build_order) - set(part_names)
+        if missing:
+            raise ValueError(f"build_order is missing parts: {sorted(missing)}")
+        if extra:
+            raise ValueError(f"build_order has unknown parts: {sorted(extra)}")
+
+    missing_required_anchors = set(preset_def["anchors"]) - set(anchor_names)
+    if missing_required_anchors:
+        raise ValueError(f"Preset '{preset}' missing required anchors: {sorted(missing_required_anchors)}")
+
+    missing_required_parts = set(preset_def["parts"]) - set(part_names)
+    if missing_required_parts:
+        raise ValueError(f"Preset '{preset}' missing required parts: {sorted(missing_required_parts)}")
+
     return True
-
-# --- Helper Builders ---
-
-def make_anchor(name: str, position: List[float]) -> Dict[str, Any]:
-    return {"name": name, "position": position}
-
-
-def make_part(
-    name: str,
-    anchor: str,
-    primitive_type: str,
-    size: List[float],
-    category: str = "generic",
-    rotation: List[float] = None,
-    offset: List[float] = None,
-    shell_thickness: float = 0.0
-) -> Dict[str, Any]:
-    return {
-        "name": name,
-        "anchor": anchor,
-        "primitive_type": primitive_type,
-        "size": size,
-        "category": category,
-        "rotation": rotation if rotation is not None else [0.0, 0.0, 0.0],
-        "offset": offset if offset is not None else [0.0, 0.0, 0.0],
-        "shell_thickness": shell_thickness
-    }
-
-def make_blueprint(preset: str, anchors: List[Dict[str, Any]], parts: List[Dict[str, Any]], build_order: List[str]) -> Dict[str, Any]:
-    bp = {
-        "preset": preset,
-        "anchors": anchors,
-        "parts": parts,
-        "build_order": build_order
-    }
-    validate_blueprint(bp)
-    return bp
