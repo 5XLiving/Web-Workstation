@@ -19,20 +19,6 @@ def _to_positive_float(value: Any, default: float) -> float:
 
 
 def generate_xyz_path_steps(build_package: dict[str, Any]) -> list[dict[str, Any]]:
-    """
-    Phase 1:
-    Create a simple layer-by-layer construction path.
-
-    This is a virtual XYZ builder path for preview/playback,
-    not a final raster fill / mesh generator.
-
-    Output stays compatible with the current xyz_modular frontend:
-    - one "move" step per layer
-    - one "deposit" step per layer
-    - layer_index starts at 1
-    - position.z is treated as the current vertical build height
-    """
-
     dimensions = build_package.get("dimensions", {}) or {}
     origin = build_package.get("origin", {}) or {}
 
@@ -51,18 +37,16 @@ def generate_xyz_path_steps(build_package: dict[str, Any]) -> list[dict[str, Any
 
     for layer_index in range(total_layers):
         layer_number = layer_index + 1
-
         layer_start_height = layer_index * layer_height
         remaining_height = max(0.0, height - layer_start_height)
         actual_layer_height = min(layer_height, remaining_height)
 
-        # Safety guard for edge cases
         if actual_layer_height <= 0:
             continue
 
         current_z = origin_z + layer_start_height + actual_layer_height
 
-        move_position = {
+        position = {
             "x": _round4(origin_x),
             "y": _round4(origin_y),
             "z": _round4(current_z),
@@ -73,7 +57,8 @@ def generate_xyz_path_steps(build_package: dict[str, Any]) -> list[dict[str, Any
                 "step_index": len(steps) + 1,
                 "kind": "move",
                 "layer_index": layer_number,
-                "position": move_position,
+                "total_layers": total_layers,
+                "position": position,
                 "meta": {
                     "note": "Move toolhead to layer origin",
                     "phase": "layer_start",
@@ -86,7 +71,8 @@ def generate_xyz_path_steps(build_package: dict[str, Any]) -> list[dict[str, Any
                 "step_index": len(steps) + 1,
                 "kind": "deposit",
                 "layer_index": layer_number,
-                "position": move_position,
+                "total_layers": total_layers,
+                "position": position,
                 "build_slice": {
                     "width": _round4(width),
                     "depth": _round4(depth),
@@ -95,6 +81,11 @@ def generate_xyz_path_steps(build_package: dict[str, Any]) -> list[dict[str, Any
                 "meta": {
                     "note": "Deposit rectangular layer slice",
                     "phase": "layer_deposit",
+                    "origin": {
+                        "x": _round4(origin_x),
+                        "y": _round4(origin_y),
+                        "z": _round4(origin_z),
+                    },
                 },
             }
         )
