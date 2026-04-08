@@ -2,10 +2,14 @@ from pathlib import Path
 from flask import Flask, jsonify, make_response, send_from_directory
 from flask_cors import CORS
 
+from routes.upload_routes import upload_bp
+
 BASE_DIR = Path(__file__).resolve().parent
 
 app = Flask(__name__, static_folder="static")
 CORS(app)
+
+app.register_blueprint(upload_bp)
 
 
 @app.route("/.well-known/appspecific/com.chrome.devtools.json")
