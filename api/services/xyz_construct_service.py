@@ -1,3 +1,5 @@
+""" xyz_construct_service.py Converts a blueprint into chamber build steps for XYZ modular system. This is the only module that feeds the chamber build. """
+
 from typing import Dict, Any
 from .xyz_blueprint_schema import validate_blueprint
 
