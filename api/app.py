@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from api.routes.xyz_routes import router as xyz_router
 
-app = FastAPI()
+app = FastAPI(title="5xLiving XYZ API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -12,10 +13,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def read_root():
-    return {"message": "API is running"}
+    return {"ok": True, "message": "API is running"}
+
+
+@app.get("/health")
+def health():
+    return {"ok": True, "message": "API healthy"}
+
 
 app.include_router(xyz_router, prefix="/api/xyz/v1", tags=["xyz"])
+
 
 print("[DEBUG] Route registration complete.")
