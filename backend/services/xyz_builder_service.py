@@ -5,7 +5,10 @@ from schemas.xyz_build_schema import (
     validate_xyz_build_package,
 )
 from services.xyz_path_service import generate_xyz_path_steps, summarize_xyz_path
-from services.xyz_geometry_service import build_xyz_geometry_state
+from services.xyz_geometry_preview import (
+    build_xyz_geometry_state,
+    build_xyz_preview_payload,
+)
 
 
 def build_xyz_session(job: dict[str, Any]) -> dict[str, Any]:
@@ -41,15 +44,7 @@ def build_xyz_session(job: dict[str, Any]) -> dict[str, Any]:
     steps = generate_xyz_path_steps(build_package)
     path_summary = summarize_xyz_path(steps)
     geometry_state = build_xyz_geometry_state(build_package, steps)
-
-    preview = {
-        "placeholder": False,
-        "kind": "xyz_fabrication_preview",
-        "template": geometry_state["template"],
-        "geometry_state": geometry_state,
-        "chamber_state": geometry_state["chamber_state"],
-        "message": "XYZ spatial fabrication preview generated.",
-    }
+    preview = build_xyz_preview_payload(build_package, steps)
 
     return {
         "ok": True,
