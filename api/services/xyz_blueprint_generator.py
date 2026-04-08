@@ -11,108 +11,101 @@ from .xyz_blueprint_schema import (
     PRESET_DEFINITIONS, make_anchor, make_part, make_blueprint
 )
 
-# --- Main Generator ---
+
+def _num(value: Any, name: str, default: float) -> float:
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        v = float(default)
+    if v <= 0:
+        raise ValueError(f"{name} must be > 0")
+    return v
+
+
+def _part_spec(part_name: str, width: float, height: float, preset_def: Dict[str, Any]) -> Dict[str, Any]:
+    limb_scale = float(preset_def["rules"].get("limb_scale", 1.0))
+    accessory_scale = float(preset_def["rules"].get("accessory_scale", 1.0))
+
+    specs = {
+        "head": {"size": [width * 0.18, height * 0.18, width * 0.18], "category": "core", "anchor": "head"},
+        "torso": {"size": [width * 0.22, height * 0.28, width * 0.14], "category": "core", "anchor": "torso"},
+        "pelvis": {"size": [width * 0.18, height * 0.14, width * 0.12], "category": "core", "anchor": "pelvis"},
+        "left_upper_arm": {"size": [width * 0.09, height * 0.16, width * 0.09], "category": "limb", "anchor": "left_shoulder"},
+        "right_upper_arm": {"size": [width * 0.09, height * 0.16, width * 0.09], "category": "limb", "anchor": "right_shoulder"},
+        "left_lower_arm": {"size": [width * 0.08, height * 0.15, width * 0.08], "category": "limb", "anchor": "left_shoulder"},
+        "right_lower_arm": {"size": [width * 0.08, height * 0.15, width * 0.08], "category": "limb", "anchor": "right_shoulder"},
+        "left_upper_leg": {"size": [width * 0.10, height * 0.18, width * 0.10], "category": "limb", "anchor": "left_hip"},
+        "right_upper_leg": {"size": [width * 0.10, height * 0.18, width * 0.10], "category": "limb", "anchor": "right_hip"},
+        "left_lower_leg": {"size": [width * 0.09, height * 0.17, width * 0.09], "category": "limb", "anchor": "left_hip"},
+        "right_lower_leg": {"size": [width * 0.09, height * 0.17, width * 0.09], "category": "limb", "anchor": "right_hip"},
+        "accessory": {"size": [width * 0.12, height * 0.12, width * 0.12], "category": "accessory", "anchor": "accessory"},
+        "block": {"size": [width * 0.24, height * 0.24, width * 0.24], "category": "generic", "anchor": "center"},
+    }
+
+    spec = specs.get(part_name, {"size": [width * 0.1, height * 0.1, width * 0.1], "category": "core", "anchor": preset_def["anchors"][0]})
+
+    if spec["category"] == "limb":
+        spec["size"] = [s * limb_scale for s in spec["size"]]
+    elif spec["category"] == "accessory":
+        spec["size"] = [s * accessory_scale for s in spec["size"]]
+
+    return spec
+
 
 def generate_blueprint_from_profile(profile: Dict[str, Any], bounds: Dict[str, Any], preset: str) -> Dict[str, Any]:
-    """
-    Generates a blueprint based on profile/mask, image bounds, and preset.
-    profile: dict with region info (e.g., mask, bounding boxes)
-    bounds: dict with image bounds (e.g., width, height)
-    preset: string, one of the supported presets
-    Returns: blueprint dict
-    """
     if preset not in PRESET_DEFINITIONS:
         raise ValueError(f"Unknown preset: {preset}")
+
     preset_def = PRESET_DEFINITIONS[preset]
-    anchors = []
-    parts = []
-    build_order = []
 
-    width = bounds.get("width", 256)
-    height = bounds.get("height", 256)
-    cx, cy = width / 2, height / 2
+    width = _num(bounds.get("width", 256), "width", 256)
+    height = _num(bounds.get("height", 256), "height", 256)
 
-    # Improved anchor placement with symmetry
-    anchor_positions = {}
+    cx, cy = width / 2.0, height / 2.0
+
+    anchors: List[Dict[str, Any]] = []
+    parts: List[Dict[str, Any]] = []
+    build_order: List[str] = []
+
     for anchor_name in preset_def["anchors"]:
         pos = [cx, cy, 0.0]
-        if "head" in anchor_name:
-            pos[1] = cy - height * 0.3
-        elif "pelvis" in anchor_name:
-            pos[1] = cy + height * 0.2
-        elif "torso" in anchor_name:
-            pos[1] = cy
-        elif "shoulder" in anchor_name:
-            pos[1] = cy - height * 0.1
-            pos[0] += -width * 0.2 if "left" in anchor_name else width * 0.2
-        elif "hip" in anchor_name:
-            pos[1] = cy + height * 0.15
-            pos[0] += -width * 0.15 if "left" in anchor_name else width * 0.15
-        elif "accessory" in anchor_name:
-            pos[1] = cy - height * 0.4
-        anchor_positions[anchor_name] = pos
+
+        if anchor_name == "head":
+            pos = [cx, cy - height * 0.30, 0.0]
+        elif anchor_name == "torso":
+            pos = [cx, cy, 0.0]
+        elif anchor_name == "pelvis":
+            pos = [cx, cy + height * 0.20, 0.0]
+        elif anchor_name == "left_shoulder":
+            pos = [cx - width * 0.20, cy - height * 0.10, 0.0]
+        elif anchor_name == "right_shoulder":
+            pos = [cx + width * 0.20, cy - height * 0.10, 0.0]
+        elif anchor_name == "left_hip":
+            pos = [cx - width * 0.15, cy + height * 0.15, 0.0]
+        elif anchor_name == "right_hip":
+            pos = [cx + width * 0.15, cy + height * 0.15, 0.0]
+        elif anchor_name == "accessory":
+            pos = [cx, cy - height * 0.40, 0.0]
+        elif anchor_name == "center":
+            pos = [cx, cy, 0.0]
+
         anchors.append(make_anchor(anchor_name, pos))
 
-    # Explicit part-to-anchor mapping and richer part fields
-
     for part_name in preset_def["parts"]:
-        # Explicit mapping for left/right limbs
-        if part_name.startswith("left_upper_arm"):
-            anchor = "left_shoulder"
-            category = "limb"
-        elif part_name.startswith("right_upper_arm"):
-            anchor = "right_shoulder"
-            category = "limb"
-        elif part_name.startswith("left_lower_arm"):
-            anchor = "left_shoulder"
-            category = "limb"
-        elif part_name.startswith("right_lower_arm"):
-            anchor = "right_shoulder"
-            category = "limb"
-        elif part_name.startswith("left_upper_leg"):
-            anchor = "left_hip"
-            category = "limb"
-        elif part_name.startswith("right_upper_leg"):
-            anchor = "right_hip"
-            category = "limb"
-        elif part_name.startswith("left_lower_leg"):
-            anchor = "left_hip"
-            category = "limb"
-        elif part_name.startswith("right_lower_leg"):
-            anchor = "right_hip"
-            category = "limb"
-        elif part_name == "accessory":
-            anchor = "accessory"
-            category = "accessory"
-        elif part_name in anchor_positions:
-            anchor = part_name
-            category = "core"
-        else:
-            anchor = preset_def["anchors"][0]
-            category = "core"
+        spec = _part_spec(part_name, width, height, preset_def)
 
-        primitive_type = "block"
-        size = [width * 0.1, height * 0.1, width * 0.1]
-        if category == "limb":
-            scale = preset_def["rules"].get("limb_scale", 1.0)
-            size = [s * scale for s in size]
-        if category == "accessory":
-            scale = preset_def["rules"].get("accessory_scale", 1.0)
-            size = [s * scale for s in size]
-        rotation = [0.0, 0.0, 0.0]
-        offset = [0.0, 0.0, 0.0]
-        shell_thickness = 0.0
-        parts.append(make_part(
-            name=part_name,
-            anchor=anchor,
-            primitive_type=primitive_type,
-            size=size,
-            category=category,
-            rotation=rotation,
-            offset=offset,
-            shell_thickness=shell_thickness
-        ))
+        parts.append(
+            make_part(
+                name=part_name,
+                anchor=spec["anchor"],
+                primitive_type="block",
+                size=spec["size"],
+                category=spec["category"],
+                rotation=[0.0, 0.0, 0.0],
+                offset=[0.0, 0.0, 0.0],
+                shell_thickness=0.0,
+            )
+        )
         build_order.append(part_name)
 
-    blueprint = make_blueprint(preset, anchors, parts, build_order)
-    return blueprint
+    return make_blueprint(preset, anchors, parts, build_order)
