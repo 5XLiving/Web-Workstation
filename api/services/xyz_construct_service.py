@@ -37,7 +37,7 @@ def construct_from_blueprint(blueprint: Dict[str, Any]) -> Dict[str, Any]:
             raise ValueError(f"build_order references missing part: {part_name}")
 
         step = {
-            "step_index": index,
+            "step_index": index + 1,
             "action": "place_part",
             "part": str(part_name),
             "anchor": str(part["anchor"]),
@@ -51,7 +51,7 @@ def construct_from_blueprint(blueprint: Dict[str, Any]) -> Dict[str, Any]:
 
         steps.append(step)
         path_summary.append({
-            "step_index": index,
+            "step_index": index + 1,
             "part": str(part_name),
             "anchor": str(part["anchor"]),
             "category": str(part.get("category", "generic")),
