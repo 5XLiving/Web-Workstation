@@ -13,16 +13,16 @@ _jobs: dict[str, dict[str, Any]] = {}
 
 def _load() -> None:
     global _jobs
+    with _store_lock:
+        if not STORE_PATH.exists():
+            _jobs = {}
+            return
 
-    if not STORE_PATH.exists():
-        _jobs = {}
-        return
-
-    try:
-        data = json.loads(STORE_PATH.read_text(encoding="utf-8"))
-        _jobs = data if isinstance(data, dict) else {}
-    except Exception:
-        _jobs = {}
+        try:
+            data = json.loads(STORE_PATH.read_text(encoding="utf-8"))
+            _jobs = data if isinstance(data, dict) else {}
+        except Exception:
+            _jobs = {}
 
 
 def save() -> None:
@@ -73,6 +73,18 @@ def update_job(job_id: str, updates: dict[str, Any]) -> dict[str, Any] | None:
         _jobs[job_id].update(deepcopy(updates))
         save()
         return deepcopy(_jobs[job_id])
+
+
+def delete_job(job_id: str) -> bool:
+    if not isinstance(job_id, str) or not job_id.strip():
+        return False
+
+    with _store_lock:
+        if job_id not in _jobs:
+            return False
+        del _jobs[job_id]
+        save()
+        return True
 
 
 def list_jobs() -> list[dict[str, Any]]:
