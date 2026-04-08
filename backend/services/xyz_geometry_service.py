@@ -1,3 +1,13 @@
+"""
+xyz_geometry_preview.py
+
+Builds a structured XYZ fabrication preview payload from:
+- build_package
+- generated XYZ path steps
+
+This is for chamber / fabrication preview state.
+"""
+
 from typing import Any
 
 
@@ -111,13 +121,13 @@ def build_xyz_geometry_state(
         "z": _round4(_num(origin_raw.get("z"), 0.0)),
     }
 
-    deposited_layers = [step for step in steps if step.get("kind") == "deposit"]
-
     all_segments, travel_segments, deposit_segments = _build_segments(
         steps=steps,
         origin=origin,
         default_layer_height=layer_height,
     )
+
+    deposited_layers = [step for step in steps if step.get("kind") == "deposit"]
 
     built_height = _round4(
         min(
@@ -141,6 +151,10 @@ def build_xyz_geometry_state(
     current_layer = 0
     if deposited_layers:
         current_layer = max(_int(step.get("layer_index"), 0) for step in deposited_layers)
+
+    total_layers = 0
+    if steps:
+        total_layers = max(_int(step.get("layer_index"), 0) for step in steps)
 
     bed_margin = 1.0
     bed = {
@@ -168,9 +182,9 @@ def build_xyz_geometry_state(
     build_progress = {
         "built_height": built_height,
         "progress_ratio": _round4(built_height / height if height > 0 else 0.0),
-        "completed_layers": len(deposited_layers),
+        "completed_layers": len(deposit_segments),
         "current_layer": current_layer,
-        "total_layers": current_layer,
+        "total_layers": total_layers,
         "total_steps": len(steps),
     }
 
