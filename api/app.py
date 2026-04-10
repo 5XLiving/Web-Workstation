@@ -24,7 +24,4 @@ def health():
     return {"ok": True, "message": "API healthy"}
 
 
-app.include_router(xyz_router, prefix="/api/xyz/v1", tags=["xyz"])
-
-
-print("[DEBUG] Route registration complete.")
+app.include_router(xyz_router)
