@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>XYZ Modular Frontend Only</title>
+  <title>XYZ Modular · Frontend Only Shaped 3D</title>
   <script type="importmap">
   {
     "imports": {
@@ -13,131 +13,618 @@
   }
   </script>
   <style>
-    :root{--bg:#07101f;--bg2:#0a1629;--line:rgba(255,255,255,.08);--text:#eef4ff;--muted:#9fb1c7;--mint:#94f3de;--mint2:#d7fff5}
+    :root{--bg:#030814;--bg2:#071221;--bg3:#0a1728;--glass:rgba(9,18,31,.82);--glass2:rgba(13,24,41,.9);--line:rgba(255,255,255,.08);--text:#eef4ff;--muted:#9fb1c7;--mint:#94f3de;--mint2:#d7fff5;--mintLine:rgba(148,243,222,.25);--warn:#ffd37a;--danger:#ff9d9d;--success:#8ef3d0}
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--text);background:linear-gradient(180deg,#030814,#071221 50%,#0a1728)}
-    .app{height:100vh;display:grid;grid-template-rows:auto 1fr;gap:10px;padding:10px}
-    .glass{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01)),rgba(9,18,31,.85);backdrop-filter:blur(10px);border-radius:20px}
-    .top{padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
-    .brand strong{font-size:28px;display:block}.brand span{color:var(--muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
-    .layout{min-height:0;display:grid;grid-template-columns:340px 1fr 300px;gap:10px}
-    .panel{min-height:0;display:flex;flex-direction:column;overflow:hidden}.head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.body{padding:14px;overflow:auto;display:grid;gap:12px;align-content:start}
-    .card{border:1px solid var(--line);border-radius:16px;padding:12px;background:rgba(8,14,24,.65)} .card h3{margin:0 0 10px;color:var(--mint2);font-size:14px}
-    .muted{color:var(--muted);font-size:13px;line-height:1.5} input,select,textarea,button{font:inherit}
-    input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(7,12,22,.9);color:var(--text)} textarea{min-height:86px;resize:vertical}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{padding:11px 14px;border-radius:12px;border:1px solid rgba(148,243,222,.24);cursor:pointer}
-    .btn-primary{background:linear-gradient(135deg,#b8fff0,#86efd8);color:#08221d;font-weight:800}.btn-secondary{background:rgba(148,243,222,.06);color:var(--text)}.btn-quiet{background:rgba(255,255,255,.03);color:var(--muted);border-color:var(--line)}
-    .toggle{padding:8px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(10,17,29,.82);color:var(--muted);cursor:pointer}.toggle.active{background:rgba(148,243,222,.08);color:var(--mint2)}
-    .toggles{display:flex;gap:8px;flex-wrap:wrap}.preview{border:1px solid var(--line);border-radius:14px;min-height:180px;display:grid;place-items:center;overflow:hidden;background:#040912}.preview img{width:100%;max-height:260px;object-fit:contain;display:none}
-    .viewport{position:relative;min-height:0;display:grid;grid-template-rows:auto 1fr auto;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:radial-gradient(circle at 20% 0%,rgba(112,146,255,.14),transparent 20%),linear-gradient(180deg,rgba(9,16,28,.82),rgba(8,13,24,.92))}
-    .viewport-top{padding:14px 14px 0;display:grid;gap:10px}.badge{display:inline-block;width:fit-content;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(7,14,24,.72);color:var(--mint2);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
-    .note{padding:10px 12px;border-radius:16px;border:1px solid var(--line);background:rgba(6,12,22,.74);display:flex;justify-content:space-between;gap:8px;align-items:center}.note .chip{padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(10,17,29,.82);color:var(--mint2);font-size:12px}.hint{color:var(--muted);font-size:12px}
-    #viewportCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}.viewport-main{position:relative;min-height:420px}
-    .overlay{position:absolute;left:16px;right:16px;bottom:16px;display:flex;justify-content:space-between;gap:12px;pointer-events:none}.callout{max-width:380px;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:rgba(9,16,28,.8)}
-    .callout strong{display:block;font-size:12px;color:var(--mint2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}.pillstrip{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.pill{min-width:90px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(8,14,24,.72);text-align:center}.pill span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}.pill strong{font-size:14px;color:var(--mint2)}
-    .viewport-bottom{padding:0 14px 14px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.chiprow{display:flex;gap:8px;flex-wrap:wrap}.chip2{padding:9px 11px;border-radius:12px;border:1px solid var(--line);background:rgba(8,14,24,.72);font-size:12px;color:var(--muted)}.chip2 strong{color:var(--mint2);margin-left:6px}
-    .metric{padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(9,14,24,.76)}.metric-line{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:3px 0}.metric-line .k{color:var(--muted)} .metric-line .v{color:var(--mint2);font-weight:700;text-align:right}
-    .status{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(10,17,29,.88)}.status:before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}.idle{color:#9aa6bb}.loading{color:#ffd37a}.success{color:#8ef3d0}.fail{color:#ff9d9d}
-    .log{min-height:180px;max-height:260px;overflow:auto;display:grid;gap:8px}.entry{padding:10px 11px;border-radius:12px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);font-size:12px;color:var(--muted)}.entry strong{color:var(--text)}
-    @media (max-width:1100px){.layout{grid-template-columns:1fr}.right{order:3}.left{order:2}.viewport-wrap{order:1}}
+    body{margin:0;color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;background:radial-gradient(circle at 12% 10%, rgba(89,126,255,.16), transparent 24%),radial-gradient(circle at 88% 14%, rgba(77,216,194,.12), transparent 24%),linear-gradient(180deg,var(--bg),var(--bg2) 52%,var(--bg3));overflow:hidden}
+    .app{height:100vh;padding:12px;display:grid;grid-template-rows:auto 1fr;gap:12px}
+    .glass{border:1px solid var(--line);background:radial-gradient(circle at top right, rgba(148,243,222,.07), transparent 24%),linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01)),linear-gradient(180deg, var(--glass2), var(--glass));border-radius:24px;backdrop-filter:blur(16px) saturate(135%)}
+    .topbar{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .brand strong{display:block;font-size:30px;font-weight:800}
+    .brand span,.muted{color:var(--muted)} .brand span{letter-spacing:.16em;font-size:12px;text-transform:uppercase}
+    .layout{min-height:0;display:grid;grid-template-columns:350px 1fr 300px;gap:12px}
+    .panel{min-height:0;display:flex;flex-direction:column;overflow:hidden}
+    .panel-head{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;gap:10px}
+    .panel-body{padding:16px;overflow:auto;display:grid;gap:14px;align-content:start}
+    .card{border-radius:18px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg, rgba(11,18,31,.86), rgba(10,16,28,.72));padding:14px;display:grid;gap:12px}
+    .card h3{margin:0;color:var(--mint2);font-size:14px}
+    .field-grid{display:grid;gap:10px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    label{display:block;color:var(--muted);font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px}
+    input,select,textarea{width:100%;padding:11px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(8,14,24,.9);color:var(--text);font:inherit}
+    textarea{min-height:88px;resize:vertical}
+    .btn{min-height:44px;border-radius:12px;border:1px solid var(--mintLine);cursor:pointer;padding:11px 14px;font:inherit;font-weight:800}
+    .btn-primary{color:#08221d;background:linear-gradient(135deg,#b8fff0,#86efd8)}
+    .btn-secondary{color:var(--text);background:rgba(148,243,222,.06)}
+    .btn-quiet{color:var(--muted);background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08)}
+    .toggles{display:flex;flex-wrap:wrap;gap:8px}
+    .toggle{border-radius:999px;padding:9px 12px;border:1px solid rgba(255,255,255,.08);background:rgba(10,17,29,.82);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer}
+    .toggle.active{color:var(--mint2);background:rgba(148,243,222,.08);border-color:var(--mintLine)}
+    .preview-box{border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(7,12,22,.82);min-height:180px;display:grid;place-items:center;overflow:hidden}
+    .preview-box img{display:none;width:100%;max-height:260px;object-fit:contain;background:#040912}
+    .viewport-shell{min-height:0;border-radius:28px;overflow:hidden;display:grid;grid-template-rows:auto 1fr auto;background:radial-gradient(circle at 16% 0%, rgba(112,146,255,.14), transparent 22%),radial-gradient(circle at 88% 12%, rgba(148,243,222,.1), transparent 24%),linear-gradient(180deg, rgba(9,16,28,.82), rgba(8,13,24,.92));border:1px solid rgba(255,255,255,.08);position:relative}
+    .viewport-top{padding:16px 16px 0;display:grid;gap:12px}
+    .badge{width:fit-content;border-radius:999px;padding:10px 14px;border:1px solid rgba(255,255,255,.08);background:rgba(7,14,24,.72);color:var(--mint2);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+    .workspace-note{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(6,12,22,.74)}
+    .mode-chip{border-radius:999px;padding:8px 12px;border:1px solid rgba(255,255,255,.08);background:rgba(10,17,29,.82);color:var(--mint2);font-size:12px;font-weight:700}
+    .viewport-main{position:relative;min-height:420px;overflow:hidden}
+    #viewportCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+    .overlay{position:absolute;left:18px;right:18px;bottom:18px;display:flex;justify-content:space-between;gap:12px;align-items:flex-end;pointer-events:none}
+    .callout{max-width:380px;border-radius:18px;padding:12px 14px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg, rgba(9,16,28,.82), rgba(8,14,24,.72))}
+    .callout strong{display:block;color:var(--mint2);font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+    .dimension-strip{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{min-width:100px;border-radius:14px;padding:10px 12px;border:1px solid rgba(255,255,255,.08);background:rgba(8,14,24,.7);display:grid;gap:4px;text-align:center}
+    .pill span{color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+    .pill strong{color:var(--mint2);font-size:14px}
+    .viewport-bottom{padding:0 16px 16px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+    .chip-row{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{border-radius:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.08);background:rgba(8,14,24,.72);color:var(--muted);font-size:12px}
+    .chip strong{color:var(--mint2);margin-left:6px}
+    .metric{border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(9,14,24,.76);padding:12px;display:grid;gap:8px}
+    .metric-line{display:flex;justify-content:space-between;gap:10px;font-size:13px}
+    .metric-line .k{color:var(--muted)} .metric-line .v{color:var(--mint2);font-weight:700;text-align:right}
+    .status-box{display:grid;gap:8px;padding:12px 14px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(9,14,24,.76)}
+    .status-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(10,17,29,.88);font-size:12px;font-weight:700}
+    .status-badge:before{content:"";width:8px;height:8px;border-radius:999px;background:currentColor}
+    .idle{color:#9aa6bb}.loading{color:var(--warn)}.success{color:var(--success)}.fail{color:var(--danger)}
+    .log{min-height:180px;max-height:260px;overflow:auto;display:grid;gap:8px}
+    .entry{border-radius:12px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);padding:10px 11px;font-size:12px;color:var(--muted);line-height:1.55}
+    .entry strong{color:var(--text)}
+    @media (max-width:1180px){.layout{grid-template-columns:1fr}.viewport-shell{order:-1}}
   </style>
 </head>
 <body>
 <div class="app">
-  <header class="top glass">
-    <div class="brand"><strong>XYZ Modular</strong><span>Frontend-only voxel mesh test</span></div>
+  <header class="topbar glass">
+    <div class="brand">
+      <strong>XYZ Modular</strong>
+      <span>Frontend-only shaped 3D prototype</span>
+    </div>
     <div class="muted">No backend. Upload → detect → generate in browser.</div>
   </header>
   <main class="layout">
-    <aside class="panel glass left">
-      <div class="head"><strong>Controls</strong><span class="muted">Upload → Detect → Generate</span></div>
-      <div class="body">
+    <aside class="panel glass">
+      <div class="panel-head"><strong>Controls</strong><span class="muted">Upload → Detect → Generate</span></div>
+      <div class="panel-body">
         <section class="card">
           <h3>Upload Image</h3>
-          <input type="file" id="uploadFile" accept="image/*" />
-          <div class="row" style="margin-top:10px"><button id="btnAutoDetect" class="btn btn-secondary">Auto Detect</button><button id="btnClearUpload" class="btn btn-quiet">Clear</button></div>
-          <div class="preview" id="imagePreviewBox" style="margin-top:10px"><span class="muted" id="imagePreviewEmpty">No image uploaded yet.</span><img id="uploadedPreview" alt="Uploaded preview" /></div>
-          <div class="muted" style="margin-top:10px">This test does everything in the browser. It creates a simple voxel/extruded mesh from the image silhouette.</div>
+          <div class="field-grid">
+            <input type="file" id="uploadFile" accept="image/*" />
+            <div class="row">
+              <button id="btnAutoDetect" class="btn btn-secondary">Auto Detect</button>
+              <button id="btnClearUpload" class="btn btn-quiet">Clear</button>
+            </div>
+          </div>
+          <div class="preview-box" id="imagePreviewBox">
+            <span class="muted" id="imagePreviewEmpty">No image uploaded yet.</span>
+            <img id="uploadedPreview" alt="Uploaded preview" />
+          </div>
+          <div class="muted">This version generates a shaped browser mesh from the silhouette. It is still a rough character form, not full AI reconstruction.</div>
         </section>
         <section class="card">
           <h3>Shape Profile</h3>
-          <select id="presetClass"><option value="generic_object">Generic Object</option><option value="chibi_humanoid" selected>Chibi Humanoid</option><option value="mascot_biped">Mascot Biped</option></select>
-          <p class="muted" id="presetDesc" style="margin-top:10px">Stylized silhouette extrusion for chibi-like character proportions.</p>
-          <h3 style="margin-top:12px">AI Prompt</h3>
+          <select id="presetClass">
+            <option value="generic_object">Generic Object</option>
+            <option value="chibi_humanoid" selected>Chibi Humanoid</option>
+            <option value="mascot_biped">Mascot Biped</option>
+          </select>
+          <p class="muted" id="presetDesc">Stylized silhouette extrusion with stronger head and torso volume.</p>
+          <h3>Prompt Note</h3>
           <textarea id="aiPrompt" placeholder="Optional note only. Not used for generation yet."></textarea>
-          <button id="btnGenerateImage" class="btn btn-primary" style="margin-top:10px">Generate Preview 3D</button>
+          <button id="btnGenerateImage" class="btn btn-primary">Generate Preview 3D</button>
         </section>
         <section class="card">
           <h3>Dimensions</h3>
-          <label>Width</label><input id="widthInput" type="number" min="0.2" max="20" step="0.1" value="1.2" />
-          <label style="margin-top:10px">Height</label><input id="heightInput" type="number" min="0.2" max="20" step="0.1" value="1.05" />
-          <label style="margin-top:10px">Depth</label><input id="depthInput" type="number" min="0.1" max="20" step="0.05" value="0.35" />
-          <label style="margin-top:10px">Scale</label><input id="scaleInput" type="number" min="0.2" max="10" step="0.1" value="1.0" />
+          <div><label for="widthInput">Width</label><input id="widthInput" type="number" min="0.2" max="20" step="0.1" value="1.2" /></div>
+          <div><label for="heightInput">Height</label><input id="heightInput" type="number" min="0.2" max="20" step="0.1" value="1.05" /></div>
+          <div><label for="depthInput">Depth</label><input id="depthInput" type="number" min="0.1" max="20" step="0.05" value="0.35" /></div>
+          <div><label for="scaleInput">Scale</label><input id="scaleInput" type="number" min="0.2" max="10" step="0.1" value="1.0" /></div>
         </section>
         <section class="card">
           <h3>Quality</h3>
-          <select id="qualitySelect"><option value="draft" selected>Draft</option><option value="standard">Standard</option><option value="high">High</option></select>
-          <div class="toggles" style="margin-top:10px"><button id="toggleGrid" class="toggle active">Grid</button><button id="toggleAxis" class="toggle active">Axis</button><button id="toggleSpin" class="toggle active">Spin</button></div>
-          <div class="row" style="margin-top:10px"><button id="btnReset" class="btn btn-quiet">Reset View</button><button id="btnRefreshJob" class="btn btn-quiet">Re-check Mask</button></div>
+          <select id="qualitySelect">
+            <option value="draft" selected>Draft</option>
+            <option value="standard">Standard</option>
+            <option value="high">High</option>
+          </select>
+          <div class="toggles">
+            <button id="toggleGrid" class="toggle active">Grid</button>
+            <button id="toggleAxis" class="toggle active">Axis</button>
+            <button id="toggleSpin" class="toggle active">Spin</button>
+          </div>
+          <div class="row">
+            <button id="btnReset" class="btn btn-quiet">Reset View</button>
+            <button id="btnRefreshJob" class="btn btn-quiet">Re-check Mask</button>
+          </div>
         </section>
       </div>
     </aside>
-    <section class="viewport viewport-wrap">
-      <div class="viewport-top"><div class="badge">Frontend 3D Chamber</div><div class="note"><span class="chip">Browser Mesh Preview</span><div class="hint" id="modeGuidance">Upload image for reference, then generate a frontend-only silhouette mesh.</div></div></div>
+    <section class="viewport-shell">
+      <div class="viewport-top">
+        <div class="badge">Frontend 3D Chamber</div>
+        <div class="workspace-note">
+          <span class="mode-chip">Browser Mesh Preview</span>
+          <div class="muted" id="modeGuidance">Upload image, detect silhouette, then generate a shaped frontend-only mesh.</div>
+        </div>
+      </div>
       <div class="viewport-main">
         <canvas id="viewportCanvas"></canvas>
         <div class="overlay">
-          <div class="callout"><strong>Construction State</strong><span id="selectionMessage" class="muted">Upload an image, click Auto Detect, then Generate Preview 3D.</span></div>
-          <div class="pillstrip"><div class="pill"><span>Width</span><strong id="dimensionWidth">1.20</strong></div><div class="pill"><span>Height</span><strong id="dimensionHeight">1.05</strong></div><div class="pill"><span>Depth</span><strong id="dimensionDepth">0.35</strong></div><div class="pill"><span>Phase</span><strong id="layerDisplay">0</strong></div></div>
+          <div class="callout">
+            <strong>Construction State</strong>
+            <span id="selectionMessage" class="muted">Upload an image, click Auto Detect, then Generate Preview 3D.</span>
+          </div>
+          <div class="dimension-strip">
+            <div class="pill"><span>Width</span><strong id="dimensionWidth">1.20</strong></div>
+            <div class="pill"><span>Height</span><strong id="dimensionHeight">1.05</strong></div>
+            <div class="pill"><span>Depth</span><strong id="dimensionDepth">0.35</strong></div>
+            <div class="pill"><span>Phase</span><strong id="layerDisplay">0</strong></div>
+          </div>
         </div>
       </div>
-      <div class="viewport-bottom"><div class="chiprow"><div class="chip2">Preview<strong id="previewState">Idle</strong></div><div class="chip2">Job<strong id="jobState">None</strong></div><div class="chip2">Steps<strong id="stepCount">0</strong></div></div><div class="chiprow"><div class="chip2">Latest Job<strong id="latestJobId">None</strong></div><div class="chip2">Current Step<strong id="currentStepDisplay">0</strong></div></div></div>
+      <div class="viewport-bottom">
+        <div class="chip-row">
+          <div class="chip">Preview<strong id="previewState">Idle</strong></div>
+          <div class="chip">Job<strong id="jobState">None</strong></div>
+          <div class="chip">Steps<strong id="stepCount">0</strong></div>
+        </div>
+        <div class="chip-row">
+          <div class="chip">Latest Job<strong id="latestJobId">None</strong></div>
+          <div class="chip">Current Step<strong id="currentStepDisplay">0</strong></div>
+        </div>
+      </div>
     </section>
-    <aside class="panel glass right">
-      <div class="head"><strong>Build Data</strong><span class="muted">Live runtime state</span></div>
-      <div class="body">
-        <section class="metric"><div class="metric-line"><span class="k">Company</span><span class="v">5xLiving</span></div><div class="metric-line"><span class="k">Project</span><span class="v">Workstation</span></div><div class="metric-line"><span class="k">Module</span><span class="v">XYZ Modular</span></div><div class="metric-line"><span class="k">Connection</span><span class="v" id="connectionState">Frontend Only</span></div><div class="metric-line"><span class="k">Snap</span><span class="v" id="snapState">Off</span></div></section>
-        <section class="card"><h3>Status</h3><div class="status idle" id="statusBadge">Idle</div><div id="statusMessage" class="muted" style="margin-top:8px">Ready to build.</div></section>
-        <section class="card"><h3>Construction Summary</h3><div class="metric"><div class="metric-line"><span class="k">Total Steps</span><span class="v" id="summaryTotalSteps">0</span></div><div class="metric-line"><span class="k">Construct Parts</span><span class="v" id="summaryMoveSteps">0</span></div><div class="metric-line"><span class="k">Phases</span><span class="v" id="summaryTotalLayers">0</span></div><div class="metric-line"><span class="k">Preset</span><span class="v" id="summaryPreset">chibi_humanoid</span></div></div></section>
-        <section class="card"><h3>Activity</h3><div id="activityLog" class="log"></div></section>
+    <aside class="panel glass">
+      <div class="panel-head"><strong>Build Data</strong><span class="muted">Live runtime state</span></div>
+      <div class="panel-body">
+        <section class="metric">
+          <div class="metric-line"><span class="k">Company</span><span class="v">5xLiving</span></div>
+          <div class="metric-line"><span class="k">Project</span><span class="v">Workstation</span></div>
+          <div class="metric-line"><span class="k">Module</span><span class="v">XYZ Modular</span></div>
+          <div class="metric-line"><span class="k">Connection</span><span class="v">Frontend Only</span></div>
+          <div class="metric-line"><span class="k">Snap</span><span class="v" id="snapState">Off</span></div>
+        </section>
+        <section class="card">
+          <h3>Status</h3>
+          <div class="status-box">
+            <div><span id="statusBadge" class="status-badge idle">Idle</span></div>
+            <div id="statusMessage" class="muted">Ready to build.</div>
+          </div>
+        </section>
+        <section class="card">
+          <h3>Construction Summary</h3>
+          <div class="metric">
+            <div class="metric-line"><span class="k">Total Steps</span><span class="v" id="summaryTotalSteps">0</span></div>
+            <div class="metric-line"><span class="k">Construct Parts</span><span class="v" id="summaryMoveSteps">0</span></div>
+            <div class="metric-line"><span class="k">Phases</span><span class="v" id="summaryTotalLayers">0</span></div>
+            <div class="metric-line"><span class="k">Preset</span><span class="v" id="summaryPreset">chibi_humanoid</span></div>
+          </div>
+        </section>
+        <section class="card">
+          <h3>Activity</h3>
+          <div id="activityLog" class="log"></div>
+        </section>
       </div>
     </aside>
   </main>
 </div>
+
 <script type="module">
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-console.log("XYZ_FRONTEND_ONLY_BOOT");
-const QUALITY_TO_GRID={draft:34,standard:52,high:74}; const QUALITY_TO_DEPTH={draft:6,standard:10,high:14};
-const PRESET_DESCRIPTIONS={generic_object:"General silhouette extrusion.",chibi_humanoid:"Stylized silhouette extrusion for chibi-like character proportions.",mascot_biped:"Rounder silhouette extrusion."};
-const el=(id)=>document.getElementById(id);
-const state={uploadedFile:null,uploadedUrl:null,uploadedImage:null,maskCanvas:document.createElement('canvas'),latestJobId:'',totalSteps:0,currentStep:0,currentLayer:0,spin:true,needsRender:true};
-let renderer,scene,camera,controls,gridHelper,axesHelper,chamberGroup,previewGroup,animationTime=0;
-function addLog(message,accent=''){const node=el('activityLog');const entry=document.createElement('div');entry.className='entry';const stamp=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});entry.innerHTML=`${accent?`<strong>${accent}</strong><br>`:''}[${stamp}] ${message}`;node.prepend(entry)}
-function setStatus(kind,message){const badge=el('statusBadge');badge.className=`status ${kind}`;badge.textContent=kind.charAt(0).toUpperCase()+kind.slice(1);el('statusMessage').textContent=message}
-function setPlaybackState(label){el('previewState').textContent=label}
-function updateDimensionsUI(){el('dimensionWidth').textContent=Number(el('widthInput').value||1.2).toFixed(2);el('dimensionHeight').textContent=Number(el('heightInput').value||1.05).toFixed(2);el('dimensionDepth').textContent=Number(el('depthInput').value||0.35).toFixed(2);el('currentStepDisplay').textContent=String(state.currentStep);el('layerDisplay').textContent=String(state.currentLayer);requestRender()}
-function updatePresetDescription(){const v=el('presetClass').value;el('presetDesc').textContent=PRESET_DESCRIPTIONS[v]||'Preset description unavailable.';el('summaryPreset').textContent=v}
-function requestRender(){state.needsRender=true}
-function disposeObject(obj){if(obj.geometry)obj.geometry.dispose?.(); if(obj.material)Array.isArray(obj.material)?obj.material.forEach(m=>m.dispose?.()):obj.material.dispose?.()}
-function clearGroup(group){while(group.children.length){const child=group.children[0];group.remove(child);child.traverse(n=>disposeObject(n));}}
-function buildChamber(){clearGroup(chamberGroup);const base=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.35,0.22,48),new THREE.MeshStandardMaterial({color:0x102032,metalness:0.35,roughness:0.6}));base.position.y=-0.11;chamberGroup.add(base);const ring=new THREE.Mesh(new THREE.TorusGeometry(1.1,0.02,12,64),new THREE.MeshBasicMaterial({color:0x94f3de,transparent:true,opacity:0.16,wireframe:true}));ring.rotation.x=Math.PI/2;ring.position.y=0.25;ring.name='buildRing';chamberGroup.add(ring);const scaffold=new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.05,2.0,20,12,true),new THREE.MeshBasicMaterial({color:0x7fdccc,transparent:true,opacity:0.06,wireframe:true}));scaffold.position.y=1.0;scaffold.name='scaffold';chamberGroup.add(scaffold)}
-function initThree(){const canvas=el('viewportCanvas');renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x071221,0.032);camera=new THREE.PerspectiveCamera(48,canvas.clientWidth/Math.max(1,canvas.clientHeight),0.1,100);camera.position.set(4.2,2.8,5.0);controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=0.07;controls.enablePan=false;controls.minDistance=2.2;controls.maxDistance=9.0;controls.target.set(0,0.9,0);scene.add(new THREE.AmbientLight(0xffffff,1.0));const keyLight=new THREE.DirectionalLight(0xdffcff,1.25);keyLight.position.set(4,8,5);scene.add(keyLight);const rimLight=new THREE.DirectionalLight(0x91a8ff,0.45);rimLight.position.set(-4,3,-5);scene.add(rimLight);gridHelper=new THREE.GridHelper(14,14,0x5cf0dc,0x2e4f66);gridHelper.material.transparent=true;gridHelper.material.opacity=0.34;scene.add(gridHelper);axesHelper=new THREE.AxesHelper(2.2);scene.add(axesHelper);chamberGroup=new THREE.Group();scene.add(chamberGroup);previewGroup=new THREE.Group();scene.add(previewGroup);buildChamber()}
-function handleResize(){const canvas=el('viewportCanvas');const width=canvas.clientWidth;const height=Math.max(1,canvas.clientHeight);renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();requestRender()}
-function fitGroup(group){const box=new THREE.Box3().setFromObject(group);if(box.isEmpty())return;const size=new THREE.Vector3();const center=new THREE.Vector3();box.getSize(size);box.getCenter(center);group.position.sub(center);const targetSize=new THREE.Vector3(Math.max(0.8,Number(el('widthInput').value||1.2)*1.2),Math.max(1.0,Number(el('heightInput').value||1.05)*1.4),Math.max(0.6,Number(el('depthInput').value||0.35)*2.4));const scale=Math.min(targetSize.x/Math.max(size.x,0.001),targetSize.y/Math.max(size.y,0.001),targetSize.z/Math.max(size.z,0.001));group.scale.setScalar(scale);const fitted=new THREE.Box3().setFromObject(group);group.position.y+=0.06-fitted.min.y}
-function imageToMask(img,quality){const maxSide=QUALITY_TO_GRID[quality]||QUALITY_TO_GRID.draft;const scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));const w=Math.max(8,Math.round(img.naturalWidth*scale));const h=Math.max(8,Math.round(img.naturalHeight*scale));const canvas=state.maskCanvas;canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.clearRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);const imageData=ctx.getImageData(0,0,w,h);const data=imageData.data;function cornerAvg(){const patch=Math.max(2,Math.floor(Math.min(w,h)/8));const pts=[[0,0],[w-patch,0],[0,h-patch],[w-patch,h-patch]];let rs=0,gs=0,bs=0,count=0;for(const [sx,sy] of pts){for(let y=sy;y<sy+patch;y++){for(let x=sx;x<sx+patch;x++){const i=(y*w+x)*4;rs+=data[i];gs+=data[i+1];bs+=data[i+2];count++;}}}return[rs/count,gs/count,bs/count]} const [br,bg,bb]=cornerAvg();const mask=new Uint8Array(w*h);for(let i=0;i<w*h;i++){const p=i*4;const r=data[p],g=data[p+1],b=data[p+2],a=data[p+3];const lum=0.2126*r+0.7152*g+0.0722*b;const dist=Math.hypot(r-br,g-bg,b-bb);let on=0;if(a<250)on=a>16?1:0;else on=(dist>28 && !(lum>246 && dist<42))?1:0;mask[i]=on} function neighborCount(src,x,y){let n=0;for(let yy=-1;yy<=1;yy++){for(let xx=-1;xx<=1;xx++){if(!xx&&!yy)continue;const nx=x+xx,ny=y+yy;if(nx>=0&&nx<w&&ny>=0&&ny<h)n+=src[ny*w+nx]}}return n} for(let round=0;round<2;round++){const next=new Uint8Array(w*h);for(let y=0;y<h;y++){for(let x=0;x<w;x++){const idx=y*w+x;const n=neighborCount(mask,x,y);next[idx]=mask[idx]?(n>=2?1:0):(n>=5?1:0)}}mask.set(next)} return {w,h,mask,imageData}}
-function buildVoxelMesh(maskInfo){const {w,h,mask,imageData}=maskInfo;const depthLayers=QUALITY_TO_DEPTH[el('qualitySelect').value]||QUALITY_TO_DEPTH.draft;const width=Number(el('widthInput').value||1.2)*Number(el('scaleInput').value||1);const height=Number(el('heightInput').value||1.05)*Number(el('scaleInput').value||1);const depth=Number(el('depthInput').value||0.35)*Number(el('scaleInput').value||1);const dx=width/w,dy=height/h,dz=depth/depthLayers;const xStart=-width/2,yStart=-height/2,zStart=-depth/2;const vertices=[],indices=[],normals=[],colors=[];function filled(x,y,z){if(x<0||x>=w||y<0||y>=h||z<0||z>=depthLayers)return false;return mask[y*w+x]===1} function addFace(quad,normal,color){const base=vertices.length/3;for(const [vx,vy,vz] of quad){vertices.push(vx,vy,vz);normals.push(normal[0],normal[1],normal[2]);colors.push(color[0],color[1],color[2])} indices.push(base,base+1,base+2,base,base+2,base+3)} for(let y=0;y<h;y++){for(let x=0;x<w;x++){const yy=h-1-y;if(!mask[yy*w+x])continue;const p=(yy*w+x)*4;const color=[imageData.data[p]/255,imageData.data[p+1]/255,imageData.data[p+2]/255];for(let z=0;z<depthLayers;z++){const x0=xStart+x*dx,x1=x0+dx;const y0=yStart+yy*dy,y1=y0+dy;const z0=zStart+z*dz,z1=z0+dz;if(!filled(x-1,yy,z))addFace([[x0,y0,z0],[x0,y1,z0],[x0,y1,z1],[x0,y0,z1]],[-1,0,0],color);if(!filled(x+1,yy,z))addFace([[x1,y0,z1],[x1,y1,z1],[x1,y1,z0],[x1,y0,z0]],[1,0,0],color);if(!filled(x,yy-1,z))addFace([[x0,y0,z1],[x1,y0,z1],[x1,y0,z0],[x0,y0,z0]],[0,-1,0],color);if(!filled(x,yy+1,z))addFace([[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],[0,1,0],color);if(!filled(x,yy,z-1))addFace([[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],[x0,y0,z0]],[0,0,-1],color);if(!filled(x,yy,z+1))addFace([[x0,y0,z1],[x0,y1,z1],[x1,y1,z1],[x1,y0,z1]],[0,0,1],color)}}} return {vertices,indices,normals,colors,depthLayers}}
-function renderVoxelMesh(meshData){clearGroup(previewGroup);const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(meshData.vertices,3));geometry.setAttribute('normal',new THREE.Float32BufferAttribute(meshData.normals,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(meshData.colors,3));geometry.setIndex(meshData.indices);const material=new THREE.MeshStandardMaterial({metalness:0.1,roughness:0.82,vertexColors:true});const mesh=new THREE.Mesh(geometry,material);const group=new THREE.Group();group.add(mesh);const edges=new THREE.LineSegments(new THREE.EdgesGeometry(geometry),new THREE.LineBasicMaterial({color:0xd9fff6,transparent:true,opacity:0.18}));group.add(edges);previewGroup.add(group);fitGroup(group);state.totalSteps=meshData.depthLayers;state.currentStep=meshData.depthLayers;state.currentLayer=meshData.depthLayers;el('summaryTotalSteps').textContent=String(meshData.depthLayers);el('summaryMoveSteps').textContent=String(meshData.depthLayers);el('summaryTotalLayers').textContent=String(meshData.depthLayers);el('stepCount').textContent=String(meshData.depthLayers);el('currentStepDisplay').textContent=String(meshData.depthLayers);el('layerDisplay').textContent=String(meshData.depthLayers);setStatus('success','Frontend 3D mesh loaded.');setPlaybackState('Ready');el('jobState').textContent='Ready';el('selectionMessage').textContent='Frontend voxel mesh rendered from image silhouette.';addLog(`Rendered voxel mesh with ${meshData.depthLayers} depth layers.`,'Preview');requestRender()}
-async function handleUpload(file){if(!file)return; if(state.uploadedUrl)URL.revokeObjectURL(state.uploadedUrl);state.uploadedFile=file;state.uploadedUrl=URL.createObjectURL(file);const img=new Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=state.uploadedUrl});state.uploadedImage=img;const preview=el('uploadedPreview');preview.src=state.uploadedUrl;preview.style.display='block';el('imagePreviewEmpty').style.display='none';el('selectionMessage').textContent='Image uploaded. Ready to detect silhouette.';addLog(`Uploaded image: ${file.name}`,'Upload');requestRender()}
-function autoDetectSubject(){if(!state.uploadedImage){setStatus('fail','Upload an image first.');return} const maskInfo=imageToMask(state.uploadedImage,el('qualitySelect').value);const count=maskInfo.mask.reduce((a,b)=>a+b,0);if(!count){setStatus('fail','No subject detected.');addLog('Mask detection found no usable subject.','Mask');return} state.maskInfo=maskInfo;setStatus('success','Subject accepted.');el('selectionMessage').textContent=`Mask detected with ${count} active pixels. Ready to generate.`;addLog(`Mask detected with ${count} active pixels.`,'Mask')}
-function startGenerateJob(){try{if(!state.uploadedImage)throw new Error('Upload an image first.');if(!state.maskInfo)state.maskInfo=imageToMask(state.uploadedImage,el('qualitySelect').value);el('btnGenerateImage').disabled=true;setStatus('loading','Generating frontend voxel mesh...');setPlaybackState('Building');el('jobState').textContent='Running';el('selectionMessage').textContent='Building voxel mesh in browser...';const meshData=buildVoxelMesh(state.maskInfo);state.latestJobId=`job-${Date.now()}`;el('latestJobId').textContent=state.latestJobId;if(!meshData.vertices.length)throw new Error('Generation produced no geometry.');renderVoxelMesh(meshData);addLog(`Frontend-only mesh job completed: ${state.latestJobId}`,'Build')}catch(error){setStatus('fail',error.message||'Generation failed.');setPlaybackState('Idle');el('jobState').textContent='Error';el('selectionMessage').textContent=error.message||'Generation failed.';addLog(error.message||'Generation failed.','Error')}finally{el('btnGenerateImage').disabled=false}}
-function clearUpload(){if(state.uploadedUrl)URL.revokeObjectURL(state.uploadedUrl);state.uploadedFile=null;state.uploadedUrl=null;state.uploadedImage=null;state.maskInfo=null;const preview=el('uploadedPreview');preview.removeAttribute('src');preview.style.display='none';el('imagePreviewEmpty').style.display='block';clearGroup(previewGroup);el('latestJobId').textContent='None';el('jobState').textContent='None';el('summaryTotalSteps').textContent='0';el('summaryMoveSteps').textContent='0';el('summaryTotalLayers').textContent='0';el('stepCount').textContent='0';el('currentStepDisplay').textContent='0';el('layerDisplay').textContent='0';el('selectionMessage').textContent='Upload an image, click Auto Detect, then Generate Preview 3D.';setStatus('idle','Ready to build.');setPlaybackState('Idle');addLog('Upload cleared.','Upload');requestRender()}
-function resetView(){controls.reset();camera.position.set(4.2,2.8,5.0);controls.target.set(0,0.9,0);controls.update();requestRender()}
-function toggleButtonState(button){button.classList.toggle('active')}
-function animate(timeMs=0){requestAnimationFrame(animate);const dt=Math.min(0.05,(timeMs-animationTime)/1000||0.016);animationTime=timeMs;controls.update();const buildRing=chamberGroup.getObjectByName('buildRing');const scaffold=chamberGroup.getObjectByName('scaffold');if(state.spin)previewGroup.rotation.y+=dt*0.38;if(buildRing)buildRing.position.y=0.25+(Math.sin(timeMs*0.0018)+1)*0.42;if(scaffold)scaffold.rotation.y+=dt*0.16;if(state.needsRender||state.spin){renderer.render(scene,camera);state.needsRender=false}}
-function wireUI(){el('uploadFile').addEventListener('change',async(e)=>{const file=e.target.files?.[0];await handleUpload(file)});el('btnAutoDetect').addEventListener('click',autoDetectSubject);el('btnClearUpload').addEventListener('click',clearUpload);el('btnGenerateImage').addEventListener('click',startGenerateJob);el('btnReset').addEventListener('click',resetView);el('btnRefreshJob').addEventListener('click',autoDetectSubject);['widthInput','heightInput','depthInput','scaleInput'].forEach(id=>el(id).addEventListener('input',updateDimensionsUI));el('presetClass').addEventListener('change',updatePresetDescription);el('toggleGrid').addEventListener('click',(e)=>{toggleButtonState(e.currentTarget);gridHelper.visible=!gridHelper.visible;requestRender()});el('toggleAxis').addEventListener('click',(e)=>{toggleButtonState(e.currentTarget);axesHelper.visible=!axesHelper.visible;requestRender()});el('toggleSpin').addEventListener('click',(e)=>{toggleButtonState(e.currentTarget);state.spin=!state.spin;requestRender()})}
-function boot(){initThree();wireUI();updateDimensionsUI();updatePresetDescription();setStatus('idle','Ready to build.');setPlaybackState('Idle');addLog('Frontend-only shell ready.','Boot');handleResize();animate()}
-window.addEventListener('resize',handleResize);boot();
+
+const QUALITY_TO_GRID = { draft: 34, standard: 52, high: 74 };
+const QUALITY_TO_DEPTH = { draft: 8, standard: 12, high: 18 };
+const PRESET_DESCRIPTIONS = {
+  generic_object: "General silhouette extrusion with soft zone depth.",
+  chibi_humanoid: "Stylized silhouette extrusion with stronger head and torso volume.",
+  mascot_biped: "Rounder silhouette extrusion with fuller width and softer body taper."
+};
+const el = (id) => document.getElementById(id);
+const state = { uploadedFile:null, uploadedUrl:null, uploadedImage:null, maskInfo:null, latestJobId:"", totalSteps:0, currentStep:0, currentLayer:0, spin:true, needsRender:true };
+let renderer, scene, camera, controls, gridHelper, axesHelper, chamberGroup, previewGroup, animationTime = 0;
+
+function addLog(message, accent = "") {
+  const node = el("activityLog");
+  const entry = document.createElement("div");
+  entry.className = "entry";
+  const stamp = new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+  entry.innerHTML = `${accent ? `<strong>${accent}</strong><br>` : ""}[${stamp}] ${message}`;
+  node.prepend(entry);
+}
+function setStatus(kind, message) {
+  const badge = el("statusBadge");
+  badge.className = `status-badge ${kind}`;
+  badge.textContent = kind.charAt(0).toUpperCase() + kind.slice(1);
+  el("statusMessage").textContent = message;
+}
+function setPlaybackState(label){ el("previewState").textContent = label; }
+function requestRender(){ state.needsRender = true; }
+function updateDimensionsUI(){
+  el("dimensionWidth").textContent = Number(el("widthInput").value || 1.2).toFixed(2);
+  el("dimensionHeight").textContent = Number(el("heightInput").value || 1.05).toFixed(2);
+  el("dimensionDepth").textContent = Number(el("depthInput").value || 0.35).toFixed(2);
+  el("currentStepDisplay").textContent = String(state.currentStep);
+  el("layerDisplay").textContent = String(state.currentLayer);
+  requestRender();
+}
+function updatePresetDescription(){
+  const v = el("presetClass").value;
+  el("presetDesc").textContent = PRESET_DESCRIPTIONS[v] || "Preset description unavailable.";
+  el("summaryPreset").textContent = v;
+}
+function disposeObject(obj){
+  if (obj.geometry) obj.geometry.dispose?.();
+  if (obj.material) Array.isArray(obj.material) ? obj.material.forEach((m)=>m.dispose?.()) : obj.material.dispose?.();
+}
+function clearGroup(group){
+  while (group.children.length){
+    const child = group.children[0];
+    group.remove(child);
+    child.traverse((n)=>disposeObject(n));
+  }
+}
+function buildChamber(){
+  clearGroup(chamberGroup);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.35,0.22,48), new THREE.MeshStandardMaterial({ color:0x102032, metalness:0.35, roughness:0.6 }));
+  base.position.y = -0.11;
+  chamberGroup.add(base);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.1,0.02,12,64), new THREE.MeshBasicMaterial({ color:0x94f3de, transparent:true, opacity:0.16, wireframe:true }));
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = 0.25;
+  ring.name = "buildRing";
+  chamberGroup.add(ring);
+  const scaffold = new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.05,2.0,20,12,true), new THREE.MeshBasicMaterial({ color:0x7fdccc, transparent:true, opacity:0.06, wireframe:true }));
+  scaffold.position.y = 1.0;
+  scaffold.name = "scaffold";
+  chamberGroup.add(scaffold);
+}
+function initThree(){
+  const canvas = el("viewportCanvas");
+  renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x071221, 0.032);
+  camera = new THREE.PerspectiveCamera(48, canvas.clientWidth / Math.max(1, canvas.clientHeight), 0.1, 100);
+  camera.position.set(4.2,2.8,5.0);
+  controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.07;
+  controls.enablePan = false;
+  controls.minDistance = 2.2;
+  controls.maxDistance = 9.0;
+  controls.target.set(0,0.9,0);
+  scene.add(new THREE.AmbientLight(0xffffff,1.0));
+  const key = new THREE.DirectionalLight(0xdffcff,1.25); key.position.set(4,8,5); scene.add(key);
+  const rim = new THREE.DirectionalLight(0x91a8ff,0.45); rim.position.set(-4,3,-5); scene.add(rim);
+  gridHelper = new THREE.GridHelper(14,14,0x5cf0dc,0x2e4f66);
+  gridHelper.material.transparent = true;
+  gridHelper.material.opacity = 0.34;
+  scene.add(gridHelper);
+  axesHelper = new THREE.AxesHelper(2.2);
+  scene.add(axesHelper);
+  chamberGroup = new THREE.Group(); scene.add(chamberGroup);
+  previewGroup = new THREE.Group(); scene.add(previewGroup);
+  buildChamber();
+  requestRender();
+}
+function handleResize(){
+  const canvas = el("viewportCanvas");
+  const width = canvas.clientWidth;
+  const height = Math.max(1, canvas.clientHeight);
+  renderer.setSize(width, height, false);
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  requestRender();
+}
+function fitGroup(group){
+  const box = new THREE.Box3().setFromObject(group);
+  if (box.isEmpty()) return;
+  const size = new THREE.Vector3();
+  const center = new THREE.Vector3();
+  box.getSize(size);
+  box.getCenter(center);
+  group.position.sub(center);
+  const target = new THREE.Vector3(Math.max(0.8, Number(el("widthInput").value || 1.2) * 1.2), Math.max(1.0, Number(el("heightInput").value || 1.05) * 1.4), Math.max(0.6, Number(el("depthInput").value || 0.35) * 2.6));
+  const scale = Math.min(target.x / Math.max(size.x, 0.001), target.y / Math.max(size.y, 0.001), target.z / Math.max(size.z, 0.001));
+  group.scale.setScalar(scale);
+  const fitted = new THREE.Box3().setFromObject(group);
+  group.position.y += 0.06 - fitted.min.y;
+}
+async function handleUpload(file){
+  if (!file) return;
+  if (state.uploadedUrl) URL.revokeObjectURL(state.uploadedUrl);
+  state.uploadedFile = file;
+  state.uploadedUrl = URL.createObjectURL(file);
+  const img = new Image();
+  await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = state.uploadedUrl; });
+  state.uploadedImage = img;
+  state.maskInfo = null;
+  const preview = el("uploadedPreview");
+  preview.src = state.uploadedUrl;
+  preview.style.display = "block";
+  el("imagePreviewEmpty").style.display = "none";
+  el("selectionMessage").textContent = "Image uploaded. Ready to detect silhouette.";
+  addLog(`Uploaded image: ${file.name}`, "Upload");
+  requestRender();
+}
+function imageToMask(img, quality){
+  const maxSide = QUALITY_TO_GRID[quality] || QUALITY_TO_GRID.draft;
+  const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(10, Math.round(img.naturalWidth * scale));
+  const h = Math.max(10, Math.round(img.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext("2d", { willReadFrequently:true });
+  ctx.drawImage(img, 0, 0, w, h);
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const data = imageData.data;
+  function averageCorners(){
+    const patch = Math.max(2, Math.floor(Math.min(w,h) / 8));
+    const corners = [[0,0],[w-patch,0],[0,h-patch],[w-patch,h-patch]];
+    let rs=0, gs=0, bs=0, count=0;
+    for (const [sx, sy] of corners){
+      for (let y = sy; y < sy + patch; y++){
+        for (let x = sx; x < sx + patch; x++){
+          const i = (y * w + x) * 4;
+          rs += data[i]; gs += data[i+1]; bs += data[i+2]; count++;
+        }
+      }
+    }
+    return [rs/count, gs/count, bs/count];
+  }
+  const [br,bg,bb] = averageCorners();
+  const mask = new Uint8Array(w*h);
+  for (let i = 0; i < w*h; i++){
+    const p = i * 4;
+    const r = data[p], g = data[p+1], b = data[p+2], a = data[p+3];
+    const lum = 0.2126*r + 0.7152*g + 0.0722*b;
+    const dist = Math.hypot(r-br, g-bg, b-bb);
+    mask[i] = (a < 250 ? a > 16 : (dist > 28 && !(lum > 246 && dist < 42))) ? 1 : 0;
+  }
+  function neighbors(src, x, y){
+    let n = 0;
+    for (let yy = -1; yy <= 1; yy++){
+      for (let xx = -1; xx <= 1; xx++){
+        if (!xx && !yy) continue;
+        const nx = x + xx, ny = y + yy;
+        if (nx >= 0 && ny >= 0 && nx < w && ny < h) n += src[ny*w + nx];
+      }
+    }
+    return n;
+  }
+  for (let round = 0; round < 2; round++){
+    const next = new Uint8Array(w*h);
+    for (let y = 0; y < h; y++){
+      for (let x = 0; x < w; x++){
+        const idx = y*w + x;
+        const n = neighbors(mask, x, y);
+        next[idx] = mask[idx] ? (n >= 2 ? 1 : 0) : (n >= 5 ? 1 : 0);
+      }
+    }
+    mask.set(next);
+  }
+  return { w, h, mask, imageData };
+}
+function shapeProfile(yNorm, xNormAbs, preset){
+  const head = Math.max(0, 1 - Math.abs((yNorm - 0.86) / 0.14));
+  const upperTorso = Math.max(0, 1 - Math.abs((yNorm - 0.60) / 0.22));
+  const pelvis = Math.max(0, 1 - Math.abs((yNorm - 0.36) / 0.16));
+  const legs = Math.max(0, 1 - Math.abs((yNorm - 0.16) / 0.18));
+  let depthFactor = 0.55;
+  let widthBias = 1.0;
+  if (preset === "chibi_humanoid"){
+    depthFactor += head * 0.80 + upperTorso * 0.65 + pelvis * 0.35 + legs * 0.15;
+    widthBias = 1.0 - xNormAbs * 0.12;
+  } else if (preset === "mascot_biped"){
+    depthFactor += head * 0.65 + upperTorso * 0.80 + pelvis * 0.45 + legs * 0.20;
+    widthBias = 1.04 - xNormAbs * 0.08;
+  } else {
+    depthFactor += head * 0.35 + upperTorso * 0.45 + pelvis * 0.25 + legs * 0.10;
+    widthBias = 1.0 - xNormAbs * 0.10;
+  }
+  return Math.max(0.35, depthFactor * widthBias);
+}
+function buildShapedVoxelMesh(maskInfo){
+  const { w, h, mask, imageData } = maskInfo;
+  const preset = el("presetClass").value;
+  const baseDepthLayers = QUALITY_TO_DEPTH[el("qualitySelect").value] || QUALITY_TO_DEPTH.draft;
+  const width = Number(el("widthInput").value || 1.2) * Number(el("scaleInput").value || 1);
+  const height = Number(el("heightInput").value || 1.05) * Number(el("scaleInput").value || 1);
+  const depth = Number(el("depthInput").value || 0.35) * Number(el("scaleInput").value || 1);
+  const dx = width / w, dy = height / h;
+  const xStart = -width / 2, yStart = -height / 2;
+  const columnDepth = new Uint16Array(w*h);
+  let maxLocalDepth = 1;
+  for (let y = 0; y < h; y++){
+    for (let x = 0; x < w; x++){
+      const idx = y*w + x;
+      if (!mask[idx]) continue;
+      const yNorm = 1 - (y / Math.max(h - 1, 1));
+      const xNormAbs = Math.abs((x / Math.max(w - 1, 1)) - 0.5) * 2;
+      const shaped = Math.max(1, Math.round(baseDepthLayers * shapeProfile(yNorm, xNormAbs, preset)));
+      columnDepth[idx] = shaped;
+      if (shaped > maxLocalDepth) maxLocalDepth = shaped;
+    }
+  }
+  const dz = depth / maxLocalDepth;
+  const zStart = -depth / 2;
+  const vertices = [], indices = [], normals = [], colors = [];
+  function filled(x, y, z){
+    if (x < 0 || y < 0 || x >= w || y >= h) return false;
+    const count = columnDepth[y*w + x];
+    return z >= 0 && z < count;
+  }
+  function addFace(quad, normal, color){
+    const base = vertices.length / 3;
+    for (const [vx, vy, vz] of quad){
+      vertices.push(vx, vy, vz);
+      normals.push(normal[0], normal[1], normal[2]);
+      colors.push(color[0], color[1], color[2]);
+    }
+    indices.push(base, base+1, base+2, base, base+2, base+3);
+  }
+  for (let y = 0; y < h; y++){
+    for (let x = 0; x < w; x++){
+      const yy = h - 1 - y;
+      const idx = yy*w + x;
+      const localDepth = columnDepth[idx];
+      if (!localDepth) continue;
+      const p = idx * 4;
+      const color = [imageData.data[p] / 255, imageData.data[p+1] / 255, imageData.data[p+2] / 255];
+      for (let z = 0; z < localDepth; z++){
+        const x0 = xStart + x * dx, x1 = x0 + dx;
+        const y0 = yStart + yy * dy, y1 = y0 + dy;
+        const z0 = zStart + z * dz, z1 = z0 + dz;
+        if (!filled(x - 1, yy, z)) addFace([[x0,y0,z0],[x0,y1,z0],[x0,y1,z1],[x0,y0,z1]], [-1,0,0], color);
+        if (!filled(x + 1, yy, z)) addFace([[x1,y0,z1],[x1,y1,z1],[x1,y1,z0],[x1,y0,z0]], [1,0,0], color);
+        if (!filled(x, yy - 1, z)) addFace([[x0,y0,z1],[x1,y0,z1],[x1,y0,z0],[x0,y0,z0]], [0,-1,0], color);
+        if (!filled(x, yy + 1, z)) addFace([[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]], [0,1,0], color);
+        if (!filled(x, yy, z - 1)) addFace([[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],[x0,y0,z0]], [0,0,-1], color);
+        if (!filled(x, yy, z + 1)) addFace([[x0,y0,z1],[x0,y1,z1],[x1,y1,z1],[x1,y0,z1]], [0,0,1], color);
+      }
+    }
+  }
+  return { vertices, indices, normals, colors, phases:maxLocalDepth };
+}
+function renderShapedMesh(meshData){
+  clearGroup(previewGroup);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(meshData.vertices, 3));
+  geometry.setAttribute("normal", new THREE.Float32BufferAttribute(meshData.normals, 3));
+  geometry.setAttribute("color", new THREE.Float32BufferAttribute(meshData.colors, 3));
+  geometry.setIndex(meshData.indices);
+  const material = new THREE.MeshStandardMaterial({ metalness:0.08, roughness:0.84, vertexColors:true });
+  const mesh = new THREE.Mesh(geometry, material);
+  const group = new THREE.Group();
+  group.add(mesh);
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), new THREE.LineBasicMaterial({ color:0xd9fff6, transparent:true, opacity:0.10 }));
+  group.add(edges);
+  previewGroup.add(group);
+  fitGroup(group);
+  state.totalSteps = meshData.phases;
+  state.currentStep = meshData.phases;
+  state.currentLayer = meshData.phases;
+  el("summaryTotalSteps").textContent = String(meshData.phases);
+  el("summaryMoveSteps").textContent = String(meshData.phases);
+  el("summaryTotalLayers").textContent = String(meshData.phases);
+  el("stepCount").textContent = String(meshData.phases);
+  el("currentStepDisplay").textContent = String(meshData.phases);
+  el("layerDisplay").textContent = String(meshData.phases);
+  setStatus("success", "Shaped frontend 3D mesh loaded.");
+  setPlaybackState("Ready");
+  el("jobState").textContent = "Ready";
+  el("selectionMessage").textContent = "Shaped frontend mesh rendered from image silhouette.";
+  addLog(`Rendered shaped voxel mesh with ${meshData.phases} depth phases.`, "Preview");
+  requestRender();
+}
+function autoDetectSubject(){
+  if (!state.uploadedImage){ setStatus("fail", "Upload an image first."); return; }
+  const maskInfo = imageToMask(state.uploadedImage, el("qualitySelect").value);
+  const count = maskInfo.mask.reduce((a,b)=>a+b,0);
+  if (!count){
+    setStatus("fail", "No subject detected.");
+    addLog("Mask detection found no usable subject.", "Mask");
+    return;
+  }
+  state.maskInfo = maskInfo;
+  setStatus("success", "Subject accepted.");
+  el("selectionMessage").textContent = `Mask detected with ${count} active pixels. Ready to generate.`;
+  addLog(`Mask detected with ${count} active pixels.`, "Mask");
+}
+function startGenerateJob(){
+  try{
+    if (!state.uploadedImage) throw new Error("Upload an image first.");
+    if (!state.maskInfo) state.maskInfo = imageToMask(state.uploadedImage, el("qualitySelect").value);
+    el("btnGenerateImage").disabled = true;
+    setStatus("loading", "Generating shaped frontend mesh...");
+    setPlaybackState("Building");
+    el("jobState").textContent = "Running";
+    el("selectionMessage").textContent = "Building shaped voxel mesh in browser...";
+    const meshData = buildShapedVoxelMesh(state.maskInfo);
+    state.latestJobId = `job-${Date.now()}`;
+    el("latestJobId").textContent = state.latestJobId;
+    if (!meshData.vertices.length) throw new Error("Generation produced no geometry.");
+    renderShapedMesh(meshData);
+    addLog(`Frontend-only shaped mesh job completed: ${state.latestJobId}`, "Build");
+  } catch(error){
+    setStatus("fail", error.message || "Generation failed.");
+    setPlaybackState("Idle");
+    el("jobState").textContent = "Error";
+    el("selectionMessage").textContent = error.message || "Generation failed.";
+    addLog(error.message || "Generation failed.", "Error");
+  } finally {
+    el("btnGenerateImage").disabled = false;
+  }
+}
+function clearUpload(){
+  if (state.uploadedUrl) URL.revokeObjectURL(state.uploadedUrl);
+  state.uploadedFile = null; state.uploadedUrl = null; state.uploadedImage = null; state.maskInfo = null;
+  const preview = el("uploadedPreview");
+  preview.removeAttribute("src");
+  preview.style.display = "none";
+  el("imagePreviewEmpty").style.display = "block";
+  clearGroup(previewGroup);
+  el("latestJobId").textContent = "None";
+  el("jobState").textContent = "None";
+  el("summaryTotalSteps").textContent = "0";
+  el("summaryMoveSteps").textContent = "0";
+  el("summaryTotalLayers").textContent = "0";
+  el("stepCount").textContent = "0";
+  el("currentStepDisplay").textContent = "0";
+  el("layerDisplay").textContent = "0";
+  el("selectionMessage").textContent = "Upload an image, click Auto Detect, then Generate Preview 3D.";
+  setStatus("idle", "Ready to build.");
+  setPlaybackState("Idle");
+  addLog("Upload cleared.", "Upload");
+  requestRender();
+}
+function resetView(){
+  controls.reset();
+  camera.position.set(4.2,2.8,5.0);
+  controls.target.set(0,0.9,0);
+  controls.update();
+  requestRender();
+}
+function toggleButtonState(button){ button.classList.toggle("active"); }
+function animate(timeMs = 0){
+  requestAnimationFrame(animate);
+  const dt = Math.min(0.05, (timeMs - animationTime) / 1000 || 0.016);
+  animationTime = timeMs;
+  controls.update();
+  const buildRing = chamberGroup.getObjectByName("buildRing");
+  const scaffold = chamberGroup.getObjectByName("scaffold");
+  if (state.spin) previewGroup.rotation.y += dt * 0.34;
+  if (buildRing) buildRing.position.y = 0.25 + (Math.sin(timeMs * 0.0018) + 1) * 0.42;
+  if (scaffold) scaffold.rotation.y += dt * 0.15;
+  if (state.needsRender || state.spin){ renderer.render(scene, camera); state.needsRender = false; }
+}
+function wireUI(){
+  el("uploadFile").addEventListener("change", async (event)=>{ const file = event.target.files?.[0]; await handleUpload(file); });
+  el("btnAutoDetect").addEventListener("click", autoDetectSubject);
+  el("btnClearUpload").addEventListener("click", clearUpload);
+  el("btnGenerateImage").addEventListener("click", startGenerateJob);
+  el("btnReset").addEventListener("click", resetView);
+  el("btnRefreshJob").addEventListener("click", autoDetectSubject);
+  ["widthInput","heightInput","depthInput","scaleInput"].forEach((id)=>{ el(id).addEventListener("input", updateDimensionsUI); });
+  el("presetClass").addEventListener("change", updatePresetDescription);
+  el("toggleGrid").addEventListener("click", (event)=>{ toggleButtonState(event.currentTarget); gridHelper.visible = !gridHelper.visible; requestRender(); });
+  el("toggleAxis").addEventListener("click", (event)=>{ toggleButtonState(event.currentTarget); axesHelper.visible = !axesHelper.visible; requestRender(); });
+  el("toggleSpin").addEventListener("click", (event)=>{ toggleButtonState(event.currentTarget); state.spin = !state.spin; requestRender(); });
+}
+function boot(){
+  initThree();
+  wireUI();
+  updateDimensionsUI();
+  updatePresetDescription();
+  setStatus("idle", "Ready to build.");
+  setPlaybackState("Idle");
+  addLog("Frontend-only shaped shell ready.", "Boot");
+  handleResize();
+  animate();
+}
+window.addEventListener("resize", handleResize);
+boot();
 </script>
 </body>
 </html>
