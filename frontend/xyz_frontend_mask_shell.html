@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>XYZ Modular Mask Workflow</title>
+	<style>
+		body { font-family: sans-serif; margin: 2em; }
+		.result { margin-top: 1em; padding: 1em; border: 1px solid #ccc; background: #f9f9f9; }
+		label { display: block; margin-top: 1em; }
+		input[type="file"] { margin-top: 0.5em; }
+		button { margin-top: 1.5em; padding: 0.5em 1.5em; }
+		#canvas-wrap { position: relative; display: inline-block; margin-top: 1em; }
+		#source-img, #mask-canvas { position: absolute; top: 0; left: 0; }
+		#mask-canvas { pointer-events: none; }
+		#brush-controls { margin-top: 1em; }
+		#brush-controls label { margin-right: 1em; }
+	</style>
+</head>
+<body>
+	<h1>XYZ Modular Mask Workflow</h1>
+	<label>
+		Upload Source Image:
+		<input type="file" id="source_image" accept="image/*">
+	</label>
+	<div id="canvas-wrap" style="display:none;">
+		<img id="source-img" style="max-width: 512px; max-height: 512px;">
+		<canvas id="mask-canvas"></canvas>
+	</div>
+	<div id="brush-controls" style="display:none;">
+		<label><input type="radio" name="brush" value="add" checked> + Add</label>
+		<label><input type="radio" name="brush" value="remove"> - Remove</label>
+		<label>Brush Size: <input type="range" id="brush-size" min="5" max="50" value="20"></label>
+		<button id="confirm-btn">Confirm Object</button>
+	</div>
+	<div id="result" class="result" style="display:none;"></div>
+
+	<script>
+		let maskData = null;
+		let imageId = null;
+		let sourceImg = document.getElementById('source-img');
+		let maskCanvas = document.getElementById('mask-canvas');
+		let ctx = maskCanvas.getContext('2d');
+		let maskArray = null; // Uint8ClampedArray for mask editing
+		let drawing = false;
+		let brushMode = 'add';
+		let brushSize = 20;
+
+		document.getElementById('source_image').addEventListener('change', async function(e) {
+			const file = e.target.files[0];
+			if (!file) return;
+			// Preview image
+			const url = URL.createObjectURL(file);
+			sourceImg.src = url;
+			sourceImg.onload = async function() {
+				// Resize canvas to match image
+				maskCanvas.width = sourceImg.naturalWidth;
+				maskCanvas.height = sourceImg.naturalHeight;
+				sourceImg.width = Math.min(512, sourceImg.naturalWidth);
+				sourceImg.height = Math.min(512, sourceImg.naturalHeight);
+				maskCanvas.style.width = sourceImg.width + 'px';
+				maskCanvas.style.height = sourceImg.height + 'px';
+				document.getElementById('canvas-wrap').style.display = '';
+				// Send to /api/segment
+				const formData = new FormData();
+				formData.append('image', file);
+				const resp = await fetch('http://127.0.0.1:8000/api/segment', {
+					method: 'POST',
+					body: formData
+				});
+				const data = await resp.json();
+				if (!data.ok) {
+					alert('Segmentation failed: ' + (data.error || 'Unknown error'));
+					return;
+				}
+				imageId = data.image_id;
+				// Draw mask overlay
+				maskData = data.mask_png_base64;
+				await loadMaskToArray(maskData);
+				drawMaskOverlay();
+				document.getElementById('brush-controls').style.display = '';
+			}
+		});
+
+		function loadMaskToArray(maskB64) {
+			return new Promise((resolve) => {
+				const maskImg = new window.Image();
+				maskImg.onload = function() {
+					// Draw mask to offscreen canvas and get pixel data
+					let off = document.createElement('canvas');
+					off.width = maskCanvas.width;
+					off.height = maskCanvas.height;
+					let offCtx = off.getContext('2d');
+					offCtx.drawImage(maskImg, 0, 0, maskCanvas.width, maskCanvas.height);
+					let imgData = offCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+					maskArray = new Uint8ClampedArray(imgData.data.length / 4);
+					for (let i = 0; i < imgData.data.length; i += 4) {
+						maskArray[i/4] = imgData.data[i] > 128 ? 1 : 0;
+					}
+					resolve();
+				};
+				maskImg.src = 'data:image/png;base64,' + maskB64;
+			});
+		}
+
+		function drawMaskOverlay() {
+			ctx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+			if (!maskArray) return;
+			let imgData = ctx.createImageData(maskCanvas.width, maskCanvas.height);
+			for (let i = 0; i < maskArray.length; i++) {
+				if (maskArray[i]) {
+					imgData.data[i*4] = 255; // R
+					imgData.data[i*4+1] = 0; // G
+					imgData.data[i*4+2] = 0; // B
+					imgData.data[i*4+3] = 128; // alpha
+				} else {
+					imgData.data[i*4+3] = 0;
+				}
+			}
+			ctx.putImageData(imgData, 0, 0);
+		}
+
+		// Brush controls
+		document.getElementsByName('brush').forEach(radio => {
+			radio.addEventListener('change', function(e) {
+				brushMode = e.target.value;
+			});
+		});
+		document.getElementById('brush-size').addEventListener('input', function(e) {
+			brushSize = parseInt(e.target.value, 10);
+		});
+
+		// Mask editing events
+		maskCanvas.addEventListener('pointerdown', function(e) {
+			drawing = true;
+			paintMask(e);
+		});
+		maskCanvas.addEventListener('pointermove', function(e) {
+			if (drawing) paintMask(e);
+		});
+		window.addEventListener('pointerup', function() { drawing = false; });
+
+		function paintMask(e) {
+			if (!maskArray) return;
+			const rect = maskCanvas.getBoundingClientRect();
+			const scaleX = maskCanvas.width / rect.width;
+			const scaleY = maskCanvas.height / rect.height;
+			const x = Math.round((e.clientX - rect.left) * scaleX);
+			const y = Math.round((e.clientY - rect.top) * scaleY);
+			const r = Math.max(1, Math.round(brushSize/2));
+			for (let dy = -r; dy <= r; dy++) {
+				for (let dx = -r; dx <= r; dx++) {
+					if (dx*dx + dy*dy <= r*r) {
+						const nx = x + dx, ny = y + dy;
+						if (nx >= 0 && nx < maskCanvas.width && ny >= 0 && ny < maskCanvas.height) {
+							maskArray[ny*maskCanvas.width + nx] = (brushMode === 'add') ? 1 : 0;
+						}
+					}
+				}
+			}
+			drawMaskOverlay();
+		}
+
+		// Confirm and generate cutout
+		document.getElementById('confirm-btn').addEventListener('click', async function() {
+			if (!maskArray) return;
+			// Draw cutout to offscreen canvas
+			let cutout = document.createElement('canvas');
+			cutout.width = maskCanvas.width;
+			cutout.height = maskCanvas.height;
+			let cutoutCtx = cutout.getContext('2d');
+			// Draw source image
+			cutoutCtx.drawImage(sourceImg, 0, 0, cutout.width, cutout.height);
+			// Get image data and apply mask
+			let imgData = cutoutCtx.getImageData(0, 0, cutout.width, cutout.height);
+			for (let i = 0; i < maskArray.length; i++) {
+				if (!maskArray[i]) {
+					imgData.data[i*4+3] = 0; // transparent
+				}
+			}
+			cutoutCtx.putImageData(imgData, 0, 0);
+			// Convert to PNG blob
+			cutout.toBlob(async function(blob) {
+				// Send to /api/model/generate-3d
+				const formData = new FormData();
+				formData.append('image_id', imageId);
+				formData.append('cutout_png', blob, 'cutout.png');
+				const response = await fetch('http://127.0.0.1:8000/api/model/generate-3d', {
+					method: 'POST',
+					body: formData
+				});
+				const data = await response.json();
+				const resultDiv = document.getElementById('result');
+				if (data.ok) {
+					resultDiv.innerHTML =
+						`<b>Job ID:</b> ${data.job_id}<br>` +
+						`<b>Status:</b> ${data.status}<br>` +
+						`<b>Message:</b> ${data.message}`;
+				} else {
+					resultDiv.innerHTML = `<b>Error:</b> ${data.message || 'Unknown error.'}`;
+				}
+				resultDiv.style.display = 'block';
+			}, 'image/png');
+		});
+
+	</script>
+</body>
+</html>

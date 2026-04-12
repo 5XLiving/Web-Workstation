@@ -1,62 +1,56 @@
-from pathlib import Path
-from flask import Flask, jsonify, make_response, send_from_directory
-from flask_cors import CORS
 
-from routes.upload_routes import upload_bp
-
-BASE_DIR = Path(__file__).resolve().parent
-
-app = Flask(__name__, static_folder="static")
-CORS(app)
-
-app.register_blueprint(upload_bp)
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from backend.routes.segment_routes import router as segment_router
+from backend.routes.model_routes import router as model_router
 
 
-@app.route("/.well-known/appspecific/com.chrome.devtools.json")
-def chrome_devtools_json():
-    return jsonify({}), 200
+import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = FastAPI(title="XYZ Modular Backend", version="0.1.0")
 
-@app.route("/")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
 def root():
-    return jsonify({"ok": True, "message": "Workstation backend root"}), 200
+    return {"ok": True, "message": "Workstation backend root"}
 
-
-@app.route("/health")
+@app.get("/health")
 def health():
-    return jsonify({"ok": True, "message": "Workstation backend healthy"}), 200
+    return {"ok": True, "message": "Workstation backend healthy"}
+
+app.include_router(segment_router, prefix="/api/segment", tags=["segment"])
+app.include_router(model_router, prefix="/api/model", tags=["model"])
+
+# Serve outputs as static files
+# Serve outputs as static files
+
+outputs_dir = os.path.join(BASE_DIR, "storage", "outputs")
+if not os.path.exists(outputs_dir):
+    os.makedirs(outputs_dir, exist_ok=True)
+app.mount("/outputs", StaticFiles(directory=outputs_dir), name="outputs")
+
+# Serve the frontend HTML at the required route
+@app.get("/xyz_modular_mask_frontend.html")
+def serve_xyz_modular_mask_frontend():
+    frontend_path = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend', 'xyz_frontend_mask_shell.html'))
+    if not os.path.exists(frontend_path):
+        # Try absolute path from workspace root as fallback
+        fallback_path = os.path.abspath(os.path.join(BASE_DIR, '..', '..', 'frontend', 'xyz_frontend_mask_shell.html'))
+        if os.path.exists(fallback_path):
+            frontend_path = fallback_path
+    return FileResponse(frontend_path, media_type='text/html')
 
 
-@app.route("/3d_model_maker")
-def serve_3d_model_maker():
-    html_path = (BASE_DIR.parent / "3d_model_maker.html").resolve()
-    return send_from_directory(html_path.parent, html_path.name)
-
-
-@app.route("/xyz_modular")
-def serve_xyz_modular():
-    html_path = (BASE_DIR.parent / "xyz_modular.html").resolve()
-    resp = make_response(send_from_directory(html_path.parent, html_path.name))
-    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    resp.headers["Pragma"] = "no-cache"
-    resp.headers["Expires"] = "0"
-    return resp
-
-
-@app.route("/static/images/<path:filename>")
-def serve_static_images(filename):
-    return send_from_directory("static/images", filename)
-
-
-@app.route("/public/images/<path:filename>")
-def serve_public_images(filename):
-    return send_from_directory("public/images", filename)
-
-
-@app.route("/favicon.ico")
-def favicon():
-    favicon_path = (BASE_DIR / "static" / "assets" / "images" / "favicon.ico").resolve()
-    return send_from_directory(favicon_path.parent, favicon_path.name)
 
 
 @app.get("/__which_app")

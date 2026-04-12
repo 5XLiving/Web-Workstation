@@ -1,0 +1,9 @@
+{
+  "job_id": "3e03290a1b2f4b7fa660e1702257cd4f",
+  "image_id": "87c65d03beaa47eea25ccfe62f2c8d4f",
+  "source_cutout": "F:\\5XLiving VS Code\\Web-Workstation\\backend\\storage\\outputs\\3e03290a1b2f4b7fa660e1702257cd4f\\cutout_87c65d03beaa47eea25ccfe62f2c8d4f.png",
+  "status": "ready_for_model",
+  "model": "triposr",
+  "created": "2026-04-12T15:21:36.762157Z",
+  "message": "3D model job created. TripoSR execution is a placeholder until integration."
+}
