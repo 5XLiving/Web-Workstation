@@ -12,6 +12,8 @@ from backend.routes.segment_routes import router as segment_router
 from backend.routes.model_routes import router as model_router
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
+APP_PORT = int(os.getenv("APP_PORT", "5000"))
 
 app = FastAPI(title="XYZ Modular Backend", version="0.1.0")
 
@@ -43,24 +45,40 @@ os.makedirs(outputs_dir, exist_ok=True)
 app.mount("/outputs", StaticFiles(directory=outputs_dir), name="outputs")
 
 
-@app.get("/xyz_modular_mask_frontend.html")
-def serve_xyz_modular_mask_frontend():
+def _serve_frontend_file(filename: str):
     candidate_paths = [
-        os.path.abspath(os.path.join(BASE_DIR, "..", "frontend", "xyz_frontend_mask_shell.html")),
-        os.path.abspath(os.path.join(BASE_DIR, "..", "..", "frontend", "xyz_frontend_mask_shell.html")),
+        os.path.abspath(os.path.join(BASE_DIR, "..", "frontend", filename)),
+        os.path.abspath(os.path.join(BASE_DIR, "..", "..", "frontend", filename)),
     ]
 
     for frontend_path in candidate_paths:
         if os.path.exists(frontend_path):
             return FileResponse(frontend_path, media_type="text/html")
 
-    raise HTTPException(status_code=404, detail="Frontend HTML not found")
+    raise HTTPException(status_code=404, detail=f"Frontend HTML not found: {filename}")
+
+
+@app.get("/xyz_modular_mask_frontend.html")
+def serve_xyz_modular_mask_frontend():
+    return _serve_frontend_file("xyz_frontend_mask_shell.html")
+
+
+@app.get("/xyz_troubleshoot_logbook.html")
+def serve_xyz_troubleshoot_logbook():
+    return _serve_frontend_file("xyz_troubleshoot_logbook.html")
 
 
 @app.get("/__which_app")
 def which_app():
-    return {"ok": True, "marker": "backend-app-clean"}
+    return {
+        "ok": True,
+        "marker": "backend-app-clean",
+        "host": APP_HOST,
+        "port": APP_PORT,
+        "engine": os.getenv("IMAGE3D_ENGINE", "triposr"),
+        "debug_fake_glb": os.getenv("DEBUG_USE_FAKE_GLB", "0"),
+    }
 
 
 if __name__ == "__main__":
-    uvicorn.run("backend.app:app", host="0.0.0.0", port=5000, reload=True)
+    uvicorn.run("backend.app:app", host=APP_HOST, port=APP_PORT, reload=True)
