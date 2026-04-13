@@ -145,7 +145,7 @@
           </div>
           <label class="mini" for="detectStrength">Detect Strength</label>
           <input id="detectStrength" type="range" min="10" max="90" value="38" />
-          <div class="mini">Tries backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/segment</span> first, then local fallback.</div>
+          <div class="mini">Calls backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/segment</span>.</div>
         </section>
 
         <section class="card">
@@ -153,7 +153,7 @@
           <div class="row3">
             <button id="btnAdd" class="btn" disabled>Add +</button>
             <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
-            <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Edits</button>
+            <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
           </div>
           <div class="row">
             <div>
@@ -174,7 +174,7 @@
             <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
             <button id="btnGenerate3D" class="btn btn-primary" disabled>Generate 3D</button>
           </div>
-          <div class="mini">Sends masked cutout to backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/generate-3d</span>.</div>
+          <div class="mini">Sends cutout to backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/model/generate-3d</span>.</div>
           <label class="mini" for="apiBase">API Base</label>
           <input id="apiBase" type="text" value="http://127.0.0.1:5000" />
         </section>
@@ -203,7 +203,7 @@
         <div class="overlay-msg">
           <div class="callout">
             <strong style="display:block;color:var(--mint2);font-size:13px;letter-spacing:.04em;text-transform:uppercase">Current Stage</strong>
-            <span id="selectionMessage" class="muted">Upload one image. Then auto detect the main object.</span>
+            <span id="selectionMessage" class="muted">Upload one image. Then press Auto Detect.</span>
           </div>
           <div class="pillbar" style="pointer-events:none; justify-content:flex-end">
             <div class="pill">Brush<strong id="pillBrush">28</strong></div>
@@ -211,8 +211,9 @@
           </div>
         </div>
       </div>
-      <div id="preview3DContainer" style="margin:24px 0 0 0; width:100%; height:400px; background:#181f2a; border-radius:18px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center;">
-        <span id="preview3DPlaceholder" style="color:#9fb1c7">3D Preview will appear here after Confirm Object</span>
+
+      <div id="preview3DContainer" style="margin:24px 16px 0; width:calc(100% - 32px); height:400px; background:#181f2a; border-radius:18px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center;">
+        <span id="preview3DPlaceholder" style="color:#9fb1c7">3D Preview will appear here after Generate 3D</span>
       </div>
 
       <div class="workspace-foot">
@@ -231,8 +232,6 @@
 </div>
 
 <script>
-console.log("Pipeline script loaded");
-
 const $ = (id) => document.getElementById(id);
 
 const uploadInput = $("uploadFile");
@@ -255,27 +254,9 @@ const maskCanvas = $("maskCanvas");
 const canvasShell = $("canvasShell");
 const preview3DContainer = $("preview3DContainer");
 
-
 const statusBadge = $("statusBadge");
 const statusMessage = $("statusMessage");
 const lastResult = $("lastResult");
-
-function setStatus(kind, msg, extra = "No result yet.") {
-  if (statusBadge) {
-    statusBadge.textContent = kind;
-    statusBadge.className =
-      "status " +
-      (kind === "Success" || kind === "3D Ready"
-        ? "success"
-        : kind === "Error" || kind === "3D Error"
-        ? "error"
-        : kind === "Loading"
-        ? "loading"
-        : "idle");
-  }
-  if (statusMessage) statusMessage.textContent = msg;
-  if (lastResult) lastResult.textContent = extra;
-}
 
 const chipImage = $("chipImage");
 const chipMask = $("chipMask");
@@ -301,100 +282,177 @@ const originalMaskCtx = originalMaskCanvas.getContext("2d", { willReadFrequently
 
 let currentFile = null;
 let currentImage = null;
-let currentImageUrl = null;
 let currentImageId = null;
 let lastCutoutBlob = null;
-let isPainting = false;
 let drawMode = "add";
-let maskLoaded = false;
-let threeReady = false;
+let brushSize = parseInt(brushSizeInput.value, 10);
+let painting = false;
+let activeRenderer = null;
+let activeSceneStop = null;
 
 if (!apiBaseInput.value || apiBaseInput.value.includes(":8000")) {
   apiBaseInput.value = "http://127.0.0.1:5000";
 }
 
+function setStatus(kind, msg, extra = "No result yet.") {
+  statusBadge.textContent = kind;
+  statusBadge.className =
+    "status " +
+    (kind === "Success" || kind === "3D Ready"
+      ? "success"
+      : kind === "Error" || kind === "3D Error"
+      ? "error"
+      : kind === "Loading"
+      ? "loading"
+      : "idle");
+  statusMessage.textContent = msg;
+  lastResult.textContent = extra;
+}
 
-// --- Upload Handler ---
-uploadInput.addEventListener('change', async () => {
-  const file = uploadInput.files[0];
-  if (!file) return;
-  currentFile = file;
-  chipImage.textContent = file.name;
-  statusBadge.textContent = 'Uploading...';
-  statusBadge.className = 'status loading';
-  statusMessage.textContent = 'Uploading image to backend...';
-  const img = new window.Image();
-  img.onload = () => {
-    currentImage = img;
-    imageCanvas.width = img.width;
-    imageCanvas.height = img.height;
-    imageCtx.clearRect(0, 0, img.width, img.height);
-    imageCtx.drawImage(img, 0, 0);
-  };
-  img.src = URL.createObjectURL(file);
-  try {
-    const fd = new FormData();
-    fd.append('image', file);
-    const apiBase = apiBaseInput.value;
-    const res = await fetch(`${apiBase}/api/segment`, { method: 'POST', body: fd });
-    let data;
-    try {
-      data = await res.json();
-    } catch (jsonErr) {
-      statusBadge.textContent = 'Error';
-      statusBadge.className = 'status error';
-      statusMessage.textContent = 'Invalid JSON from backend.';
-      return;
-    }
-    const maskB64 = data.mask_png_base64 || data.mask_b64 || data.maskBase64 || data.mask || null;
-    currentImageId = data.image_id || data.id || null;
-    if (maskB64) {
-      await drawMaskOverlay(maskB64);
-      chipMask.textContent = 'Loaded';
-      btnConfirm.disabled = false;
-      statusBadge.textContent = 'Success';
-      statusBadge.className = 'status success';
-      statusMessage.textContent = 'Mask loaded. You can refine or confirm.';
-      lastResult.textContent = currentImageId ? `image_id: ${currentImageId}` : 'Segment success';
-    } else {
-      chipMask.textContent = 'Empty';
-      statusBadge.textContent = 'Error';
-      statusBadge.className = 'status error';
-      statusMessage.textContent = 'Segment succeeded but mask was not drawn.';
-    }
-  } catch (err) {
-    statusBadge.textContent = 'Error';
-    statusBadge.className = 'status error';
-    statusMessage.textContent = err.message || 'Network error.';
-    btnAutoDetect.disabled = true;
-    btnResetMask.disabled = true;
-    btnAdd.disabled = true;
-    btnRemove.disabled = true;
-    btnClearEdits.disabled = true;
-    btnConfirm.disabled = true;
-    btnGenerate3D.disabled = true;
+function setEditingEnabled(enabled) {
+  btnResetMask.disabled = !enabled;
+  btnAdd.disabled = !enabled;
+  btnRemove.disabled = !enabled;
+  btnClearEdits.disabled = !enabled;
+  btnConfirm.disabled = !enabled;
+}
+
+function resetSessionKeepImage() {
+  currentImageId = null;
+  lastCutoutBlob = null;
+  chipConfirm.textContent = "No";
+  chip3D.textContent = "Not started";
+  chipApi.textContent = "Idle";
+  chipMask.textContent = "Empty";
+  pillMask.textContent = "0%";
+  pillSelection.textContent = "None";
+  btnGenerate3D.disabled = true;
+  setEditingEnabled(false);
+  clearMaskCanvases();
+  clear3DPreview();
+}
+
+function clearMaskCanvases() {
+  [maskCanvas, maskDataCanvas, originalMaskCanvas].forEach((c) => {
+    c.width = imageCanvas.width || 1;
+    c.height = imageCanvas.height || 1;
+    const ctx = c.getContext("2d", { willReadFrequently: true });
+    ctx.clearRect(0, 0, c.width, c.height);
+  });
+  renderMaskOverlay();
+}
+
+function updateSelectionStats() {
+  if (!maskDataCanvas.width || !maskDataCanvas.height) {
+    chipMask.textContent = "Empty";
+    pillMask.textContent = "0%";
+    pillSelection.textContent = "None";
+    return;
   }
-});
+  const data = maskDataCtx.getImageData(0, 0, maskDataCanvas.width, maskDataCanvas.height).data;
+  let on = 0;
+  const total = data.length / 4;
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] > 0) on += 1;
+  }
+  const pct = total ? ((on / total) * 100).toFixed(1) : "0.0";
+  pillMask.textContent = `${pct}%`;
+  chipMask.textContent = on > 0 ? "Loaded" : "Empty";
+  pillSelection.textContent = on > 0 ? "Active" : "None";
+}
 
-// --- Draw Mask Overlay ---
-async function drawMaskOverlay(maskB64) {
-  const src = maskB64.startsWith('data:') ? maskB64 : `data:image/png;base64,${maskB64}`;
+function renderMaskOverlay() {
+  if (!maskCanvas.width || !maskCanvas.height) return;
+  maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+  const src = maskDataCtx.getImageData(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  const out = maskCtx.createImageData(maskCanvas.width, maskCanvas.height);
+  const opacity = Math.max(0.1, Math.min(0.9, Number(overlayOpacityInput.value) / 100));
+
+  for (let i = 0; i < src.data.length; i += 4) {
+    const a = src.data[i + 3] > 0 ? Math.round(255 * opacity) : 0;
+    out.data[i] = 255;
+    out.data[i + 1] = 0;
+    out.data[i + 2] = 0;
+    out.data[i + 3] = a;
+  }
+
+  maskCtx.putImageData(out, 0, 0);
+  updateSelectionStats();
+}
+
+function copyMaskToOriginal() {
+  originalMaskCanvas.width = maskDataCanvas.width;
+  originalMaskCanvas.height = maskDataCanvas.height;
+  originalMaskCtx.clearRect(0, 0, originalMaskCanvas.width, originalMaskCanvas.height);
+  originalMaskCtx.drawImage(maskDataCanvas, 0, 0);
+}
+
+function restoreOriginalMask() {
+  maskDataCanvas.width = originalMaskCanvas.width;
+  maskDataCanvas.height = originalMaskCanvas.height;
+  maskDataCtx.clearRect(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  maskDataCtx.drawImage(originalMaskCanvas, 0, 0);
+  renderMaskOverlay();
+}
+
+function loadImageToCanvas(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
+      currentImage = img;
+      imageCanvas.width = img.width;
+      imageCanvas.height = img.height;
       maskCanvas.width = img.width;
       maskCanvas.height = img.height;
-      maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-      maskCtx.drawImage(img, 0, 0, maskCanvas.width, maskCanvas.height);
-      const data = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
-      for (let i = 0; i < data.data.length; i += 4) {
-        const v = data.data[i];
-        data.data[i] = 255;
-        data.data[i + 1] = 0;
-        data.data[i + 2] = 0;
-        data.data[i + 3] = Math.round(v * (overlayOpacityInput.value / 100));
-      }
-      maskCtx.putImageData(data, 0, 0);
+      maskDataCanvas.width = img.width;
+      maskDataCanvas.height = img.height;
+      originalMaskCanvas.width = img.width;
+      originalMaskCanvas.height = img.height;
+
+      imageCtx.clearRect(0, 0, img.width, img.height);
+      imageCtx.drawImage(img, 0, 0);
+      clearMaskCanvases();
+      resolve();
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function buildBinaryMaskFromImage(maskImg) {
+  maskDataCanvas.width = maskImg.width;
+  maskDataCanvas.height = maskImg.height;
+  maskDataCtx.clearRect(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  maskDataCtx.drawImage(maskImg, 0, 0, maskDataCanvas.width, maskDataCanvas.height);
+
+  const data = maskDataCtx.getImageData(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  for (let i = 0; i < data.data.length; i += 4) {
+    const r = data.data[i];
+    const g = data.data[i + 1];
+    const b = data.data[i + 2];
+    const a = data.data[i + 3];
+    const v = Math.max(r, g, b, a);
+    const on = v > 8 ? 255 : 0;
+
+    data.data[i] = 255;
+    data.data[i + 1] = 255;
+    data.data[i + 2] = 255;
+    data.data[i + 3] = on;
+  }
+  maskDataCtx.putImageData(data, 0, 0);
+  copyMaskToOriginal();
+  renderMaskOverlay();
+}
+
+async function drawBackendMask(maskValue) {
+  const src = maskValue.startsWith("data:")
+    ? maskValue
+    : `data:image/png;base64,${maskValue}`;
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      buildBinaryMaskFromImage(img);
       resolve();
     };
     img.onerror = reject;
@@ -402,166 +460,301 @@ async function drawMaskOverlay(maskB64) {
   });
 }
 
-// --- Refine Mask: Add/Remove/Brush ---
-let brushSize = parseInt(brushSizeInput.value, 10);
-brushSizeInput.addEventListener('input', () => {
-  brushSize = parseInt(brushSizeInput.value, 10);
-  pillBrush.textContent = brushSize;
-});
-overlayOpacityInput.addEventListener('input', () => {
-  if (maskCanvas.width && maskCanvas.height) {
-    const data = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
-    for (let i = 0; i < data.data.length; i += 4) {
-      data.data[i + 3] = Math.round(data.data[i] * (overlayOpacityInput.value / 100));
-    }
-    maskCtx.putImageData(data, 0, 0);
-  }
-});
-
-let painting = false;
-let paintMode = 'add';
-canvasShell.addEventListener('mousedown', (e) => {
-  painting = true;
-  paintAt(e);
-});
-canvasShell.addEventListener('mousemove', (e) => {
-  if (painting) paintAt(e);
-});
-window.addEventListener('mouseup', () => { painting = false; });
-
-function paintAt(e) {
+function canvasPointFromEvent(e) {
   const rect = maskCanvas.getBoundingClientRect();
   const x = ((e.clientX - rect.left) / rect.width) * maskCanvas.width;
   const y = ((e.clientY - rect.top) / rect.height) * maskCanvas.height;
-  maskCtx.save();
-  maskCtx.globalCompositeOperation = paintMode === 'add' ? 'source-over' : 'destination-out';
-  maskCtx.beginPath();
-  maskCtx.arc(x, y, brushSize, 0, 2 * Math.PI);
-  maskCtx.fillStyle = 'rgba(255,0,0,0.7)';
-  maskCtx.fill();
-  maskCtx.restore();
+  return { x, y };
 }
 
-btnAdd.addEventListener('click', () => {
-  paintMode = 'add';
-  btnAdd.classList.add('active');
-  btnRemove.classList.remove('active');
-});
-btnRemove.addEventListener('click', () => {
-  paintMode = 'remove';
-  btnRemove.classList.add('active');
-  btnAdd.classList.remove('active');
-});
-btnClearEdits.addEventListener('click', () => {
-  if (maskCanvas.width && maskCanvas.height) {
-    maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+function paintAtPoint(x, y) {
+  if (!maskDataCanvas.width || !maskDataCanvas.height) return;
+
+  maskDataCtx.save();
+  maskDataCtx.beginPath();
+  maskDataCtx.arc(x, y, brushSize, 0, Math.PI * 2);
+
+  if (drawMode === "add") {
+    maskDataCtx.fillStyle = "rgba(255,255,255,1)";
+    maskDataCtx.fill();
+  } else {
+    maskDataCtx.globalCompositeOperation = "destination-out";
+    maskDataCtx.fillStyle = "rgba(255,255,255,1)";
+    maskDataCtx.fill();
+  }
+  maskDataCtx.restore();
+  renderMaskOverlay();
+}
+
+function startPaint(e) {
+  if (btnAdd.disabled && btnRemove.disabled) return;
+  painting = true;
+  const p = canvasPointFromEvent(e);
+  paintAtPoint(p.x, p.y);
+}
+
+function movePaint(e) {
+  if (!painting) return;
+  const p = canvasPointFromEvent(e);
+  paintAtPoint(p.x, p.y);
+}
+
+function stopPaint() {
+  painting = false;
+}
+
+function enablePostDetectButtons() {
+  setEditingEnabled(true);
+  btnAdd.classList.add("active");
+  btnRemove.classList.remove("active");
+  drawMode = "add";
+  chipApi.textContent = "Ready";
+}
+
+function makeAbsoluteUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = apiBaseInput.value.replace(/\/+$/, "");
+  const path = url.startsWith("/") ? url : `/${url}`;
+  return `${base}${path}`;
+}
+
+function clear3DPreview() {
+  if (activeSceneStop) {
+    activeSceneStop();
+    activeSceneStop = null;
+  }
+  if (activeRenderer) {
+    try { activeRenderer.dispose(); } catch (_) {}
+    activeRenderer = null;
+  }
+  preview3DContainer.innerHTML = '<span style="color:#9fb1c7">3D Preview will appear here after Generate 3D</span>';
+}
+
+uploadInput.addEventListener("change", async () => {
+  const file = uploadInput.files && uploadInput.files[0];
+  if (!file) return;
+
+  currentFile = file;
+  chipImage.textContent = file.name;
+  pillMode.textContent = "Loaded";
+  selectionMessage.textContent = "Image loaded. Press Auto Detect to request backend mask.";
+  resetSessionKeepImage();
+
+  try {
+    await loadImageToCanvas(file);
+    btnAutoDetect.disabled = false;
+    chipApi.textContent = "Ready";
+    setStatus("Success", "Image loaded. Press Auto Detect.", file.name);
+  } catch (err) {
+    setStatus("Error", "Failed to load image.", err.message || String(err));
   }
 });
 
-// --- Confirm Object ---
-btnConfirm.addEventListener('click', () => {
-  if (!currentImage || !maskCanvas.width) return;
-  statusBadge.textContent = 'Processing cutout...';
-  statusBadge.className = 'status loading';
-  statusMessage.textContent = 'Generating cutout PNG...';
+btnAutoDetect.addEventListener("click", async () => {
+  if (!currentFile) return;
+
+  setStatus("Loading", "Uploading image for segmentation...", "Waiting for /api/segment");
+  chipApi.textContent = "Calling";
+  pillBackend.textContent = "Segment";
+  selectionMessage.textContent = "Backend is detecting the main object...";
+
+  try {
+    const fd = new FormData();
+    fd.append("image", currentFile);
+
+    const apiBase = apiBaseInput.value.replace(/\/+$/, "");
+    const res = await fetch(`${apiBase}/api/segment`, {
+      method: "POST",
+      body: fd
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (jsonErr) {
+      throw new Error("Invalid JSON from /api/segment");
+    }
+
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || data.detail || data.message || `Segment failed (${res.status})`);
+    }
+
+    const maskB64 = data.mask_png_base64 || data.mask_b64 || data.maskBase64 || data.mask || null;
+    currentImageId = data.image_id || data.id || null;
+
+    if (!maskB64) {
+      throw new Error("Backend returned no mask.");
+    }
+
+    await drawBackendMask(maskB64);
+    enablePostDetectButtons();
+    btnGenerate3D.disabled = true;
+    chipConfirm.textContent = "No";
+    setStatus("Success", "Mask loaded. Refine or confirm.", currentImageId ? `image_id: ${currentImageId}` : "Mask ready");
+    selectionMessage.textContent = "Mask loaded. Refine with Add or Remove, then Confirm Object.";
+  } catch (err) {
+    chipApi.textContent = "Error";
+    pillBackend.textContent = "Error";
+    setStatus("Error", err.message || "Segmentation failed.");
+    selectionMessage.textContent = "Segmentation failed. Check backend route and response.";
+  }
+});
+
+btnResetMask.addEventListener("click", () => {
+  restoreOriginalMask();
+  chipConfirm.textContent = "No";
   btnGenerate3D.disabled = true;
-  const cutoutCanvas = document.createElement('canvas');
+  lastCutoutBlob = null;
+  setStatus("Success", "Mask reset to backend result.");
+});
+
+btnClearEdits.addEventListener("click", () => {
+  maskDataCtx.clearRect(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  renderMaskOverlay();
+  chipConfirm.textContent = "No";
+  btnGenerate3D.disabled = true;
+  lastCutoutBlob = null;
+  setStatus("Success", "Mask cleared.");
+});
+
+btnAdd.addEventListener("click", () => {
+  drawMode = "add";
+  btnAdd.classList.add("active");
+  btnRemove.classList.remove("active");
+  pillMode.textContent = "Add";
+});
+
+btnRemove.addEventListener("click", () => {
+  drawMode = "remove";
+  btnRemove.classList.add("active");
+  btnAdd.classList.remove("active");
+  pillMode.textContent = "Remove";
+});
+
+brushSizeInput.addEventListener("input", () => {
+  brushSize = parseInt(brushSizeInput.value, 10);
+  pillBrush.textContent = String(brushSize);
+});
+
+overlayOpacityInput.addEventListener("input", () => {
+  renderMaskOverlay();
+});
+
+canvasShell.addEventListener("pointerdown", (e) => {
+  if (btnAdd.disabled && btnRemove.disabled) return;
+  canvasShell.setPointerCapture(e.pointerId);
+  startPaint(e);
+});
+canvasShell.addEventListener("pointermove", movePaint);
+canvasShell.addEventListener("pointerup", stopPaint);
+canvasShell.addEventListener("pointercancel", stopPaint);
+canvasShell.addEventListener("pointerleave", stopPaint);
+
+btnConfirm.addEventListener("click", () => {
+  if (!currentImage || !maskDataCanvas.width || !currentImageId) {
+    setStatus("Error", "Need image and backend image_id before confirm.");
+    return;
+  }
+
+  setStatus("Loading", "Generating cutout PNG...", "Preparing alpha mask");
+  const cutoutCanvas = document.createElement("canvas");
   cutoutCanvas.width = imageCanvas.width;
   cutoutCanvas.height = imageCanvas.height;
-  const ctx = cutoutCanvas.getContext('2d', { willReadFrequently: true });
+  const ctx = cutoutCanvas.getContext("2d", { willReadFrequently: true });
+
   ctx.drawImage(imageCanvas, 0, 0);
-  const maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
-  const cutoutData = ctx.getImageData(0, 0, cutoutCanvas.width, cutoutCanvas.height);
-  for (let i = 0; i < maskData.data.length; i += 4) {
-    cutoutData.data[i + 3] = maskData.data[i];
+
+  const base = ctx.getImageData(0, 0, cutoutCanvas.width, cutoutCanvas.height);
+  const mask = maskDataCtx.getImageData(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+
+  for (let i = 0; i < base.data.length; i += 4) {
+    base.data[i + 3] = mask.data[i + 3];
   }
-  ctx.putImageData(cutoutData, 0, 0);
-  cutoutCanvas.toBlob(blob => {
+
+  ctx.putImageData(base, 0, 0);
+
+  cutoutCanvas.toBlob((blob) => {
+    if (!blob) {
+      setStatus("Error", "Failed to create cutout PNG.");
+      return;
+    }
     lastCutoutBlob = blob;
-    chipConfirm.textContent = 'Yes';
-    statusBadge.textContent = 'Success';
-    statusBadge.className = 'status success';
-    statusMessage.textContent = 'Cutout finalized. Ready to generate 3D.';
+    chipConfirm.textContent = "Yes";
     btnGenerate3D.disabled = false;
-  }, 'image/png');
+    selectionMessage.textContent = "Cutout confirmed. Press Generate 3D.";
+    setStatus("Success", "Cutout finalized. Ready to generate 3D.", `image_id: ${currentImageId}`);
+  }, "image/png");
 });
 
-// --- Generate 3D ---
-btnGenerate3D.addEventListener('click', async () => {
-  if (!lastCutoutBlob || !currentImageId) return;
-  statusBadge.textContent = 'Uploading cutout...';
-  statusBadge.className = 'status loading';
-  statusMessage.textContent = 'Uploading cutout to 3D backend...';
+btnGenerate3D.addEventListener("click", async () => {
+  if (!lastCutoutBlob || !currentImageId) {
+    setStatus("Error", "Cutout not ready.");
+    return;
+  }
+
+  chip3D.textContent = "Uploading";
+  setStatus("Loading", "Uploading cutout to 3D backend...", "Waiting for /api/model/generate-3d");
+  selectionMessage.textContent = "Backend is processing the 3D generation request...";
+
   const fd = new FormData();
-  fd.append('image_id', currentImageId);
-  fd.append('cutout_png', lastCutoutBlob, 'cutout.png');
-  const apiBase = apiBaseInput.value;
+  fd.append("image_id", currentImageId);
+  fd.append("cutout_png", lastCutoutBlob, "cutout.png");
+
+  const apiBase = apiBaseInput.value.replace(/\/+$/, "");
+
   try {
-    const res = await fetch(`${apiBase}/api/model/generate-3d`, { method: 'POST', body: fd });
+    const res = await fetch(`${apiBase}/api/model/generate-3d`, {
+      method: "POST",
+      body: fd
+    });
+
     const raw = await res.text();
-    console.log("/api/generate-3d raw:", raw);
     let data;
     try {
       data = JSON.parse(raw);
     } catch {
-      throw new Error(`Bad JSON from /api/generate-3d: ${raw.slice(0, 200)}`);
+      throw new Error(`Bad JSON from /api/model/generate-3d: ${raw.slice(0, 200)}`);
     }
 
-    const modelUrl =
-      data.model_url ||
-      data.url ||
-      data.glb_url ||
-      data.gltf_url ||
-      data.preview_url ||
-      null;
-
-    if (!res.ok) {
+    if (!res.ok || data.ok === false) {
       const msg = data.error || data.detail || data.message || `3D backend error (${res.status})`;
       chip3D.textContent = "Error";
-      setStatus("3D Error", msg, raw.slice(0, 200));
       preview3DContainer.innerHTML = '<span style="color:#ff4d6d">3D backend error.</span>';
+      setStatus("3D Error", msg, raw.slice(0, 200));
       return;
     }
 
+    const modelUrl = makeAbsoluteUrl(
+      data.model_url || data.url || data.glb_url || data.gltf_url || data.preview_url || null
+    );
 
     if (modelUrl) {
       chip3D.textContent = "Ready";
-      try {
-        await render3DPreview(modelUrl);
-        setStatus("3D Ready", "3D model received.", modelUrl);
-      } catch (err) {
-        console.error("render3DPreview failed:", err);
-        setStatus("3D Error", err.message || "Preview render failed.", modelUrl);
-        preview3DContainer.innerHTML =
-          '<span style="color:#ff4d6d">Failed to render 3D preview.</span>';
-      }
+      await render3DPreview(modelUrl);
+      selectionMessage.textContent = "3D model loaded successfully.";
+      setStatus("3D Ready", "3D model received.", modelUrl);
       return;
     }
 
-    // handle placeholder / queued job success
-    if (data.ok === true && data.job_id) {
+    if (data.job_id) {
       chip3D.textContent = "Queued";
-      setStatus(
-        "Success",
-        data.message || "3D job created.",
-        `job_id: ${data.job_id} | status: ${data.status || "queued"}`
-      );
       preview3DContainer.innerHTML =
-        `<span style="color:#9fb1c7">Job created: ${data.job_id}<br>Status: ${data.status || "queued"}<br>No preview yet because model generation is still placeholder.</span>`;
+        `<span style="color:#9fb1c7">Job created: ${data.job_id}<br>Status: ${data.status || "queued"}<br>No preview yet.</span>`;
+      setStatus("Success", data.message || "3D job created.", `job_id: ${data.job_id} | status: ${data.status || "queued"}`);
       return;
     }
 
     chip3D.textContent = "Error";
-    setStatus("3D Error", "No model URL or usable job result returned.", raw.slice(0, 200));
     preview3DContainer.innerHTML = '<span style="color:#ff4d6d">No preview available.</span>';
+    setStatus("3D Error", "No model URL or usable job result returned.", raw.slice(0, 200));
   } catch (err) {
-    statusBadge.textContent = '3D Error';
-    statusBadge.className = 'status error';
-    statusMessage.textContent = err.message || '3D backend network error.';
+    chip3D.textContent = "Error";
+    preview3DContainer.innerHTML = '<span style="color:#ff4d6d">3D backend network error.</span>';
+    setStatus("3D Error", err.message || "3D backend network error.");
   }
 });
 
-// --- Three.js + GLTFLoader helpers ---
 let THREE_MOD = null;
 let GLTFLoaderMod = null;
 
@@ -570,7 +763,7 @@ async function ensureThree() {
     THREE_MOD = await import("https://esm.sh/three@0.152.2");
   }
   if (!GLTFLoaderMod) {
-    GLTFLoaderMod = await import("https://esm.sh/three@0.152.2/examples/jsm/loaders/GLTFLoader");
+    GLTFLoaderMod = await import("https://esm.sh/three@0.152.2/examples/jsm/loaders/GLTFLoader.js");
   }
   return {
     THREE: THREE_MOD,
@@ -579,12 +772,12 @@ async function ensureThree() {
 }
 
 async function render3DPreview(modelUrl) {
-  console.log("render3DPreview modelUrl:", modelUrl);
+  clear3DPreview();
 
-  preview3DContainer.innerHTML = "";
   const canvas = document.createElement("canvas");
   canvas.style.width = "100%";
   canvas.style.height = "100%";
+  preview3DContainer.innerHTML = "";
   preview3DContainer.appendChild(canvas);
 
   const { THREE, GLTFLoader } = await ensureThree();
@@ -598,10 +791,11 @@ async function render3DPreview(modelUrl) {
     antialias: true
   });
   renderer.setSize(width, height, false);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x1a2230, 1);
+  activeRenderer = renderer;
 
   const scene = new THREE.Scene();
-
   const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
   camera.position.set(0, 1.2, 4);
 
@@ -619,41 +813,45 @@ async function render3DPreview(modelUrl) {
   scene.add(new THREE.AxesHelper(2));
 
   const loader = new GLTFLoader();
-  loader.load(
-    modelUrl,
-    (gltf) => {
-      console.log("GLB loaded:", gltf);
 
-      const model = gltf.scene;
-      scene.add(model);
+  await new Promise((resolve, reject) => {
+    loader.load(
+      modelUrl,
+      (gltf) => {
+        const model = gltf.scene;
+        scene.add(model);
 
-      const box = new THREE.Box3().setFromObject(model);
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
 
-      console.log("Model size:", size);
-      console.log("Model center:", center);
+        model.position.sub(center);
 
-      model.position.sub(center);
+        const maxDim = Math.max(size.x, size.y, size.z, 1);
+        camera.position.set(0, maxDim * 0.8, maxDim * 2.2);
+        camera.lookAt(0, 0, 0);
 
-      const maxDim = Math.max(size.x, size.y, size.z, 1);
-      camera.position.set(0, maxDim * 0.8, maxDim * 2.2);
-      camera.lookAt(0, 0, 0);
+        let stopped = false;
+        function animate() {
+          if (stopped) return;
+          requestAnimationFrame(animate);
+          model.rotation.y += 0.01;
+          renderer.render(scene, camera);
+        }
+        animate();
 
-      function animate() {
-        requestAnimationFrame(animate);
-        model.rotation.y += 0.01;
-        renderer.render(scene, camera);
+        activeSceneStop = () => {
+          stopped = true;
+        };
+
+        resolve();
+      },
+      undefined,
+      (err) => {
+        reject(err);
       }
-      animate();
-    },
-    undefined,
-    (err) => {
-      console.error("GLTF load failed:", err);
-      preview3DContainer.innerHTML =
-        '<span style="color:#ff4d6d">Failed to load 3D model.</span>';
-    }
-  );
+    );
+  });
 }
 </script>
 </body>
