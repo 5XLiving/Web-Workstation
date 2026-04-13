@@ -1,3 +1,6 @@
+from backend.config import load_env
+load_env()
+
 import os
 import uvicorn
 from fastapi import FastAPI, HTTPException
