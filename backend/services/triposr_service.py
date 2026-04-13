@@ -1,66 +1,108 @@
-
-
+```python id="9jq6cg"
 import os
 import uuid
 import shutil
-import json
-from datetime import datetime
-from . import image_service
-
-from pathlib import Path
 import logging
+from pathlib import Path
+
+
+logger = logging.getLogger(__name__)
+
+
+def _outputs_root() -> str:
+    root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "storage", "outputs")
+    )
+    os.makedirs(root, exist_ok=True)
+    return root
+
+
+def _job_dir(job_id: str) -> str:
+    path = os.path.join(_outputs_root(), job_id)
+    os.makedirs(path, exist_ok=True)
+    return path
+
+
+def _public_output_url(job_id: str, filename: str) -> str:
+    return f"/outputs/{job_id}/{filename}"
+
 
 def generate_3d_from_cutout(image_id: str, cutout_path: str) -> dict:
-	job_id = uuid.uuid4().hex
-	outputs_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../storage/outputs'))
-	job_dir = os.path.join(outputs_root, job_id)
-	os.makedirs(job_dir, exist_ok=True)
+    if not cutout_path or not os.path.exists(cutout_path):
+        return {
+            "ok": False,
+            "image_id": image_id,
+            "status": "failed",
+            "message": "Cutout PNG not found.",
+        }
 
-	# Logging: job folder creation
-	logging.info(f"[3DGen] Created job folder: {job_dir}")
+    job_id = uuid.uuid4().hex
+    job_dir = _job_dir(job_id)
 
-	# Copy cutout to job folder
-	cutout_filename = f"cutout_{image_id}.png"
-	job_cutout_path = os.path.join(job_dir, cutout_filename)
-	shutil.copy2(cutout_path, job_cutout_path)
-	logging.info(f"[3DGen] Saved cutout to: {job_cutout_path}")
+    logger.info("[3DGen] Created job folder: %s", job_dir)
 
+    cutout_filename = f"cutout_{image_id}.png"
+    job_cutout_path = os.path.join(job_dir, cutout_filename)
+    shutil.copy2(cutout_path, job_cutout_path)
+    logger.info("[3DGen] Saved cutout to: %s", job_cutout_path)
 
-	# --- REAL 3D GENERATION STEP ---
-	# To enable the old test GLB fallback, set this debug flag to True:
-	DEBUG_USE_FAKE_GLB = False  # Set True ONLY for local debug
-	model_path = None
-	if DEBUG_USE_FAKE_GLB:
-		test_glb = os.path.abspath(os.path.join(os.path.dirname(__file__), '../storage/test_assets/sample.glb'))
-		logging.info(f"[3DGen] test_glb resolved path: {test_glb}")
-		if os.path.exists(test_glb):
-			model_path = os.path.join(job_dir, "model.glb")
-			shutil.copy2(test_glb, model_path)
-			logging.info(f"[3DGen] Copied test GLB to: {model_path}")
+    model_path = None
 
-	# --- REAL GENERATOR CALL GOES HERE ---
-	# Example:
-	# model_path = run_real_3d_generation(job_cutout_path, job_dir)
-	# (job_cutout_path: PNG input, job_dir: output folder)
+    debug_use_fake_glb = os.getenv("DEBUG_USE_FAKE_GLB", "0").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
-	if model_path and Path(model_path).exists():
-		model_url = f"http://127.0.0.1:5000/outputs/{job_id}/{Path(model_path).name}"
-		logging.info(f"[3DGen] Model available at: {model_url}")
-		return {
-			"ok": True,
-			"job_id": job_id,
-			"image_id": image_id,
-			"status": "completed",
-			"model_url": model_url,
-			"preview_url": model_url,
-		}
+    if debug_use_fake_glb:
+        test_glb = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "storage",
+                "test_assets",
+                "sample.glb",
+            )
+        )
+        logger.info("[3DGen] DEBUG_USE_FAKE_GLB enabled. sample path: %s", test_glb)
 
-	# If not available, return clear not_implemented state
-	logging.warning(f"[3DGen] Model generation not integrated yet for job {job_id}.")
-	return {
-		"ok": False,
-		"job_id": job_id,
-		"image_id": image_id,
-		"status": "not_implemented",
-		"message": "Real image-to-3D generation is not integrated yet."
-	}
+        if os.path.exists(test_glb):
+            model_path = os.path.join(job_dir, "model.glb")
+            shutil.copy2(test_glb, model_path)
+            logger.info("[3DGen] Copied test GLB to: %s", model_path)
+        else:
+            logger.warning("[3DGen] sample.glb not found at: %s", test_glb)
+
+    # Real generator hook goes here later.
+    # Example:
+    # model_path = run_real_3d_generation(job_cutout_path, job_dir)
+
+    if model_path and Path(model_path).exists():
+        model_name = Path(model_path).name
+        model_url = _public_output_url(job_id, model_name)
+        cutout_url = _public_output_url(job_id, cutout_filename)
+
+        logger.info("[3DGen] Model available at: %s", model_url)
+
+        return {
+            "ok": True,
+            "job_id": job_id,
+            "image_id": image_id,
+            "status": "completed",
+            "model_url": model_url,
+            "preview_url": model_url,
+            "cutout_url": cutout_url,
+        }
+
+    logger.warning("[3DGen] Model generation not integrated yet for job %s.", job_id)
+
+    return {
+        "ok": False,
+        "job_id": job_id,
+        "image_id": image_id,
+        "status": "not_implemented",
+        "message": "Real image-to-3D generation is not integrated yet.",
+        "cutout_url": _public_output_url(job_id, cutout_filename),
+    }
+```
