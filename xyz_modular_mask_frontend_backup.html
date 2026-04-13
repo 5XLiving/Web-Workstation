@@ -1,9 +1,858 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- ...existing code... -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>XYZ Modular Mask Frontend</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root{
+      --bg:#07111f; --bg2:#0d1b2f; --panel:rgba(10,18,33,.88); --line:rgba(255,255,255,.08);
+      --text:#eef4ff; --muted:#9fb1c7; --mint:#94f3de; --mint2:#d8fff5; --danger:#ff4d6d; --danger2:rgba(255,77,109,.34);
+      --good:#90f0cf; --warn:#ffd37a; --accent:#7fb7ff;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--text); font-family:Inter,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(95,122,255,.14), transparent 24%),
+        radial-gradient(circle at 88% 12%, rgba(85,220,196,.10), transparent 22%),
+        linear-gradient(180deg,#030814,#071221 54%,#0a1728);
+    }
+    .app{min-height:100vh; display:grid; grid-template-rows:auto 1fr; gap:12px; padding:12px}
+    .glass{
+      border:1px solid var(--line);
+      background:
+        radial-gradient(circle at top right, rgba(148,243,222,.06), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01)),
+        linear-gradient(180deg, rgba(14,24,42,.95), rgba(8,15,28,.88));
+      backdrop-filter:blur(16px) saturate(135%);
+      border-radius:24px;
+    }
+    .topbar{padding:16px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
+    .brand strong{display:block; font-size:28px; font-weight:800}
+    .brand span,.muted{color:var(--muted)}
+    .brand span{font-size:12px; letter-spacing:.16em; text-transform:uppercase}
+    .layout{min-height:0; display:grid; grid-template-columns:340px minmax(0,1fr); gap:12px}
+    .panel{min-height:0; display:flex; flex-direction:column; overflow:hidden}
+    .head{padding:16px 18px; border-bottom:1px solid rgba(255,255,255,.06); display:flex; justify-content:space-between; gap:10px; align-items:center}
+    .body{padding:16px; overflow:auto; display:grid; gap:14px; align-content:start}
+    .card{
+      border:1px solid var(--line); border-radius:18px; padding:14px;
+      background:linear-gradient(180deg, rgba(11,18,31,.86), rgba(10,16,28,.72));
+      display:grid; gap:12px;
+    }
+    .card h3{margin:0; color:var(--mint2); font-size:14px}
+    .drop{border:1px dashed rgba(148,243,222,.28); border-radius:16px; padding:16px; display:grid; gap:10px; background:rgba(8,14,24,.55)}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+    input,button{font:inherit}
+    input[type="range"], input[type="text"], input[type="file"]{
+      width:100%; padding:11px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.1);
+      background:rgba(8,14,24,.92); color:var(--text)
+    }
+    input[type="file"]{padding:8px}
+    .btn{
+      min-height:44px; border-radius:12px; border:1px solid rgba(148,243,222,.24); cursor:pointer;
+      padding:10px 14px; font-weight:800; background:rgba(148,243,222,.06); color:var(--text)
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.45; cursor:not-allowed; transform:none}
+    .btn-primary{background:linear-gradient(135deg,#b8fff0,#86efd8); color:#08221d}
+    .btn-danger{background:rgba(255,77,109,.12); border-color:rgba(255,77,109,.35)}
+    .btn-quiet{background:rgba(255,255,255,.03); color:var(--muted); border-color:var(--line)}
+    .btn.active{box-shadow:0 0 0 2px rgba(148,243,222,.18) inset; border-color:rgba(148,243,222,.46)}
+    .btn.active.remove{box-shadow:0 0 0 2px rgba(255,77,109,.2) inset; border-color:rgba(255,77,109,.45)}
+    .pillbar{display:flex; gap:8px; flex-wrap:wrap}
+    .pill{padding:8px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); font-size:12px; background:rgba(255,255,255,.03)}
+    .pill strong{color:var(--mint2); margin-left:6px}
+    .status{display:inline-flex; align-items:center; gap:8px; padding:7px 11px; border-radius:999px; border:1px solid var(--line); background:rgba(10,17,29,.88); width:fit-content}
+    .status:before{content:""; width:8px; height:8px; border-radius:50%; background:currentColor}
+    .idle{color:#9aa6bb}.loading{color:var(--warn)}.success{color:var(--good)}.error{color:#ff95a8}
+    .workspace{min-height:0; display:grid; grid-template-rows:auto 1fr auto; overflow:hidden}
+    .workspace-head{padding:16px 18px 0; display:grid; gap:12px}
+    .note{padding:12px 14px; border-radius:18px; border:1px solid var(--line); background:rgba(6,12,22,.74); display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap}
+    .canvas-shell{position:relative; min-height:420px; margin:0 16px; border-radius:24px; overflow:hidden; border:1px solid var(--line); background:#040a14; touch-action:none}
+    .checker{
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(45deg, rgba(255,255,255,.04) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,.04) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,.04) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,.04) 75%);
+      background-size:28px 28px;
+      background-position:0 0, 0 14px, 14px -14px, -14px 0;
+      opacity:.4;
+      pointer-events:none;
+    }
+    #imageCanvas,#maskCanvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+    .overlay-msg{position:absolute; inset:auto 18px 18px 18px; display:flex; justify-content:space-between; gap:12px; align-items:flex-end; pointer-events:none}
+    .callout{max-width:540px; border-radius:18px; padding:12px 14px; border:1px solid var(--line); background:rgba(9,16,28,.8)}
+    .workspace-foot{padding:14px 16px 16px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap}
+    .chips{display:flex; gap:8px; flex-wrap:wrap}
+    .chip{padding:9px 11px; border-radius:12px; border:1px solid var(--line); background:rgba(8,14,24,.72); font-size:12px; color:var(--muted)}
+    .chip strong{color:var(--mint2); margin-left:6px}
+    .mini{font-size:12px; color:var(--muted)}
+    .endpoint{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:rgba(5,10,18,.76); color:#dff3ff}
+    @media (max-width:1080px){
+      .layout{grid-template-columns:1fr}
+      .panel{order:2}
+      .workspace-wrap{order:1}
+      .canvas-shell{min-height:50vh}
+    }
+    @media (max-width:640px){
+      .app{padding:10px}
+      .topbar,.head,.body,.workspace-head,.workspace-foot{padding-left:14px; padding-right:14px}
+      .row,.row3{grid-template-columns:1fr}
+      .canvas-shell{margin:0 14px; min-height:46vh}
+      .brand strong{font-size:24px}
+      .overlay-msg{left:12px; right:12px; bottom:12px; display:grid}
+    }
+  </style>
 </head>
 <body>
-  <!-- ...existing code... -->
+<div class="app">
+  <header class="topbar glass">
+    <div class="brand">
+      <strong>XYZ Modular Mask Frontend</strong>
+      <span>Upload → Auto Detect → Add / Remove → Confirm → Generate 3D</span>
+    </div>
+    <div class="pillbar">
+      <div class="pill">Mode<strong id="pillMode">Idle</strong></div>
+      <div class="pill">Mask<strong id="pillMask">0%</strong></div>
+      <div class="pill">Backend<strong id="pillBackend">Ready</strong></div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel glass">
+      <div class="head"><strong>Controls</strong><span class="muted">Modular mask editing for 3D pipeline.</span></div>
+      <div class="body">
+        <section class="card">
+          <h3>1. Upload Photo</h3>
+          <div class="drop">
+            <input type="file" id="uploadFile" accept="image/*" />
+            <div class="mini">Use a clear subject photo for best results.</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3>2. Auto Detect</h3>
+          <div class="row">
+            <button id="btnAutoDetect" class="btn btn-primary" disabled>Auto Detect Focus</button>
+            <button id="btnResetMask" class="btn btn-quiet" disabled>Reset Mask</button>
+          </div>
+          <label class="mini" for="detectStrength">Detect Strength</label>
+          <input id="detectStrength" type="range" min="10" max="90" value="38" />
+          <div class="mini">Calls backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/segment</span>.</div>
+        </section>
+
+        <section class="card">
+          <h3>3. Refine Mask</h3>
+          <div class="row3">
+            <button id="btnAdd" class="btn" disabled>Add +</button>
+            <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
+            <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
+          </div>
+          <div class="row">
+            <div>
+              <label class="mini" for="brushSize">Brush Size</label>
+              <input id="brushSize" type="range" min="6" max="120" value="28" />
+            </div>
+            <div>
+              <label class="mini" for="overlayOpacity">Red Overlay</label>
+              <input id="overlayOpacity" type="range" min="10" max="90" value="42" />
+            </div>
+          </div>
+          <div class="mini">Paint on the image. Red = selected object.</div>
+        </section>
+
+        <section class="card">
+          <h3>4. Confirm & Generate</h3>
+          <div class="row">
+            <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
+            <button id="btnGenerate3D" class="btn btn-primary" disabled>Generate 3D</button>
+          </div>
+          <div class="mini">Sends cutout to backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/model/generate-3d</span>.</div>
+          <label class="mini" for="apiBase">API Base</label>
+          <input id="apiBase" type="text" value="http://127.0.0.1:5000" />
+        </section>
+
+        <section class="card">
+          <h3>Status</h3>
+          <div id="statusBadge" class="status idle">Idle</div>
+          <div id="statusMessage" class="muted">Upload a photo to begin.</div>
+          <div id="lastResult" class="mini">No result yet.</div>
+        </section>
+      </div>
+    </aside>
+
+    <section class="workspace-wrap glass workspace">
+      <div class="workspace-head">
+        <div class="note">
+          <strong style="color:var(--mint2)">Mask Editing Stage</strong>
+          <span class="muted">Prepare a clean subject cutout for modular 3D pipeline.</span>
+        </div>
+      </div>
+
+      <div class="canvas-shell" id="canvasShell">
+        <div class="checker"></div>
+        <canvas id="imageCanvas"></canvas>
+        <canvas id="maskCanvas"></canvas>
+        <div class="overlay-msg">
+          <div class="callout">
+            <strong style="display:block;color:var(--mint2);font-size:13px;letter-spacing:.04em;text-transform:uppercase">Current Stage</strong>
+            <span id="selectionMessage" class="muted">Upload one image. Then press Auto Detect.</span>
+          </div>
+          <div class="pillbar" style="pointer-events:none; justify-content:flex-end">
+            <div class="pill">Brush<strong id="pillBrush">28</strong></div>
+            <div class="pill">Selection<strong id="pillSelection">None</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="preview3DContainer" style="margin:24px 16px 0; width:calc(100% - 32px); height:400px; background:#181f2a; border-radius:18px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center;">
+        <span id="preview3DPlaceholder" style="color:#9fb1c7">3D Preview will appear here after Generate 3D</span>
+      </div>
+
+      <div class="workspace-foot">
+        <div class="chips">
+          <div class="chip">Image<strong id="chipImage">None</strong></div>
+          <div class="chip">Mask<strong id="chipMask">Empty</strong></div>
+          <div class="chip">Confirm<strong id="chipConfirm">No</strong></div>
+        </div>
+        <div class="chips">
+          <div class="chip">API<strong id="chipApi">Idle</strong></div>
+          <div class="chip">3D<strong id="chip3D">Not started</strong></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const uploadInput = $("uploadFile");
+const apiBaseInput = $("apiBase");
+
+const btnAutoDetect = $("btnAutoDetect");
+const btnResetMask = $("btnResetMask");
+const btnAdd = $("btnAdd");
+const btnRemove = $("btnRemove");
+const btnClearEdits = $("btnClearEdits");
+const btnConfirm = $("btnConfirm");
+const btnGenerate3D = $("btnGenerate3D");
+
+const detectStrength = $("detectStrength");
+const brushSizeInput = $("brushSize");
+const overlayOpacityInput = $("overlayOpacity");
+
+const imageCanvas = $("imageCanvas");
+const maskCanvas = $("maskCanvas");
+const canvasShell = $("canvasShell");
+const preview3DContainer = $("preview3DContainer");
+
+const statusBadge = $("statusBadge");
+const statusMessage = $("statusMessage");
+const lastResult = $("lastResult");
+
+const chipImage = $("chipImage");
+const chipMask = $("chipMask");
+const chipConfirm = $("chipConfirm");
+const chipApi = $("chipApi");
+const chip3D = $("chip3D");
+
+const pillMode = $("pillMode");
+const pillMask = $("pillMask");
+const pillBackend = $("pillBackend");
+const pillBrush = $("pillBrush");
+const pillSelection = $("pillSelection");
+const selectionMessage = $("selectionMessage");
+
+const imageCtx = imageCanvas.getContext("2d", { willReadFrequently: true });
+const maskCtx = maskCanvas.getContext("2d", { willReadFrequently: true });
+
+const maskDataCanvas = document.createElement("canvas");
+const maskDataCtx = maskDataCanvas.getContext("2d", { willReadFrequently: true });
+
+const originalMaskCanvas = document.createElement("canvas");
+const originalMaskCtx = originalMaskCanvas.getContext("2d", { willReadFrequently: true });
+
+let currentFile = null;
+let currentImage = null;
+let currentImageId = null;
+let lastCutoutBlob = null;
+let drawMode = "add";
+let brushSize = parseInt(brushSizeInput.value, 10);
+let painting = false;
+let activeRenderer = null;
+let activeSceneStop = null;
+
+if (!apiBaseInput.value || apiBaseInput.value.includes(":8000")) {
+  apiBaseInput.value = "http://127.0.0.1:5000";
+}
+
+function setStatus(kind, msg, extra = "No result yet.") {
+  statusBadge.textContent = kind;
+  statusBadge.className =
+    "status " +
+    (kind === "Success" || kind === "3D Ready"
+      ? "success"
+      : kind === "Error" || kind === "3D Error"
+      ? "error"
+      : kind === "Loading"
+      ? "loading"
+      : "idle");
+  statusMessage.textContent = msg;
+  lastResult.textContent = extra;
+}
+
+function setEditingEnabled(enabled) {
+  btnResetMask.disabled = !enabled;
+  btnAdd.disabled = !enabled;
+  btnRemove.disabled = !enabled;
+  btnClearEdits.disabled = !enabled;
+  btnConfirm.disabled = !enabled;
+}
+
+function resetSessionKeepImage() {
+  currentImageId = null;
+  lastCutoutBlob = null;
+  chipConfirm.textContent = "No";
+  chip3D.textContent = "Not started";
+  chipApi.textContent = "Idle";
+  chipMask.textContent = "Empty";
+  pillMask.textContent = "0%";
+  pillSelection.textContent = "None";
+  btnGenerate3D.disabled = true;
+  setEditingEnabled(false);
+  clearMaskCanvases();
+  clear3DPreview();
+}
+
+function clearMaskCanvases() {
+  [maskCanvas, maskDataCanvas, originalMaskCanvas].forEach((c) => {
+    c.width = imageCanvas.width || 1;
+    c.height = imageCanvas.height || 1;
+    const ctx = c.getContext("2d", { willReadFrequently: true });
+    ctx.clearRect(0, 0, c.width, c.height);
+  });
+  renderMaskOverlay();
+}
+
+function updateSelectionStats() {
+  if (!maskDataCanvas.width || !maskDataCanvas.height) {
+    chipMask.textContent = "Empty";
+    pillMask.textContent = "0%";
+    pillSelection.textContent = "None";
+    return;
+  }
+  const data = maskDataCtx.getImageData(0, 0, maskDataCanvas.width, maskDataCanvas.height).data;
+  let on = 0;
+  const total = data.length / 4;
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] > 0) on += 1;
+  }
+  const pct = total ? ((on / total) * 100).toFixed(1) : "0.0";
+  pillMask.textContent = `${pct}%`;
+  chipMask.textContent = on > 0 ? "Loaded" : "Empty";
+  pillSelection.textContent = on > 0 ? "Active" : "None";
+}
+
+function renderMaskOverlay() {
+  if (!maskCanvas.width || !maskCanvas.height) return;
+  maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+  const src = maskDataCtx.getImageData(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  const out = maskCtx.createImageData(maskCanvas.width, maskCanvas.height);
+  const opacity = Math.max(0.1, Math.min(0.9, Number(overlayOpacityInput.value) / 100));
+
+  for (let i = 0; i < src.data.length; i += 4) {
+    const a = src.data[i + 3] > 0 ? Math.round(255 * opacity) : 0;
+    out.data[i] = 255;
+    out.data[i + 1] = 0;
+    out.data[i + 2] = 0;
+    out.data[i + 3] = a;
+  }
+
+  maskCtx.putImageData(out, 0, 0);
+  updateSelectionStats();
+}
+
+function copyMaskToOriginal() {
+  originalMaskCanvas.width = maskDataCanvas.width;
+  originalMaskCanvas.height = maskDataCanvas.height;
+  originalMaskCtx.clearRect(0, 0, originalMaskCanvas.width, originalMaskCanvas.height);
+  originalMaskCtx.drawImage(maskDataCanvas, 0, 0);
+}
+
+function restoreOriginalMask() {
+  maskDataCanvas.width = originalMaskCanvas.width;
+  maskDataCanvas.height = originalMaskCanvas.height;
+  maskDataCtx.clearRect(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  maskDataCtx.drawImage(originalMaskCanvas, 0, 0);
+  renderMaskOverlay();
+}
+
+function loadImageToCanvas(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      currentImage = img;
+      imageCanvas.width = img.width;
+      imageCanvas.height = img.height;
+      maskCanvas.width = img.width;
+      maskCanvas.height = img.height;
+      maskDataCanvas.width = img.width;
+      maskDataCanvas.height = img.height;
+      originalMaskCanvas.width = img.width;
+      originalMaskCanvas.height = img.height;
+
+      imageCtx.clearRect(0, 0, img.width, img.height);
+      imageCtx.drawImage(img, 0, 0);
+      clearMaskCanvases();
+      resolve();
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function buildBinaryMaskFromImage(maskImg) {
+  maskDataCanvas.width = maskImg.width;
+  maskDataCanvas.height = maskImg.height;
+  maskDataCtx.clearRect(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  maskDataCtx.drawImage(maskImg, 0, 0, maskDataCanvas.width, maskDataCanvas.height);
+
+  const data = maskDataCtx.getImageData(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  for (let i = 0; i < data.data.length; i += 4) {
+    const r = data.data[i];
+    const g = data.data[i + 1];
+    const b = data.data[i + 2];
+    const a = data.data[i + 3];
+    const v = Math.max(r, g, b, a);
+    const on = v > 8 ? 255 : 0;
+
+    data.data[i] = 255;
+    data.data[i + 1] = 255;
+    data.data[i + 2] = 255;
+    data.data[i + 3] = on;
+  }
+  maskDataCtx.putImageData(data, 0, 0);
+  copyMaskToOriginal();
+  renderMaskOverlay();
+}
+
+async function drawBackendMask(maskValue) {
+  const src = maskValue.startsWith("data:")
+    ? maskValue
+    : `data:image/png;base64,${maskValue}`;
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      buildBinaryMaskFromImage(img);
+      resolve();
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+function canvasPointFromEvent(e) {
+  const rect = maskCanvas.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width) * maskCanvas.width;
+  const y = ((e.clientY - rect.top) / rect.height) * maskCanvas.height;
+  return { x, y };
+}
+
+function paintAtPoint(x, y) {
+  if (!maskDataCanvas.width || !maskDataCanvas.height) return;
+
+  maskDataCtx.save();
+  maskDataCtx.beginPath();
+  maskDataCtx.arc(x, y, brushSize, 0, Math.PI * 2);
+
+  if (drawMode === "add") {
+    maskDataCtx.fillStyle = "rgba(255,255,255,1)";
+    maskDataCtx.fill();
+  } else {
+    maskDataCtx.globalCompositeOperation = "destination-out";
+    maskDataCtx.fillStyle = "rgba(255,255,255,1)";
+    maskDataCtx.fill();
+  }
+  maskDataCtx.restore();
+  renderMaskOverlay();
+}
+
+function startPaint(e) {
+  if (btnAdd.disabled && btnRemove.disabled) return;
+  painting = true;
+  const p = canvasPointFromEvent(e);
+  paintAtPoint(p.x, p.y);
+}
+
+function movePaint(e) {
+  if (!painting) return;
+  const p = canvasPointFromEvent(e);
+  paintAtPoint(p.x, p.y);
+}
+
+function stopPaint() {
+  painting = false;
+}
+
+function enablePostDetectButtons() {
+  setEditingEnabled(true);
+  btnAdd.classList.add("active");
+  btnRemove.classList.remove("active");
+  drawMode = "add";
+  chipApi.textContent = "Ready";
+}
+
+function makeAbsoluteUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = apiBaseInput.value.replace(/\/+$/, "");
+  const path = url.startsWith("/") ? url : `/${url}`;
+  return `${base}${path}`;
+}
+
+function clear3DPreview() {
+  if (activeSceneStop) {
+    activeSceneStop();
+    activeSceneStop = null;
+  }
+  if (activeRenderer) {
+    try { activeRenderer.dispose(); } catch (_) {}
+    activeRenderer = null;
+  }
+  preview3DContainer.innerHTML = '<span style="color:#9fb1c7">3D Preview will appear here after Generate 3D</span>';
+}
+
+uploadInput.addEventListener("change", async () => {
+  const file = uploadInput.files && uploadInput.files[0];
+  if (!file) return;
+
+  currentFile = file;
+  chipImage.textContent = file.name;
+  pillMode.textContent = "Loaded";
+  selectionMessage.textContent = "Image loaded. Press Auto Detect to request backend mask.";
+  resetSessionKeepImage();
+
+  try {
+    await loadImageToCanvas(file);
+    btnAutoDetect.disabled = false;
+    chipApi.textContent = "Ready";
+    setStatus("Success", "Image loaded. Press Auto Detect.", file.name);
+  } catch (err) {
+    setStatus("Error", "Failed to load image.", err.message || String(err));
+  }
+});
+
+btnAutoDetect.addEventListener("click", async () => {
+  if (!currentFile) return;
+
+  setStatus("Loading", "Uploading image for segmentation...", "Waiting for /api/segment");
+  chipApi.textContent = "Calling";
+  pillBackend.textContent = "Segment";
+  selectionMessage.textContent = "Backend is detecting the main object...";
+
+  try {
+    const fd = new FormData();
+    fd.append("image", currentFile);
+
+    const apiBase = apiBaseInput.value.replace(/\/+$/, "");
+    const res = await fetch(`${apiBase}/api/segment`, {
+      method: "POST",
+      body: fd
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (jsonErr) {
+      throw new Error("Invalid JSON from /api/segment");
+    }
+
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || data.detail || data.message || `Segment failed (${res.status})`);
+    }
+
+    const maskB64 = data.mask_png_base64 || data.mask_b64 || data.maskBase64 || data.mask || null;
+    currentImageId = data.image_id || data.id || null;
+
+    if (!maskB64) {
+      throw new Error("Backend returned no mask.");
+    }
+
+    await drawBackendMask(maskB64);
+    enablePostDetectButtons();
+    btnGenerate3D.disabled = true;
+    chipConfirm.textContent = "No";
+    setStatus("Success", "Mask loaded. Refine or confirm.", currentImageId ? `image_id: ${currentImageId}` : "Mask ready");
+    selectionMessage.textContent = "Mask loaded. Refine with Add or Remove, then Confirm Object.";
+  } catch (err) {
+    chipApi.textContent = "Error";
+    pillBackend.textContent = "Error";
+    setStatus("Error", err.message || "Segmentation failed.");
+    selectionMessage.textContent = "Segmentation failed. Check backend route and response.";
+  }
+});
+
+btnResetMask.addEventListener("click", () => {
+  restoreOriginalMask();
+  chipConfirm.textContent = "No";
+  btnGenerate3D.disabled = true;
+  lastCutoutBlob = null;
+  setStatus("Success", "Mask reset to backend result.");
+});
+
+btnClearEdits.addEventListener("click", () => {
+  maskDataCtx.clearRect(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  renderMaskOverlay();
+  chipConfirm.textContent = "No";
+  btnGenerate3D.disabled = true;
+  lastCutoutBlob = null;
+  setStatus("Success", "Mask cleared.");
+});
+
+btnAdd.addEventListener("click", () => {
+  drawMode = "add";
+  btnAdd.classList.add("active");
+  btnRemove.classList.remove("active");
+  pillMode.textContent = "Add";
+});
+
+btnRemove.addEventListener("click", () => {
+  drawMode = "remove";
+  btnRemove.classList.add("active");
+  btnAdd.classList.remove("active");
+  pillMode.textContent = "Remove";
+});
+
+brushSizeInput.addEventListener("input", () => {
+  brushSize = parseInt(brushSizeInput.value, 10);
+  pillBrush.textContent = String(brushSize);
+});
+
+overlayOpacityInput.addEventListener("input", () => {
+  renderMaskOverlay();
+});
+
+canvasShell.addEventListener("pointerdown", (e) => {
+  if (btnAdd.disabled && btnRemove.disabled) return;
+  canvasShell.setPointerCapture(e.pointerId);
+  startPaint(e);
+});
+canvasShell.addEventListener("pointermove", movePaint);
+canvasShell.addEventListener("pointerup", stopPaint);
+canvasShell.addEventListener("pointercancel", stopPaint);
+canvasShell.addEventListener("pointerleave", stopPaint);
+
+btnConfirm.addEventListener("click", () => {
+  if (!currentImage || !maskDataCanvas.width || !currentImageId) {
+    setStatus("Error", "Need image and backend image_id before confirm.");
+    return;
+  }
+
+  setStatus("Loading", "Generating cutout PNG...", "Preparing alpha mask");
+  const cutoutCanvas = document.createElement("canvas");
+  cutoutCanvas.width = imageCanvas.width;
+  cutoutCanvas.height = imageCanvas.height;
+  const ctx = cutoutCanvas.getContext("2d", { willReadFrequently: true });
+
+  ctx.drawImage(imageCanvas, 0, 0);
+
+  const base = ctx.getImageData(0, 0, cutoutCanvas.width, cutoutCanvas.height);
+  const mask = maskDataCtx.getImageData(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+
+  for (let i = 0; i < base.data.length; i += 4) {
+    base.data[i + 3] = mask.data[i + 3];
+  }
+
+  ctx.putImageData(base, 0, 0);
+
+  cutoutCanvas.toBlob((blob) => {
+    if (!blob) {
+      setStatus("Error", "Failed to create cutout PNG.");
+      return;
+    }
+    lastCutoutBlob = blob;
+    chipConfirm.textContent = "Yes";
+    btnGenerate3D.disabled = false;
+    selectionMessage.textContent = "Cutout confirmed. Press Generate 3D.";
+    setStatus("Success", "Cutout finalized. Ready to generate 3D.", `image_id: ${currentImageId}`);
+  }, "image/png");
+});
+
+btnGenerate3D.addEventListener("click", async () => {
+  if (!lastCutoutBlob || !currentImageId) {
+    setStatus("Error", "Cutout not ready.");
+    return;
+  }
+
+  chip3D.textContent = "Uploading";
+  setStatus("Loading", "Uploading cutout to 3D backend...", "Waiting for /api/model/generate-3d");
+  selectionMessage.textContent = "Backend is processing the 3D generation request...";
+
+  const fd = new FormData();
+  fd.append("image_id", currentImageId);
+  fd.append("cutout_png", lastCutoutBlob, "cutout.png");
+
+  const apiBase = apiBaseInput.value.replace(/\/+$/, "");
+
+  try {
+    const res = await fetch(`${apiBase}/api/model/generate-3d`, {
+      method: "POST",
+      body: fd
+    });
+
+    const raw = await res.text();
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error(`Bad JSON from /api/model/generate-3d: ${raw.slice(0, 200)}`);
+    }
+
+    if (!res.ok || data.ok === false) {
+      const msg = data.error || data.detail || data.message || `3D backend error (${res.status})`;
+      chip3D.textContent = "Error";
+      preview3DContainer.innerHTML = '<span style="color:#ff4d6d">3D backend error.</span>';
+      setStatus("3D Error", msg, raw.slice(0, 200));
+      return;
+    }
+
+    const modelUrl = makeAbsoluteUrl(
+      data.model_url || data.url || data.glb_url || data.gltf_url || data.preview_url || null
+    );
+
+    if (modelUrl) {
+      chip3D.textContent = "Ready";
+      await render3DPreview(modelUrl);
+      selectionMessage.textContent = "3D model loaded successfully.";
+      setStatus("3D Ready", "3D model received.", modelUrl);
+      return;
+    }
+
+    if (data.job_id) {
+      chip3D.textContent = "Queued";
+      preview3DContainer.innerHTML =
+        `<span style="color:#9fb1c7">Job created: ${data.job_id}<br>Status: ${data.status || "queued"}<br>No preview yet.</span>`;
+      setStatus("Success", data.message || "3D job created.", `job_id: ${data.job_id} | status: ${data.status || "queued"}`);
+      return;
+    }
+
+    chip3D.textContent = "Error";
+    preview3DContainer.innerHTML = '<span style="color:#ff4d6d">No preview available.</span>';
+    setStatus("3D Error", "No model URL or usable job result returned.", raw.slice(0, 200));
+  } catch (err) {
+    chip3D.textContent = "Error";
+    preview3DContainer.innerHTML = '<span style="color:#ff4d6d">3D backend network error.</span>';
+    setStatus("3D Error", err.message || "3D backend network error.");
+  }
+});
+
+let THREE_MOD = null;
+let GLTFLoaderMod = null;
+
+async function ensureThree() {
+  if (!THREE_MOD) {
+    THREE_MOD = await import("https://esm.sh/three@0.152.2");
+  }
+  if (!GLTFLoaderMod) {
+    GLTFLoaderMod = await import("https://esm.sh/three@0.152.2/examples/jsm/loaders/GLTFLoader.js");
+  }
+  return {
+    THREE: THREE_MOD,
+    GLTFLoader: GLTFLoaderMod.GLTFLoader
+  };
+}
+
+async function render3DPreview(modelUrl) {
+  clear3DPreview();
+
+  const canvas = document.createElement("canvas");
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  preview3DContainer.innerHTML = "";
+  preview3DContainer.appendChild(canvas);
+
+  const { THREE, GLTFLoader } = await ensureThree();
+
+  const width = Math.max(400, preview3DContainer.clientWidth);
+  const height = Math.max(300, preview3DContainer.clientHeight);
+
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    alpha: true,
+    antialias: true
+  });
+  renderer.setSize(width, height, false);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x1a2230, 1);
+  activeRenderer = renderer;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+  camera.position.set(0, 1.2, 4);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+
+  const light1 = new THREE.DirectionalLight(0xffffff, 1.2);
+  light1.position.set(3, 4, 5);
+  scene.add(light1);
+
+  const light2 = new THREE.DirectionalLight(0xffffff, 0.8);
+  light2.position.set(-3, 2, -4);
+  scene.add(light2);
+
+  scene.add(new THREE.GridHelper(10, 10));
+  scene.add(new THREE.AxesHelper(2));
+
+  const loader = new GLTFLoader();
+
+  await new Promise((resolve, reject) => {
+    loader.load(
+      modelUrl,
+      (gltf) => {
+        const model = gltf.scene;
+        scene.add(model);
+
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+
+        model.position.sub(center);
+
+        const maxDim = Math.max(size.x, size.y, size.z, 1);
+        camera.position.set(0, maxDim * 0.8, maxDim * 2.2);
+        camera.lookAt(0, 0, 0);
+
+        let stopped = false;
+        function animate() {
+          if (stopped) return;
+          requestAnimationFrame(animate);
+          model.rotation.y += 0.01;
+          renderer.render(scene, camera);
+        }
+        animate();
+
+        activeSceneStop = () => {
+          stopped = true;
+        };
+
+        resolve();
+      },
+      undefined,
+      (err) => {
+        reject(err);
+      }
+    );
+  });
+}
+</script>
 </body>
 </html>
