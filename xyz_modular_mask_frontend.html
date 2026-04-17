@@ -4,23 +4,43 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>XYZ Modular Mask Frontend</title>
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="data:," />
   <style>
     :root{
-      --bg:#07111f; --bg2:#0d1b2f; --panel:rgba(10,18,33,.88); --line:rgba(255,255,255,.08);
-      --text:#eef4ff; --muted:#9fb1c7; --mint:#94f3de; --mint2:#d8fff5; --danger:#ff4d6d; --danger2:rgba(255,77,109,.34);
-      --good:#90f0cf; --warn:#ffd37a; --accent:#7fb7ff;
+      --bg:#07111f;
+      --bg2:#0d1b2f;
+      --panel:rgba(10,18,33,.88);
+      --line:rgba(255,255,255,.08);
+      --text:#eef4ff;
+      --muted:#9fb1c7;
+      --mint:#94f3de;
+      --mint2:#d8fff5;
+      --danger:#ff4d6d;
+      --good:#90f0cf;
+      --warn:#ffd37a;
+      --accent:#7fb7ff;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
-      margin:0; color:var(--text); font-family:Inter,Arial,sans-serif;
+      margin:0;
+      color:var(--text);
+      font-family:Inter,Arial,sans-serif;
       background:
         radial-gradient(circle at 10% 10%, rgba(95,122,255,.14), transparent 24%),
         radial-gradient(circle at 88% 12%, rgba(85,220,196,.10), transparent 22%),
         linear-gradient(180deg,#030814,#071221 54%,#0a1728);
     }
-    .app{min-height:100vh; display:grid; grid-template-rows:auto 1fr; gap:12px; padding:12px}
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-rows:auto 1fr;
+      gap:12px;
+      padding:12px;
+    }
+
     .glass{
       border:1px solid var(--line);
       background:
@@ -30,52 +50,246 @@
       backdrop-filter:blur(16px) saturate(135%);
       border-radius:24px;
     }
-    .topbar{padding:16px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
-    .brand strong{display:block; font-size:28px; font-weight:800}
-    .brand span,.muted{color:var(--muted)}
-    .brand span{font-size:12px; letter-spacing:.16em; text-transform:uppercase}
-    .layout{min-height:0; display:grid; grid-template-columns:340px minmax(0,1fr); gap:12px}
-    .panel{min-height:0; display:flex; flex-direction:column; overflow:hidden}
-    .head{padding:16px 18px; border-bottom:1px solid rgba(255,255,255,.06); display:flex; justify-content:space-between; gap:10px; align-items:center}
-    .body{padding:16px; overflow:auto; display:grid; gap:14px; align-content:start}
+
+    .topbar{
+      padding:16px 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .brand strong{
+      display:block;
+      font-size:28px;
+      font-weight:800;
+    }
+
+    .brand span,.muted{ color:var(--muted); }
+    .brand span{
+      font-size:12px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    .layout{
+      min-height:0;
+      display:grid;
+      grid-template-columns:340px minmax(0,1fr);
+      gap:12px;
+    }
+
+    .panel{
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+
+    .head{
+      padding:16px 18px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+
+    .body{
+      padding:16px;
+      overflow:auto;
+      display:grid;
+      gap:14px;
+      align-content:start;
+    }
+
     .card{
-      border:1px solid var(--line); border-radius:18px; padding:14px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
       background:linear-gradient(180deg, rgba(11,18,31,.86), rgba(10,16,28,.72));
-      display:grid; gap:12px;
+      display:grid;
+      gap:12px;
     }
-    .card h3{margin:0; color:var(--mint2); font-size:14px}
-    .drop{border:1px dashed rgba(148,243,222,.28); border-radius:16px; padding:16px; display:grid; gap:10px; background:rgba(8,14,24,.55)}
-    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
-    input,button{font:inherit}
-    input[type="range"], input[type="text"], input[type="file"]{
-      width:100%; padding:11px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.1);
-      background:rgba(8,14,24,.92); color:var(--text)
+
+    .card h3{
+      margin:0;
+      color:var(--mint2);
+      font-size:14px;
     }
-    input[type="file"]{padding:8px}
+
+    .drop{
+      border:1px dashed rgba(148,243,222,.28);
+      border-radius:16px;
+      padding:16px;
+      display:grid;
+      gap:10px;
+      background:rgba(8,14,24,.55);
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .row3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+    }
+
+    input,button{ font:inherit; }
+
+    input[type="range"],
+    input[type="text"],
+    input[type="file"]{
+      width:100%;
+      padding:11px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.1);
+      background:rgba(8,14,24,.92);
+      color:var(--text);
+    }
+
+    input[type="file"]{ padding:8px; }
+
     .btn{
-      min-height:44px; border-radius:12px; border:1px solid rgba(148,243,222,.24); cursor:pointer;
-      padding:10px 14px; font-weight:800; background:rgba(148,243,222,.06); color:var(--text)
+      min-height:44px;
+      border-radius:12px;
+      border:1px solid rgba(148,243,222,.24);
+      cursor:pointer;
+      padding:10px 14px;
+      font-weight:800;
+      background:rgba(148,243,222,.06);
+      color:var(--text);
     }
-    .btn:hover{transform:translateY(-1px)}
-    .btn:disabled{opacity:.45; cursor:not-allowed; transform:none}
-    .btn-primary{background:linear-gradient(135deg,#b8fff0,#86efd8); color:#08221d}
-    .btn-danger{background:rgba(255,77,109,.12); border-color:rgba(255,77,109,.35)}
-    .btn-quiet{background:rgba(255,255,255,.03); color:var(--muted); border-color:var(--line)}
-    .btn.active{box-shadow:0 0 0 2px rgba(148,243,222,.18) inset; border-color:rgba(148,243,222,.46)}
-    .btn.active.remove{box-shadow:0 0 0 2px rgba(255,77,109,.2) inset; border-color:rgba(255,77,109,.45)}
-    .pillbar{display:flex; gap:8px; flex-wrap:wrap}
-    .pill{padding:8px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); font-size:12px; background:rgba(255,255,255,.03)}
-    .pill strong{color:var(--mint2); margin-left:6px}
-    .status{display:inline-flex; align-items:center; gap:8px; padding:7px 11px; border-radius:999px; border:1px solid var(--line); background:rgba(10,17,29,.88); width:fit-content}
-    .status:before{content:""; width:8px; height:8px; border-radius:50%; background:currentColor}
-    .idle{color:#9aa6bb}.loading{color:var(--warn)}.success{color:var(--good)}.error{color:#ff95a8}
-    .workspace{min-height:0; display:grid; grid-template-rows:auto 1fr auto; overflow:hidden}
-    .workspace-head{padding:16px 18px 0; display:grid; gap:12px}
-    .note{padding:12px 14px; border-radius:18px; border:1px solid var(--line); background:rgba(6,12,22,.74); display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap}
-    .canvas-shell{position:relative; min-height:420px; margin:0 16px; border-radius:24px; overflow:hidden; border:1px solid var(--line); background:#040a14; touch-action:none}
+
+    .btn:hover{ transform:translateY(-1px); }
+    .btn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,#b8fff0,#86efd8);
+      color:#08221d;
+    }
+
+    .btn-danger{
+      background:rgba(255,77,109,.12);
+      border-color:rgba(255,77,109,.35);
+    }
+
+    .btn-quiet{
+      background:rgba(255,255,255,.03);
+      color:var(--muted);
+      border-color:var(--line);
+    }
+
+    .btn.active{
+      box-shadow:0 0 0 2px rgba(148,243,222,.18) inset;
+      border-color:rgba(148,243,222,.46);
+    }
+
+    .btn.active.remove{
+      box-shadow:0 0 0 2px rgba(255,77,109,.2) inset;
+      border-color:rgba(255,77,109,.45);
+    }
+
+    .pillbar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .pill{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:12px;
+      background:rgba(255,255,255,.03);
+    }
+
+    .pill strong{
+      color:var(--mint2);
+      margin-left:6px;
+    }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 11px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(10,17,29,.88);
+      width:fit-content;
+    }
+
+    .status:before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:currentColor;
+    }
+
+    .idle{ color:#9aa6bb; }
+    .loading{ color:var(--warn); }
+    .success{ color:var(--good); }
+    .error{ color:#ff95a8; }
+
+    .workspace{
+      min-height:0;
+      display:grid;
+      grid-template-rows:auto minmax(0,1fr) auto;
+      overflow:hidden;
+    }
+
+    .workspace-head{
+      padding:16px 18px 0;
+      display:grid;
+      gap:12px;
+    }
+
+    .note{
+      padding:12px 14px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(6,12,22,.74);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .workspace-body{
+      min-height:0;
+      overflow:auto;
+      padding:0 16px 16px;
+      display:grid;
+      gap:14px;
+      align-content:start;
+    }
+
+    .canvas-shell{
+      position:relative;
+      min-height:420px;
+      border-radius:24px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background:#040a14;
+      touch-action:none;
+    }
+
     .checker{
-      position:absolute; inset:0;
+      position:absolute;
+      inset:0;
       background-image:
         linear-gradient(45deg, rgba(255,255,255,.04) 25%, transparent 25%),
         linear-gradient(-45deg, rgba(255,255,255,.04) 25%, transparent 25%),
@@ -86,420 +300,1036 @@
       opacity:.4;
       pointer-events:none;
     }
-    #imageCanvas,#maskCanvas{position:absolute; inset:0; width:100%; height:100%; display:block}
-    .overlay-msg{position:absolute; inset:auto 18px 18px 18px; display:flex; justify-content:space-between; gap:12px; align-items:flex-end; pointer-events:none}
-    .callout{max-width:540px; border-radius:18px; padding:12px 14px; border:1px solid var(--line); background:rgba(9,16,28,.8)}
-    .workspace-foot{padding:14px 16px 16px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap}
-    .chips{display:flex; gap:8px; flex-wrap:wrap}
-    .chip{padding:9px 11px; border-radius:12px; border:1px solid var(--line); background:rgba(8,14,24,.72); font-size:12px; color:var(--muted)}
-    .chip strong{color:var(--mint2); margin-left:6px}
-    .mini{font-size:12px; color:var(--muted)}
-    .endpoint{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:rgba(5,10,18,.76); color:#dff3ff}
-    @media (max-width:1080px){
-      .layout{grid-template-columns:1fr}
-      .panel{order:2}
-      .workspace-wrap{order:1}
-      .canvas-shell{min-height:50vh}
+
+    #imageCanvas,#maskCanvas{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
     }
+
+    .overlay-msg{
+      position:absolute;
+      inset:auto 18px 18px 18px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-end;
+      pointer-events:none;
+    }
+
+    .callout{
+      max-width:540px;
+      border-radius:18px;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      background:rgba(9,16,28,.8);
+    }
+
+    .chips{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      padding:9px 11px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(8,14,24,.72);
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .chip strong{
+      color:var(--mint2);
+      margin-left:6px;
+    }
+
+    .mini{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .endpoint{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      font-size:12px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(5,10,18,.76);
+      color:#dff3ff;
+      word-break:break-all;
+    }
+
+    .preview-box{
+      width:100%;
+      min-height:360px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:#181f2a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .preview-panel{
+      padding:14px;
+      border-radius:16px;
+      background:#0b1220;
+      border:1px solid rgba(255,255,255,.08);
+      color:#cfe7ff;
+      font:13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+      white-space:pre-wrap;
+      min-height:60px;
+      overflow:auto;
+    }
+
+    .workspace-foot{
+      padding:14px 16px 16px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    @media (max-width:1080px){
+      .layout{ grid-template-columns:1fr; }
+      .panel{ order:2; }
+      .workspace-wrap{ order:1; }
+      .canvas-shell{ min-height:50vh; }
+    }
+
     @media (max-width:640px){
-      .app{padding:10px}
-      .topbar,.head,.body,.workspace-head,.workspace-foot{padding-left:14px; padding-right:14px}
-      .row,.row3{grid-template-columns:1fr}
-      .canvas-shell{margin:0 14px; min-height:46vh}
-      .brand strong{font-size:24px}
-      .overlay-msg{left:12px; right:12px; bottom:12px; display:grid}
+      .app{ padding:10px; }
+      .topbar,.head,.body,.workspace-head,.workspace-foot{ padding-left:14px; padding-right:14px; }
+      .workspace-body{ padding-left:14px; padding-right:14px; }
+      .row,.row3{ grid-template-columns:1fr; }
+      .canvas-shell{ min-height:46vh; }
+      .brand strong{ font-size:24px; }
+      .overlay-msg{ left:12px; right:12px; bottom:12px; display:grid; }
+      .preview-box{ min-height:280px; }
     }
   </style>
 </head>
 <body>
-<div class="app">
-  <header class="topbar glass">
-    <div class="brand">
-      <strong>XYZ Modular Mask Frontend</strong>
-      <span>Upload → Auto Detect → Add / Remove → Confirm → Generate 3D</span>
-    </div>
-    <div class="pillbar">
-      <div class="pill">Mode<strong id="pillMode">Idle</strong></div>
-      <div class="pill">Mask<strong id="pillMask">0%</strong></div>
-      <div class="pill">Backend<strong id="pillBackend">Ready</strong></div>
-    </div>
-  </header>
+  <div class="app">
+    <header class="topbar glass">
+      <div class="brand">
+        <strong>XYZ Modular Mask Frontend</strong>
+        <span>Upload → Auto Detect → Add / Remove → Confirm → Generate 3D</span>
+      </div>
+      <div class="pillbar">
+        <div class="pill">Mode<strong id="pillMode">Idle</strong></div>
+        <div class="pill">Mask<strong id="pillMask">0%</strong></div>
+        <div class="pill">Backend<strong id="pillBackend">Ready</strong></div>
+      </div>
+    </header>
 
-  <main class="layout">
-    <aside class="panel glass">
-      <div class="head"><strong>Controls</strong><span class="muted">Modular mask editing for 3D pipeline.</span></div>
-      <div class="body">
-        <section class="card">
-          <h3>1. Upload Photo</h3>
-          <div class="drop">
-            <input type="file" id="uploadFile" accept="image/*" />
-            <div class="mini">Use a clear subject photo for best results.</div>
-          </div>
-        </section>
+    <main class="layout">
+      <aside class="panel glass">
+        <div class="head">
+          <strong>Controls</strong>
+          <span class="muted">Modular mask editing for 3D pipeline.</span>
+        </div>
 
-        <section class="card">
-          <h3>2. Auto Detect</h3>
-          <div class="row">
-            <button id="btnAutoDetect" class="btn btn-primary" disabled>Auto Detect Focus</button>
-            <button id="btnResetMask" class="btn btn-quiet" disabled>Reset Mask</button>
-          </div>
-          <label class="mini" for="detectStrength">Detect Strength</label>
-          <input id="detectStrength" type="range" min="10" max="90" value="38" />
-          <div class="mini">Calls backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/segment</span>.</div>
-        </section>
-
-        <section class="card">
-          <h3>3. Refine Mask</h3>
-          <div class="row3">
-            <button id="btnAdd" class="btn" disabled>Add +</button>
-            <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
-            <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
-          </div>
-          <div class="row">
-            <div>
-              <label class="mini" for="brushSize">Brush Size</label>
-              <input id="brushSize" type="range" min="6" max="120" value="28" />
+        <div class="body">
+          <section class="card">
+            <h3>1. Upload Photo</h3>
+            <div class="drop">
+              <input type="file" id="uploadFile" accept="image/*" />
+              <div class="mini">Use a clear subject photo for best results.</div>
             </div>
-            <div>
-              <label class="mini" for="overlayOpacity">Red Overlay</label>
-              <input id="overlayOpacity" type="range" min="10" max="90" value="42" />
+          </section>
+
+          <section class="card">
+            <h3>2. Auto Detect</h3>
+            <div class="row">
+              <button id="btnAutoDetect" class="btn btn-primary" disabled>Auto Detect Focus</button>
+              <button id="btnResetMask" class="btn btn-quiet" disabled>Reset Mask</button>
+            </div>
+            <label class="mini" for="detectStrength">Detect Strength</label>
+            <input id="detectStrength" type="range" min="10" max="90" value="38" />
+            <div class="mini">Calls backend <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/segment</span></div>
+          </section>
+
+          <section class="card">
+            <h3>3. Refine Mask</h3>
+            <div class="row3">
+              <button id="btnAdd" class="btn" disabled>Add +</button>
+              <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
+              <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
+            </div>
+
+            <div class="row">
+              <div>
+                <label class="mini" for="brushSize">Brush Size</label>
+                <input id="brushSize" type="range" min="6" max="120" value="28" />
+              </div>
+              <div>
+                <label class="mini" for="overlayOpacity">Red Overlay</label>
+                <input id="overlayOpacity" type="range" min="10" max="90" value="42" />
+              </div>
+            </div>
+            <div class="mini">Paint directly on the image. Red = selected object.</div>
+          </section>
+
+          <section class="card">
+            <h3>4. Confirm & Generate</h3>
+            <div class="row">
+              <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
+              <button id="btnGenerate3D" class="btn btn-primary" disabled>Generate 3D</button>
+            </div>
+            <div class="mini">Sends cutout to backend <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/model/generate-3d</span></div>
+
+            <label class="mini" for="apiBase">API Base</label>
+            <input id="apiBase" type="text" value="http://127.0.0.1:5000" />
+          </section>
+
+          <section class="card">
+            <h3>Status</h3>
+            <div id="statusBadge" class="status idle">Idle</div>
+            <div id="statusMessage" class="muted">Upload a photo to begin.</div>
+            <div id="lastResult" class="mini">No result yet.</div>
+          </section>
+        </div>
+      </aside>
+
+      <section class="workspace-wrap glass workspace">
+        <div class="workspace-head">
+          <div class="note">
+            <strong style="color:var(--mint2)">Mask Editing Stage</strong>
+            <span class="muted">Prepare a clean subject cutout for modular 3D pipeline.</span>
+          </div>
+        </div>
+
+        <div class="workspace-body">
+          <div class="canvas-shell" id="canvasShell">
+            <div class="checker"></div>
+            <canvas id="imageCanvas"></canvas>
+            <canvas id="maskCanvas"></canvas>
+
+            <div class="overlay-msg">
+              <div class="callout">
+                <strong style="display:block;color:var(--mint2);font-size:13px;letter-spacing:.04em;text-transform:uppercase;">Current Stage</strong>
+                <span id="selectionMessage" class="muted">Upload one image. Then press Auto Detect.</span>
+              </div>
+              <div class="pillbar" style="pointer-events:none;justify-content:flex-end;">
+                <div class="pill">Brush<strong id="pillBrush">28</strong></div>
+                <div class="pill">Selection<strong id="pillSelection">None</strong></div>
+              </div>
             </div>
           </div>
-          <div class="mini">Paint on the image. Red = selected object.</div>
-        </section>
 
-        <section class="card">
-          <h3>4. Confirm & Generate</h3>
-          <div class="row">
-            <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
-            <button id="btnGenerate3D" class="btn btn-primary" disabled>Generate 3D</button>
+          <div class="preview-box" id="preview3DContainer">
+            <span id="preview3DPlaceholder" style="color:#9fb1c7;">3D Preview will appear here after Generate 3D</span>
           </div>
-          <div class="mini">Sends cutout to backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/model/generate-3d</span>.</div>
-          <label class="mini" for="apiBase">API Base</label>
-          <input id="apiBase" type="text" value="http://127.0.0.1:5000" />
-        </section>
 
-        <section class="card">
-          <h3>Status</h3>
-          <div id="statusBadge" class="status idle">Idle</div>
-          <div id="statusMessage" class="muted">Upload a photo to begin.</div>
-          <div id="lastResult" class="mini">No result yet.</div>
-        </section>
-      </div>
-    </aside>
-
-    <section class="workspace-wrap glass workspace">
-      <div class="workspace-head">
-        <div class="note">
-          <strong style="color:var(--mint2)">Mask Editing Stage</strong>
-          <span class="muted">Prepare a clean subject cutout for modular 3D pipeline.</span>
+          <div class="preview-panel" id="previewResultPanel"></div>
         </div>
-      </div>
 
-      <div class="canvas-shell" id="canvasShell">
-        <div class="checker"></div>
-        <canvas id="imageCanvas"></canvas>
-        <canvas id="maskCanvas"></canvas>
-        <div class="overlay-msg">
-          <div class="callout">
-            <strong style="display:block;color:var(--mint2);font-size:13px;letter-spacing:.04em;text-transform:uppercase">Current Stage</strong>
-            <span id="selectionMessage" class="muted">Upload one image. Then press Auto Detect.</span>
+        <div class="workspace-foot">
+          <div class="chips">
+            <div class="chip">Image<strong id="chipImage">None</strong></div>
+            <div class="chip">Mask<strong id="chipMask">Empty</strong></div>
+            <div class="chip">Confirm<strong id="chipConfirm">No</strong></div>
           </div>
-          <div class="pillbar" style="pointer-events:none; justify-content:flex-end">
-            <div class="pill">Brush<strong id="pillBrush">28</strong></div>
-            <div class="pill">Selection<strong id="pillSelection">None</strong></div>
+          <div class="chips">
+            <div class="chip">API<strong id="chipApi">Idle</strong></div>
+            <div class="chip">3D<strong id="chip3D">Not started</strong></div>
           </div>
         </div>
-      </div>
+      </section>
+    </main>
+  </div>
 
-      <div id="preview3DContainer" style="margin:24px 16px 0; width:calc(100% - 32px); height:400px; background:#181f2a; border-radius:18px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center;">
-        <span id="preview3DPlaceholder" style="color:#9fb1c7">3D Preview will appear here after Generate 3D</span>
-      </div>
-      <div id="previewResultPanel" style="margin:12px 16px 0; padding:14px; border-radius:16px; background:#0b1220; border:1px solid rgba(255,255,255,.08); color:#cfe7ff; font:13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre-wrap; min-height:60px;"></div>
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js";
+    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/controls/OrbitControls.js";
+    import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/loaders/GLTFLoader.js";
+    import { OBJLoader } from "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/loaders/OBJLoader.js";
 
-      <div class="workspace-foot">
-        <div class="chips">
-          <div class="chip">Image<strong id="chipImage">None</strong></div>
-          <div class="chip">Mask<strong id="chipMask">Empty</strong></div>
-          <div class="chip">Confirm<strong id="chipConfirm">No</strong></div>
-        </div>
-        <div class="chips">
-          <div class="chip">API<strong id="chipApi">Idle</strong></div>
-          <div class="chip">3D<strong id="chip3D">Not started</strong></div>
-        </div>
-      </div>
-    </section>
-  </main>
-</div>
+    const $ = (id) => document.getElementById(id);
 
-<script>
-const $ = (id) => document.getElementById(id);
+    const els = {
+      uploadFile: $("uploadFile"),
+      detectStrength: $("detectStrength"),
+      brushSize: $("brushSize"),
+      overlayOpacity: $("overlayOpacity"),
+      apiBase: $("apiBase"),
 
-// --- MOCKRUN TEST MODE ---
-// Set this to one of: "none", "success", "backend_error", "invalid_json", "network_error"
-const MOCKRUN_3D = window.MOCKRUN_3D || "none";
+      btnAutoDetect: $("btnAutoDetect"),
+      btnResetMask: $("btnResetMask"),
+      btnAdd: $("btnAdd"),
+      btnRemove: $("btnRemove"),
+      btnClearEdits: $("btnClearEdits"),
+      btnConfirm: $("btnConfirm"),
+      btnGenerate3D: $("btnGenerate3D"),
 
-function mock3DResponse(fd) {
-  // Simulate different backend responses
-  if (MOCKRUN_3D === "success") {
-    return Promise.resolve({
-      ok: true,
-      status: 200,
-      headers: { get: (k) => "application/json" },
-      text: async () => JSON.stringify({
-        ok: true,
-        model_url: "https://example.com/model.glb"
-      })
-    });
-  }
-  if (MOCKRUN_3D === "backend_error") {
-    return Promise.resolve({
-      ok: false,
-      status: 500,
-      headers: { get: (k) => "application/json" },
-      text: async () => JSON.stringify({
-        ok: false,
-        error: "Simulated backend error!"
-      })
-    });
-  }
-  if (MOCKRUN_3D === "invalid_json") {
-    return Promise.resolve({
-      ok: false,
-      status: 502,
-      headers: { get: (k) => "text/plain" },
-      text: async () => "# This is not JSON!\n<html>Backend error</html>"
-    });
-  }
-  if (MOCKRUN_3D === "network_error") {
-    return Promise.reject(new Error("Simulated network error"));
-  }
-  return null;
-}
+      canvasShell: $("canvasShell"),
+      imageCanvas: $("imageCanvas"),
+      maskCanvas: $("maskCanvas"),
 
-const uploadInput = $("uploadFile");
-const apiBaseInput = $("apiBase");
+      statusBadge: $("statusBadge"),
+      statusMessage: $("statusMessage"),
+      lastResult: $("lastResult"),
+      selectionMessage: $("selectionMessage"),
+      preview3DContainer: $("preview3DContainer"),
+      preview3DPlaceholder: $("preview3DPlaceholder"),
+      previewResultPanel: $("previewResultPanel"),
 
-const btnAutoDetect = $("btnAutoDetect");
-const btnResetMask = $("btnResetMask");
-const btnAdd = $("btnAdd");
-const btnRemove = $("btnRemove");
-const btnClearEdits = $("btnClearEdits");
-const btnConfirm = $("btnConfirm");
-const btnGenerate3D = $("btnGenerate3D");
-// Add click handler for Generate 3D
-btnGenerate3D.addEventListener("click", async () => {
-  setStatus("Loading", "Generating 3D model...");
-  btnGenerate3D.disabled = true;
-  clearPreviewResultPanel();
-  try {
-    // Simulate sending data to backend
-    const response = await mock3DResponse();
-    if (!response) throw new Error("No backend response");
-    let data;
-    try {
-      data = JSON.parse(await response.text());
-    } catch (e) {
-      setStatus("3D Error", "Invalid backend response.", "Could not parse JSON.");
-      writePreviewResultPanel(`<div><strong>Backend returned invalid JSON.</strong></div>`);
-      btnGenerate3D.disabled = false;
-      return;
-    }
-    if (!response.ok || !data.ok) {
-      setStatus("3D Error", data.error || "Unknown backend error.");
-      writePreviewResultPanel(`<div><strong>Backend error:</strong> ${data.error || "Unknown error"}</div><pre>${JSON.stringify(data, null, 2)}</pre>`);
-      btnGenerate3D.disabled = false;
-      return;
-    }
-    // Success: show 3D and details
-    setStatus("3D Ready", "3D model generated!", data.model_url);
-    chip3D.textContent = "Ready";
-    let url = data.model_url || data.glbUrl || data.previewUrl;
-    if (url) {
-      await render3DPreview(url);
-      writePreviewResultPanel(`<div><strong>3D Model URL:</strong> <a href="${url}" target="_blank">${url}</a></div><pre>${JSON.stringify(data, null, 2)}</pre>`);
-    } else if (data.job_id) {
-      // Queued job, no model yet
-      writePreviewResultPanel(`<div><strong>Job Queued</strong> (job_id: ${data.job_id})</div><pre>${JSON.stringify(data, null, 2)}</pre>`);
-    } else {
-      writePreviewResultPanel(`<div><strong>No model URL or job info in response.</strong></div><pre>${JSON.stringify(data, null, 2)}</pre>`);
-    }
-  } catch (err) {
-    setStatus("3D Error", err.message || "Network error.");
-    preview3DContainer.innerHTML = '<span style="color:#ff95a8">Failed to render 3D preview.</span>';
-    writePreviewResultPanel(`<div><strong>3D Render Error:</strong> ${err.message || err}</div>`);
-    btnGenerate3D.disabled = false;
-  }
-});
+      pillMode: $("pillMode"),
+      pillMask: $("pillMask"),
+      pillBackend: $("pillBackend"),
+      pillBrush: $("pillBrush"),
+      pillSelection: $("pillSelection"),
 
-// Fallback/Debug result panel rendering
-function renderPreviewFallback(urls, payload) {
-  // Write debug info to previewResultPanel only
-  let html = '';
-  if (urls) {
-    if (urls.previewUrl) html += `<div><strong>Preview URL:</strong> <a href="${urls.previewUrl}" target="_blank">${urls.previewUrl}</a></div>`;
-    if (urls.modelUrl) html += `<div><strong>Model URL:</strong> <a href="${urls.modelUrl}" target="_blank">${urls.modelUrl}</a></div>`;
-    if (urls.glbUrl) html += `<div><strong>GLB URL:</strong> <a href="${urls.glbUrl}" target="_blank">${urls.glbUrl}</a></div>`;
-  }
-  if (payload) {
-    html += `<pre>${typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2)}</pre>`;
-  }
-  writePreviewResultPanel(html);
-}
+      chipImage: $("chipImage"),
+      chipMask: $("chipMask"),
+      chipConfirm: $("chipConfirm"),
+      chipApi: $("chipApi"),
+      chip3D: $("chip3D"),
+    };
 
-function clear3DPreview() {
-  if (activeSceneStop) activeSceneStop();
-  preview3DContainer.innerHTML = "<span id=\"preview3DPlaceholder\" style=\"color:#9fb1c7\">3D Preview will appear here after Generate 3D</span>";
-  clearPreviewResultPanel();
-}
+    const imageCtx = els.imageCanvas.getContext("2d");
+    const maskCtx = els.maskCanvas.getContext("2d");
 
-async function render3DPreview(modelUrl) {
-  console.log("render3DPreview modelUrl:", modelUrl);
+    const off = {
+      image: document.createElement("canvas"),
+      mask: document.createElement("canvas"),
+      baseMask: document.createElement("canvas"),
+      cutout: document.createElement("canvas"),
+    };
+    const offCtx = {
+      image: off.image.getContext("2d"),
+      mask: off.mask.getContext("2d"),
+      baseMask: off.baseMask.getContext("2d"),
+      cutout: off.cutout.getContext("2d"),
+    };
 
-  preview3DContainer.innerHTML = "";
-  const canvas = document.createElement("canvas");
-  canvas.style.width = "100%";
-  canvas.style.height = "100%";
-  preview3DContainer.appendChild(canvas);
+    const state = {
+      img: null,
+      uploadedFile: null,
+      drawRect: null,
+      currentTool: "add",
+      isDrawing: false,
+      baseMaskLoaded: false,
+      hasMask: false,
+      confirmed: false,
+      cutoutBlob: null,
+      previewStop: null,
+      renderer: null,
+      controls: null,
+    };
 
-  const { THREE, GLTFLoader, OBJLoader } = await ensureThree();
-
-  const width = Math.max(400, preview3DContainer.clientWidth);
-  const height = Math.max(300, preview3DContainer.clientHeight);
-
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    alpha: true,
-    antialias: true
-  });
-  renderer.setSize(width, height, false);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setClearColor(0x1a2230, 1);
-  activeRenderer = renderer;
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-  camera.position.set(0, 1.2, 4);
-
-  scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-
-  const light1 = new THREE.DirectionalLight(0xffffff, 1.2);
-  light1.position.set(3, 4, 5);
-  scene.add(light1);
-
-  const light2 = new THREE.DirectionalLight(0xffffff, 0.8);
-  light2.position.set(-3, 2, -4);
-  scene.add(light2);
-
-  scene.add(new THREE.GridHelper(10, 10));
-  scene.add(new THREE.AxesHelper(2));
-
-  const ext = (modelUrl.split("?")[0].split(".").pop() || "").toLowerCase();
-
-  function mountModel(model) {
-    scene.add(model);
-
-    const box = new THREE.Box3().setFromObject(model);
-    const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
-
-    model.position.sub(center);
-
-    const maxDim = Math.max(size.x, size.y, size.z, 1);
-    camera.position.set(0, maxDim * 0.8, maxDim * 2.2);
-    camera.lookAt(0, 0, 0);
-
-    let stopped = false;
-    function animate() {
-      if (stopped) return;
-      requestAnimationFrame(animate);
-      model.rotation.y += 0.01;
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    activeSceneStop = () => { stopped = true; };
-  }
-
-  return new Promise((resolve, reject) => {
-    if (ext === "obj") {
-      const loader = new OBJLoader();
-      loader.load(
-        modelUrl,
-        (obj) => {
-          mountModel(obj);
-          resolve();
-        },
-        undefined,
-        (err) => {
-          preview3DContainer.innerHTML = '<span style="color:#ff95a8">Failed to render 3D preview.</span>';
-          reject(err);
-        }
-      );
-      return;
+    function getApiBase() {
+      return (els.apiBase.value || "").trim().replace(/\/+$/, "");
     }
 
-    if (ext === "glb" || ext === "gltf") {
-      const loader = new GLTFLoader();
-      loader.load(
-        modelUrl,
-        (gltf) => {
-          mountModel(gltf.scene);
-          resolve();
-        },
-        undefined,
-        (err) => {
-          preview3DContainer.innerHTML = '<span style="color:#ff95a8">Failed to render 3D preview.</span>';
-          reject(err);
-        }
-      );
-      return;
+    function setStatus(kind, message, extra = "") {
+      els.statusBadge.className = "status";
+      if (kind === "idle") els.statusBadge.classList.add("idle");
+      if (kind === "loading") els.statusBadge.classList.add("loading");
+      if (kind === "success") els.statusBadge.classList.add("success");
+      if (kind === "error") els.statusBadge.classList.add("error");
+
+      const labelMap = {
+        idle: "Idle",
+        loading: "Loading",
+        success: "Success",
+        error: "Error",
+      };
+
+      els.statusBadge.textContent = labelMap[kind] || kind;
+      els.statusMessage.textContent = message || "";
+      els.lastResult.textContent = extra || "No result yet.";
+      els.chipApi.textContent = kind === "loading" ? "Working" : kind === "success" ? "Done" : kind === "error" ? "Error" : "Idle";
+      els.pillBackend.textContent = kind === "loading" ? "Busy" : kind === "success" ? "OK" : kind === "error" ? "Error" : "Ready";
     }
 
-    preview3DContainer.innerHTML = '<span style="color:#ff95a8">Failed to render 3D preview.</span>';
-    reject(new Error(`Unsupported preview format: .${ext}`));
-  });
-}
-
-  await new Promise((resolve, reject) => {
-    loader.load(
-      modelUrl,
-      (gltf) => {
-        const model = gltf.scene;
-        scene.add(model);
-
-        const box = new THREE.Box3().setFromObject(model);
-        const size = box.getSize(new THREE.Vector3());
-        const center = box.getCenter(new THREE.Vector3());
-
-        model.position.sub(center);
-
-        const maxDim = Math.max(size.x, size.y, size.z, 1);
-        camera.position.set(0, maxDim * 0.8, maxDim * 2.2);
-        camera.lookAt(0, 0, 0);
-
-        let stopped = false;
-        function animate() {
-          if (stopped) return;
-          requestAnimationFrame(animate);
-          model.rotation.y += 0.01;
-          renderer.render(scene, camera);
-        }
-        animate();
-
-        activeSceneStop = () => {
-          stopped = true;
-        };
-
-        resolve();
-      },
-      undefined,
-      (err) => {
-        reject(err);
+    function writePreviewResultPanel(content) {
+      if (typeof content === "string") {
+        els.previewResultPanel.innerHTML = content;
+      } else {
+        els.previewResultPanel.textContent = JSON.stringify(content, null, 2);
       }
-    );
-  });
-}
-</script>
+    }
+
+    function clearPreviewResultPanel() {
+      els.previewResultPanel.textContent = "";
+    }
+
+    function setTool(tool) {
+      state.currentTool = tool;
+      els.btnAdd.classList.toggle("active", tool === "add");
+      els.btnRemove.classList.toggle("active", tool === "remove");
+      els.btnRemove.classList.toggle("remove", tool === "remove");
+      els.pillSelection.textContent = tool === "add" ? "Add" : "Remove";
+      els.pillMode.textContent = tool === "add" ? "Paint +" : "Paint −";
+    }
+
+    function resizeVisibleCanvases() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = els.canvasShell.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rect.width * dpr));
+      const h = Math.max(1, Math.round(rect.height * dpr));
+
+      if (els.imageCanvas.width !== w || els.imageCanvas.height !== h) {
+        els.imageCanvas.width = w;
+        els.imageCanvas.height = h;
+      }
+      if (els.maskCanvas.width !== w || els.maskCanvas.height !== h) {
+        els.maskCanvas.width = w;
+        els.maskCanvas.height = h;
+      }
+
+      drawAll();
+    }
+
+    function computeDrawRect() {
+      if (!state.img) {
+        state.drawRect = null;
+        return;
+      }
+      const cw = els.imageCanvas.width;
+      const ch = els.imageCanvas.height;
+      const iw = state.img.naturalWidth;
+      const ih = state.img.naturalHeight;
+      const scale = Math.min(cw / iw, ch / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
+      const dx = (cw - dw) / 2;
+      const dy = (ch - dh) / 2;
+      state.drawRect = { dx, dy, dw, dh, scale };
+    }
+
+    function drawImageLayer() {
+      imageCtx.clearRect(0, 0, els.imageCanvas.width, els.imageCanvas.height);
+      if (!state.img || !state.drawRect) return;
+      const { dx, dy, dw, dh } = state.drawRect;
+      imageCtx.drawImage(state.img, dx, dy, dw, dh);
+    }
+
+    function drawMaskLayer() {
+      maskCtx.clearRect(0, 0, els.maskCanvas.width, els.maskCanvas.height);
+      if (!state.img || !state.drawRect || !state.hasMask) return;
+
+      const { dx, dy, dw, dh } = state.drawRect;
+      const alpha = Number(els.overlayOpacity.value) / 100;
+
+      const temp = document.createElement("canvas");
+      temp.width = off.mask.width;
+      temp.height = off.mask.height;
+      const tctx = temp.getContext("2d");
+
+      tctx.clearRect(0, 0, temp.width, temp.height);
+      tctx.drawImage(off.mask, 0, 0);
+      tctx.globalCompositeOperation = "source-in";
+      tctx.fillStyle = `rgba(255, 77, 109, ${alpha})`;
+      tctx.fillRect(0, 0, temp.width, temp.height);
+      tctx.globalCompositeOperation = "source-over";
+
+      maskCtx.drawImage(temp, dx, dy, dw, dh);
+    }
+
+    function drawAll() {
+      computeDrawRect();
+      drawImageLayer();
+      drawMaskLayer();
+      updateMaskStats();
+    }
+
+    function resetStateForNewImage() {
+      state.baseMaskLoaded = false;
+      state.hasMask = false;
+      state.confirmed = false;
+      state.cutoutBlob = null;
+
+      offCtx.mask.clearRect(0, 0, off.mask.width, off.mask.height);
+      offCtx.baseMask.clearRect(0, 0, off.baseMask.width, off.baseMask.height);
+
+      clear3DPreview();
+      drawAll();
+      updateUiState();
+    }
+
+    function updateUiState() {
+      const hasImage = !!state.img;
+      const hasMask = state.hasMask;
+      const confirmed = state.confirmed;
+
+      els.btnAutoDetect.disabled = !hasImage;
+      els.btnResetMask.disabled = !state.baseMaskLoaded;
+      els.btnAdd.disabled = !hasImage;
+      els.btnRemove.disabled = !hasImage;
+      els.btnClearEdits.disabled = !hasImage;
+      els.btnConfirm.disabled = !hasMask;
+      els.btnGenerate3D.disabled = !hasMask;
+
+      els.chipImage.textContent = hasImage ? `${state.img.naturalWidth}×${state.img.naturalHeight}` : "None";
+      els.chipMask.textContent = hasMask ? "Ready" : "Empty";
+      els.chipConfirm.textContent = confirmed ? "Yes" : "No";
+    }
+
+    function updateMaskStats() {
+      if (!off.mask.width || !off.mask.height) {
+        els.pillMask.textContent = "0%";
+        return;
+      }
+
+      const imgData = offCtx.mask.getImageData(0, 0, off.mask.width, off.mask.height).data;
+      let count = 0;
+      for (let i = 3; i < imgData.length; i += 4) {
+        if (imgData[i] > 10) count++;
+      }
+      const total = off.mask.width * off.mask.height;
+      const pct = total ? ((count / total) * 100).toFixed(1) : "0.0";
+      state.hasMask = count > 0;
+      els.pillMask.textContent = `${pct}%`;
+      els.pillBrush.textContent = String(els.brushSize.value);
+      updateUiState();
+    }
+
+    function setSelectionMessage(text) {
+      els.selectionMessage.textContent = text;
+    }
+
+    async function loadFileIntoCanvas(file) {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        state.img = img;
+        state.uploadedFile = file;
+
+        off.image.width = img.naturalWidth;
+        off.image.height = img.naturalHeight;
+        off.mask.width = img.naturalWidth;
+        off.mask.height = img.naturalHeight;
+        off.baseMask.width = img.naturalWidth;
+        off.baseMask.height = img.naturalHeight;
+        off.cutout.width = img.naturalWidth;
+        off.cutout.height = img.naturalHeight;
+
+        offCtx.image.clearRect(0, 0, off.image.width, off.image.height);
+        offCtx.image.drawImage(img, 0, 0);
+
+        resetStateForNewImage();
+        resizeVisibleCanvases();
+        setStatus("idle", "Image loaded. Press Auto Detect.", file.name);
+        setSelectionMessage("Image loaded. Press Auto Detect.");
+      };
+      img.onerror = () => {
+        setStatus("error", "Failed to load image.");
+      };
+      img.src = url;
+    }
+
+    function normalizeMaybeBase64Image(str) {
+      if (!str || typeof str !== "string") return null;
+      const trimmed = str.trim();
+
+      if (trimmed.startsWith("data:image/")) return trimmed;
+      if (/^https?:\/\//i.test(trimmed)) return trimmed;
+      if (trimmed.startsWith("/")) return getApiBase() + trimmed;
+      if (/^[A-Za-z0-9+/=\r\n]+$/.test(trimmed) && trimmed.length > 100) {
+        return "data:image/png;base64," + trimmed.replace(/\s+/g, "");
+      }
+      return null;
+    }
+
+    function deepFindMaskString(obj, depth = 0) {
+      if (!obj || depth > 5) return null;
+
+      if (typeof obj === "string") {
+        return normalizeMaybeBase64Image(obj);
+      }
+
+      if (Array.isArray(obj)) {
+        for (const item of obj) {
+          const found = deepFindMaskString(item, depth + 1);
+          if (found) return found;
+        }
+        return null;
+      }
+
+      if (typeof obj === "object") {
+        const priorityKeys = [
+          "mask_base64","maskBase64","mask_png_base64","maskPngBase64","mask",
+          "image_base64","imageBase64","image","png","result","data","overlay","overlay_mask"
+        ];
+        for (const key of priorityKeys) {
+          if (key in obj) {
+            const found = deepFindMaskString(obj[key], depth + 1);
+            if (found) return found;
+          }
+        }
+        for (const key of Object.keys(obj)) {
+          const found = deepFindMaskString(obj[key], depth + 1);
+          if (found) return found;
+        }
+      }
+
+      return null;
+    }
+
+    async function fetchJsonOrText(response) {
+      const raw = await response.text();
+      let json = null;
+      try {
+        json = JSON.parse(raw);
+      } catch (_) {}
+      return { raw, json };
+    }
+
+    async function applyMaskFromSource(maskSrc) {
+      return new Promise((resolve, reject) => {
+        const m = new Image();
+        m.onload = () => {
+          offCtx.mask.clearRect(0, 0, off.mask.width, off.mask.height);
+          offCtx.baseMask.clearRect(0, 0, off.baseMask.width, off.baseMask.height);
+
+          offCtx.mask.drawImage(m, 0, 0, off.mask.width, off.mask.height);
+          offCtx.baseMask.drawImage(m, 0, 0, off.baseMask.width, off.baseMask.height);
+
+          state.baseMaskLoaded = true;
+          state.confirmed = false;
+          state.cutoutBlob = null;
+          drawAll();
+          updateUiState();
+          resolve();
+        };
+        m.onerror = reject;
+        m.crossOrigin = "anonymous";
+        m.src = maskSrc;
+      });
+    }
+
+    async function autoDetect() {
+      if (!state.uploadedFile) return;
+
+      setStatus("loading", "Detecting subject...");
+      setSelectionMessage("Running backend segmentation...");
+      clearPreviewResultPanel();
+
+      const fd = new FormData();
+      fd.append("file", state.uploadedFile);
+      fd.append("image", state.uploadedFile);
+      fd.append("upload", state.uploadedFile);
+      fd.append("strength", els.detectStrength.value);
+
+      try {
+        const res = await fetch(`${getApiBase()}/api/segment`, {
+          method: "POST",
+          body: fd,
+        });
+
+        const { raw, json } = await fetchJsonOrText(res);
+
+        if (!res.ok) {
+          setStatus("error", "Segment request failed.", raw.slice(0, 300));
+          writePreviewResultPanel(`<strong>Segment Error</strong>\n${escapeHtml(raw)}`);
+          return;
+        }
+
+        const maskSrc = json ? deepFindMaskString(json) : normalizeMaybeBase64Image(raw);
+
+        if (!maskSrc) {
+          setStatus("error", "No usable mask returned.", raw.slice(0, 300));
+          writePreviewResultPanel(`<strong>Segment Response</strong>\n${escapeHtml(raw)}`);
+          return;
+        }
+
+        await applyMaskFromSource(maskSrc);
+        setStatus("success", "Mask detected. You can refine it now.");
+        setSelectionMessage("Mask loaded. Use Add / Remove to refine.");
+        writePreviewResultPanel(json || raw);
+      } catch (err) {
+        setStatus("error", "Segment request failed.", err.message || String(err));
+        writePreviewResultPanel(`<strong>Segment Exception</strong>\n${escapeHtml(err.message || String(err))}`);
+      }
+    }
+
+    function resetMaskToBase() {
+      if (!state.baseMaskLoaded) return;
+      offCtx.mask.clearRect(0, 0, off.mask.width, off.mask.height);
+      offCtx.mask.drawImage(off.baseMask, 0, 0);
+      state.confirmed = false;
+      state.cutoutBlob = null;
+      drawAll();
+      setSelectionMessage("Mask reset to backend result.");
+    }
+
+    function clearMask() {
+      if (!state.img) return;
+      offCtx.mask.clearRect(0, 0, off.mask.width, off.mask.height);
+      state.confirmed = false;
+      state.cutoutBlob = null;
+      drawAll();
+      setSelectionMessage("Mask cleared.");
+    }
+
+    function getImagePointFromPointer(ev) {
+      if (!state.drawRect || !state.img) return null;
+
+      const rect = els.maskCanvas.getBoundingClientRect();
+      const px = (ev.clientX - rect.left) * (els.maskCanvas.width / rect.width);
+      const py = (ev.clientY - rect.top) * (els.maskCanvas.height / rect.height);
+
+      const { dx, dy, dw, dh } = state.drawRect;
+      if (px < dx || px > dx + dw || py < dy || py > dy + dh) return null;
+
+      const ix = ((px - dx) / dw) * off.mask.width;
+      const iy = ((py - dy) / dh) * off.mask.height;
+      return { x: ix, y: iy };
+    }
+
+    function paintMaskPoint(point) {
+      if (!point) return;
+
+      const radius = Number(els.brushSize.value) / 2;
+      offCtx.mask.save();
+      offCtx.mask.beginPath();
+      offCtx.mask.arc(point.x, point.y, radius, 0, Math.PI * 2);
+
+      if (state.currentTool === "add") {
+        offCtx.mask.globalCompositeOperation = "source-over";
+        offCtx.mask.fillStyle = "rgba(255,255,255,1)";
+      } else {
+        offCtx.mask.globalCompositeOperation = "destination-out";
+        offCtx.mask.fillStyle = "rgba(0,0,0,1)";
+      }
+
+      offCtx.mask.fill();
+      offCtx.mask.restore();
+
+      state.confirmed = false;
+      state.cutoutBlob = null;
+      drawAll();
+    }
+
+    function confirmCutout() {
+      if (!state.img || !state.hasMask) return;
+
+      offCtx.cutout.clearRect(0, 0, off.cutout.width, off.cutout.height);
+      offCtx.cutout.drawImage(off.image, 0, 0);
+
+      offCtx.cutout.globalCompositeOperation = "destination-in";
+      offCtx.cutout.drawImage(off.mask, 0, 0);
+      offCtx.cutout.globalCompositeOperation = "source-over";
+
+      off.cutout.toBlob((blob) => {
+        state.cutoutBlob = blob;
+        state.confirmed = true;
+        updateUiState();
+        setStatus("success", "Object confirmed. Ready to generate 3D.");
+        setSelectionMessage("Object confirmed. Press Generate 3D.");
+      }, "image/png");
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;",
+      }[m]));
+    }
+
+    function collectUrlsDeep(obj, acc = [], depth = 0) {
+      if (!obj || depth > 6) return acc;
+
+      if (typeof obj === "string") {
+        const s = obj.trim();
+        if (/^https?:\/\//i.test(s) || s.startsWith("/")) acc.push(s);
+        return acc;
+      }
+
+      if (Array.isArray(obj)) {
+        for (const item of obj) collectUrlsDeep(item, acc, depth + 1);
+        return acc;
+      }
+
+      if (typeof obj === "object") {
+        const preferredKeys = [
+          "model_url","modelUrl","glb_url","glbUrl","mesh_url","meshUrl",
+          "preview_url","previewUrl","output_url","outputUrl","file_url","fileUrl",
+          "obj_url","objUrl","url","download_url","downloadUrl"
+        ];
+        for (const key of preferredKeys) {
+          if (key in obj) collectUrlsDeep(obj[key], acc, depth + 1);
+        }
+        for (const key of Object.keys(obj)) {
+          collectUrlsDeep(obj[key], acc, depth + 1);
+        }
+      }
+      return acc;
+    }
+
+    function normalizeUrl(url) {
+      if (!url) return null;
+      if (/^https?:\/\//i.test(url)) return url;
+      if (url.startsWith("/")) return getApiBase() + url;
+      return null;
+    }
+
+    function bestModelUrlFromPayload(payload) {
+      const urls = collectUrlsDeep(payload).map(normalizeUrl).filter(Boolean);
+      const supported = urls.find((u) => /\.(glb|gltf|obj)(\?|#|$)/i.test(u));
+      return supported || urls[0] || null;
+    }
+
+    function clear3DPreview() {
+      if (state.previewStop) {
+        try { state.previewStop(); } catch (_) {}
+      }
+      state.previewStop = null;
+
+      if (state.renderer) {
+        try { state.renderer.dispose(); } catch (_) {}
+      }
+      state.renderer = null;
+
+      els.preview3DContainer.innerHTML = `<span id="preview3DPlaceholder" style="color:#9fb1c7;">3D Preview will appear here after Generate 3D</span>`;
+      els.chip3D.textContent = "Not started";
+      clearPreviewResultPanel();
+    }
+
+    async function render3DPreview(modelUrl) {
+      clear3DPreview();
+
+      const canvas = document.createElement("canvas");
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      els.preview3DContainer.innerHTML = "";
+      els.preview3DContainer.appendChild(canvas);
+
+      const width = Math.max(400, els.preview3DContainer.clientWidth);
+      const height = Math.max(280, els.preview3DContainer.clientHeight);
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+      });
+      renderer.setSize(width, height, false);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setClearColor(0x1a2230, 1);
+      state.renderer = renderer;
+
+      const scene = new THREE.Scene();
+      scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+
+      const light1 = new THREE.DirectionalLight(0xffffff, 1.25);
+      light1.position.set(3, 4, 5);
+      scene.add(light1);
+
+      const light2 = new THREE.DirectionalLight(0xffffff, 0.9);
+      light2.position.set(-3, 2, -4);
+      scene.add(light2);
+
+      scene.add(new THREE.GridHelper(10, 10, 0x37536f, 0x243547));
+
+      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
+      camera.position.set(0, 1.2, 4);
+
+      const controls = new OrbitControls(camera, canvas);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.06;
+      controls.target.set(0, 0, 0);
+      state.controls = controls;
+
+      const ext = (modelUrl.split("?")[0].split(".").pop() || "").toLowerCase();
+
+      const loadModel = () => new Promise((resolve, reject) => {
+        if (ext === "obj") {
+          const loader = new OBJLoader();
+          loader.load(modelUrl, resolve, undefined, reject);
+          return;
+        }
+
+        if (ext === "glb" || ext === "gltf") {
+          const loader = new GLTFLoader();
+          loader.load(modelUrl, (gltf) => resolve(gltf.scene), undefined, reject);
+          return;
+        }
+
+        reject(new Error(`Unsupported preview format: .${ext}`));
+      });
+
+      const model = await loadModel();
+      scene.add(model);
+
+      const box = new THREE.Box3().setFromObject(model);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+
+      model.position.sub(center);
+      const maxDim = Math.max(size.x, size.y, size.z, 1);
+      camera.position.set(0, maxDim * 0.85, maxDim * 2.35);
+      controls.target.set(0, 0, 0);
+      controls.update();
+
+      let stopped = false;
+      function animate() {
+        if (stopped) return;
+        requestAnimationFrame(animate);
+        model.rotation.y += 0.006;
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      state.previewStop = () => {
+        stopped = true;
+        controls.dispose();
+      };
+
+      els.chip3D.textContent = "Ready";
+    }
+
+    async function generate3D() {
+      if (!state.hasMask) return;
+      if (!state.cutoutBlob) confirmCutout();
+
+      await waitFor(() => !!state.cutoutBlob, 1500);
+
+      if (!state.cutoutBlob) {
+        setStatus("error", "Could not create cutout PNG.");
+        return;
+      }
+
+      setStatus("loading", "Generating 3D model...");
+      setSelectionMessage("Uploading cutout to 3D backend...");
+      clearPreviewResultPanel();
+      els.chip3D.textContent = "Working";
+
+      const fd = new FormData();
+      const filename = (state.uploadedFile?.name || "cutout").replace(/\.[^.]+$/, "") + "_cutout.png";
+      fd.append("file", state.cutoutBlob, filename);
+      fd.append("image", state.cutoutBlob, filename);
+      fd.append("cutout", state.cutoutBlob, filename);
+      fd.append("image_file", state.cutoutBlob, filename);
+
+      try {
+        const res = await fetch(`${getApiBase()}/api/model/generate-3d`, {
+          method: "POST",
+          body: fd,
+        });
+
+        const { raw, json } = await fetchJsonOrText(res);
+
+        if (!res.ok) {
+          setStatus("error", "3D generation failed.", raw.slice(0, 400));
+          writePreviewResultPanel(`<strong>3D Error</strong>\n${escapeHtml(raw)}`);
+          els.chip3D.textContent = "Error";
+          return;
+        }
+
+        const payload = json || raw;
+        const modelUrl = json ? bestModelUrlFromPayload(json) : null;
+
+        if (modelUrl) {
+          try {
+            await render3DPreview(modelUrl);
+            setStatus("success", "3D model generated.", modelUrl);
+            setSelectionMessage("3D preview loaded.");
+          } catch (previewErr) {
+            setStatus("error", "3D response received, but preview failed.", previewErr.message || String(previewErr));
+          }
+        } else {
+          setStatus("success", "3D request finished.", "No preview URL found in response.");
+          setSelectionMessage("3D request finished. No preview URL found.");
+          els.chip3D.textContent = "No URL";
+        }
+
+        writePreviewResultPanel(payload);
+      } catch (err) {
+        setStatus("error", "3D request failed.", err.message || String(err));
+        writePreviewResultPanel(`<strong>3D Exception</strong>\n${escapeHtml(err.message || String(err))}`);
+        els.chip3D.textContent = "Error";
+      }
+    }
+
+    function waitFor(testFn, timeoutMs = 1000) {
+      const start = performance.now();
+      return new Promise((resolve) => {
+        function tick() {
+          if (testFn()) return resolve(true);
+          if (performance.now() - start >= timeoutMs) return resolve(false);
+          requestAnimationFrame(tick);
+        }
+        tick();
+      });
+    }
+
+    function bindPaintEvents() {
+      const start = (ev) => {
+        if (!state.img) return;
+        const point = getImagePointFromPointer(ev);
+        if (!point) return;
+        state.isDrawing = true;
+        paintMaskPoint(point);
+      };
+
+      const move = (ev) => {
+        if (!state.isDrawing) return;
+        const point = getImagePointFromPointer(ev);
+        if (!point) return;
+        paintMaskPoint(point);
+      };
+
+      const end = () => {
+        if (!state.isDrawing) return;
+        state.isDrawing = false;
+        updateUiState();
+      };
+
+      els.maskCanvas.addEventListener("pointerdown", start);
+      els.maskCanvas.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", end);
+      window.addEventListener("pointercancel", end);
+    }
+
+    function bindUi() {
+      els.uploadFile.addEventListener("change", async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        await loadFileIntoCanvas(file);
+      });
+
+      els.btnAutoDetect.addEventListener("click", autoDetect);
+      els.btnResetMask.addEventListener("click", resetMaskToBase);
+      els.btnClearEdits.addEventListener("click", clearMask);
+
+      els.btnAdd.addEventListener("click", () => setTool("add"));
+      els.btnRemove.addEventListener("click", () => setTool("remove"));
+
+      els.btnConfirm.addEventListener("click", confirmCutout);
+      els.btnGenerate3D.addEventListener("click", generate3D);
+
+      els.overlayOpacity.addEventListener("input", drawAll);
+      els.brushSize.addEventListener("input", () => {
+        els.pillBrush.textContent = els.brushSize.value;
+      });
+
+      window.addEventListener("resize", resizeVisibleCanvases);
+    }
+
+    function init() {
+      setTool("add");
+      bindUi();
+      bindPaintEvents();
+      resizeVisibleCanvases();
+      updateUiState();
+      clearPreviewResultPanel();
+      writePreviewResultPanel("Waiting for segment or 3D response...");
+    }
+
+    init();
+  </script>
 </body>
 </html>
