@@ -76,7 +76,7 @@
     .layout{
       min-height:0;
       display:grid;
-      grid-template-columns:340px minmax(0,1fr);
+      grid-template-columns:360px minmax(0,1fr);
       gap:12px;
     }
 
@@ -94,6 +94,7 @@
       justify-content:space-between;
       gap:10px;
       align-items:center;
+      flex-wrap:wrap;
     }
 
     .body{
@@ -131,12 +132,6 @@
     .row{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .row3{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
       gap:10px;
     }
 
@@ -199,6 +194,18 @@
       border-color:rgba(255,77,109,.45);
     }
 
+    .action-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .tool-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
     .pillbar{
       display:flex;
       gap:8px;
@@ -243,44 +250,11 @@
     .success{ color:var(--good); }
     .error{ color:#ff95a8; }
 
-    .workspace{
-      min-height:0;
-      display:grid;
-      grid-template-rows:auto minmax(0,1fr) auto;
-      overflow:hidden;
-    }
-
-    .workspace-head{
-      padding:16px 18px 0;
-      display:grid;
-      gap:12px;
-    }
-
-    .note{
-      padding:12px 14px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background:rgba(6,12,22,.74);
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    .workspace-body{
-      min-height:0;
-      overflow:auto;
-      padding:0 16px 16px;
-      display:grid;
-      gap:14px;
-      align-content:start;
-    }
-
     .canvas-shell{
       position:relative;
-      min-height:420px;
-      border-radius:24px;
+      min-height:260px;
+      height:260px;
+      border-radius:20px;
       overflow:hidden;
       border:1px solid var(--line);
       background:#040a14;
@@ -311,26 +285,20 @@
 
     .overlay-msg{
       position:absolute;
-      inset:auto 18px 18px 18px;
+      inset:auto 10px 10px 10px;
       display:flex;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
       align-items:flex-end;
       pointer-events:none;
     }
 
     .callout{
-      max-width:540px;
-      border-radius:18px;
-      padding:12px 14px;
+      max-width:100%;
+      border-radius:16px;
+      padding:10px 12px;
       border:1px solid var(--line);
-      background:rgba(9,16,28,.8);
-    }
-
-    .chips{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
+      background:rgba(9,16,28,.82);
     }
 
     .chip{
@@ -365,8 +333,8 @@
 
     .preview-box{
       width:100%;
-      min-height:360px;
-      border-radius:18px;
+      min-height:calc(100vh - 180px);
+      border-radius:20px;
       border:1px solid var(--line);
       background:#181f2a;
       display:flex;
@@ -374,44 +342,26 @@
       justify-content:center;
       overflow:hidden;
       position:relative;
+      padding:12px;
     }
 
-    .preview-panel{
-      padding:14px;
-      border-radius:16px;
-      background:#0b1220;
-      border:1px solid rgba(255,255,255,.08);
-      color:#cfe7ff;
-      font:13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
-      white-space:pre-wrap;
-      min-height:60px;
-      overflow:auto;
-    }
-
-    .workspace-foot{
-      padding:14px 16px 16px;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
+    .hidden-ui{
+      display:none !important;
     }
 
     @media (max-width:1080px){
       .layout{ grid-template-columns:1fr; }
-      .panel{ order:2; }
-      .workspace-wrap{ order:1; }
-      .canvas-shell{ min-height:50vh; }
+      .preview-box{ min-height:52vh; }
     }
 
     @media (max-width:640px){
       .app{ padding:10px; }
-      .topbar,.head,.body,.workspace-head,.workspace-foot{ padding-left:14px; padding-right:14px; }
-      .workspace-body{ padding-left:14px; padding-right:14px; }
-      .row,.row3{ grid-template-columns:1fr; }
-      .canvas-shell{ min-height:46vh; }
+      .topbar,.head,.body{ padding-left:14px; padding-right:14px; }
+      .row,.action-grid,.tool-grid{ grid-template-columns:1fr; }
       .brand strong{ font-size:24px; }
-      .overlay-msg{ left:12px; right:12px; bottom:12px; display:grid; }
-      .preview-box{ min-height:280px; }
+      .canvas-shell{ min-height:240px; height:240px; }
+      .preview-box{ min-height:46vh; }
+      .overlay-msg{ display:grid; }
     }
   </style>
 </head>
@@ -420,7 +370,7 @@
     <header class="topbar glass">
       <div class="brand">
         <strong>XYZ Modular Mask Frontend</strong>
-        <span>Upload → Auto Detect → Add / Remove → Confirm → Generate 3D</span>
+        <span>Upload → Auto Detect → Confirm → Generate 3D</span>
       </div>
       <div class="pillbar">
         <div class="pill">Mode<strong id="pillMode">Idle</strong></div>
@@ -433,36 +383,60 @@
       <aside class="panel glass">
         <div class="head">
           <strong>Controls</strong>
-          <span class="muted">Modular mask editing for 3D pipeline.</span>
+          <span class="muted">Left panel for upload, cutout, refine, and status.</span>
         </div>
 
         <div class="body">
           <section class="card">
-            <h3>1. Upload Photo</h3>
+            <h3>1. Upload File & Preview Image</h3>
             <div class="drop">
               <input type="file" id="uploadFile" accept="image/*" />
               <div class="mini">Use a clear subject photo for best results.</div>
             </div>
+
+            <div class="canvas-shell" id="canvasShell">
+              <div class="checker"></div>
+              <canvas id="imageCanvas"></canvas>
+              <canvas id="maskCanvas"></canvas>
+
+              <div class="overlay-msg">
+                <div class="callout">
+                  <strong style="display:block;color:var(--mint2);font-size:12px;letter-spacing:.04em;text-transform:uppercase;">Preview</strong>
+                  <span id="selectionMessage" class="muted">Upload one image. Then press Auto Detect.</span>
+                </div>
+                <div class="pillbar" style="pointer-events:none;justify-content:flex-end;">
+                  <div class="pill">Brush<strong id="pillBrush">28</strong></div>
+                  <div class="pill">Selection<strong id="pillSelection">Add</strong></div>
+                </div>
+              </div>
+            </div>
           </section>
 
           <section class="card">
-            <h3>2. Auto Detect</h3>
-            <div class="row">
+            <h3>2. Auto Detect & Generate 3D</h3>
+
+            <div class="action-grid">
               <button id="btnAutoDetect" class="btn btn-primary" disabled>Auto Detect Focus</button>
-              <button id="btnResetMask" class="btn btn-quiet" disabled>Reset Mask</button>
+              <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
+              <button id="btnGenerate3D" class="btn btn-primary" disabled>Generate 3D</button>
+              <button id="btnResetMask" class="btn btn-quiet" disabled>Reset Focus</button>
             </div>
-            <label class="mini" for="detectStrength">Detect Strength</label>
-            <input id="detectStrength" type="range" min="10" max="90" value="38" />
-            <div class="mini">Calls backend <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/segment</span></div>
+
+            <div>
+              <label class="mini" for="detectStrength">Detect Strength</label>
+              <input id="detectStrength" type="range" min="10" max="90" value="38" />
+            </div>
+
+            <div class="tool-grid">
+              <button id="btnAdd" class="btn" disabled>Add +</button>
+              <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
+            </div>
+
+            <div class="mini">Auto Detect is kept intact. Use Add / Remove only when needed.</div>
           </section>
 
           <section class="card">
             <h3>3. Refine Mask</h3>
-            <div class="row3">
-              <button id="btnAdd" class="btn" disabled>Add +</button>
-              <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
-              <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
-            </div>
 
             <div class="row">
               <div>
@@ -474,72 +448,44 @@
                 <input id="overlayOpacity" type="range" min="10" max="90" value="42" />
               </div>
             </div>
-            <div class="mini">Paint directly on the image. Red = selected object.</div>
+
+            <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
+            <div class="mini">Paint directly on the preview image. Red overlay = selected object.</div>
           </section>
 
           <section class="card">
-            <h3>4. Confirm & Generate</h3>
-            <div class="row">
-              <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
-              <button id="btnGenerate3D" class="btn btn-primary" disabled>Generate 3D</button>
-            </div>
-            <div class="mini">Sends cutout to backend <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/model/generate-3d</span></div>
-
-            <label class="mini" for="apiBase">API Base</label>
-            <input id="apiBase" type="text" value="http://127.0.0.1:5000" />
-          </section>
-
-          <section class="card">
-            <h3>Status</h3>
+            <h3>4. Status</h3>
             <div id="statusBadge" class="status idle">Idle</div>
             <div id="statusMessage" class="muted">Upload a photo to begin.</div>
             <div id="lastResult" class="mini">No result yet.</div>
+
+            <label class="mini" for="apiBase">API Base</label>
+            <input id="apiBase" type="text" value="http://127.0.0.1:5000" />
+
+            <div class="mini">Segment: <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/segment</span></div>
+            <div class="mini">Generate: <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/model/generate-3d</span></div>
           </section>
+
+          <div class="hidden-ui" aria-hidden="true">
+            <span id="chipImage"></span>
+            <span id="chipMask"></span>
+            <span id="chipConfirm"></span>
+            <span id="chipApi"></span>
+            <span id="chip3D"></span>
+            <div id="previewResultPanel"></div>
+          </div>
         </div>
       </aside>
 
-      <section class="workspace-wrap glass workspace">
-        <div class="workspace-head">
-          <div class="note">
-            <strong style="color:var(--mint2)">Mask Editing Stage</strong>
-            <span class="muted">Prepare a clean subject cutout for modular 3D pipeline.</span>
-          </div>
+      <section class="panel glass">
+        <div class="head">
+          <strong>3D Viewport</strong>
+          <span class="muted">Real model preview loads here when backend returns a model URL.</span>
         </div>
 
-        <div class="workspace-body">
-          <div class="canvas-shell" id="canvasShell">
-            <div class="checker"></div>
-            <canvas id="imageCanvas"></canvas>
-            <canvas id="maskCanvas"></canvas>
-
-            <div class="overlay-msg">
-              <div class="callout">
-                <strong style="display:block;color:var(--mint2);font-size:13px;letter-spacing:.04em;text-transform:uppercase;">Current Stage</strong>
-                <span id="selectionMessage" class="muted">Upload one image. Then press Auto Detect.</span>
-              </div>
-              <div class="pillbar" style="pointer-events:none;justify-content:flex-end;">
-                <div class="pill">Brush<strong id="pillBrush">28</strong></div>
-                <div class="pill">Selection<strong id="pillSelection">None</strong></div>
-              </div>
-            </div>
-          </div>
-
+        <div class="body" style="grid-template-columns:1fr;">
           <div class="preview-box" id="preview3DContainer">
             <span id="preview3DPlaceholder" style="color:#9fb1c7;">3D Preview will appear here after Generate 3D</span>
-          </div>
-
-          <div class="preview-panel" id="previewResultPanel"></div>
-        </div>
-
-        <div class="workspace-foot">
-          <div class="chips">
-            <div class="chip">Image<strong id="chipImage">None</strong></div>
-            <div class="chip">Mask<strong id="chipMask">Empty</strong></div>
-            <div class="chip">Confirm<strong id="chipConfirm">No</strong></div>
-          </div>
-          <div class="chips">
-            <div class="chip">API<strong id="chipApi">Idle</strong></div>
-            <div class="chip">3D<strong id="chip3D">Not started</strong></div>
           </div>
         </div>
       </section>
@@ -553,6 +499,7 @@
     import { OBJLoader } from "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/loaders/OBJLoader.js";
 
     const $ = (id) => document.getElementById(id);
+    const setText = (el, value) => { if (el) el.textContent = value; };
 
     const els = {
       uploadFile: $("uploadFile"),
@@ -646,11 +593,13 @@
       els.statusBadge.textContent = labelMap[kind] || kind;
       els.statusMessage.textContent = message || "";
       els.lastResult.textContent = extra || "No result yet.";
-      els.chipApi.textContent = kind === "loading" ? "Working" : kind === "success" ? "Done" : kind === "error" ? "Error" : "Idle";
-      els.pillBackend.textContent = kind === "loading" ? "Busy" : kind === "success" ? "OK" : kind === "error" ? "Error" : "Ready";
+
+      setText(els.chipApi, kind === "loading" ? "Working" : kind === "success" ? "Done" : kind === "error" ? "Error" : "Idle");
+      setText(els.pillBackend, kind === "loading" ? "Busy" : kind === "success" ? "OK" : kind === "error" ? "Error" : "Ready");
     }
 
     function writePreviewResultPanel(content) {
+      if (!els.previewResultPanel) return;
       if (typeof content === "string") {
         els.previewResultPanel.innerHTML = content;
       } else {
@@ -659,7 +608,7 @@
     }
 
     function clearPreviewResultPanel() {
-      els.previewResultPanel.textContent = "";
+      if (els.previewResultPanel) els.previewResultPanel.textContent = "";
     }
 
     function setTool(tool) {
@@ -667,8 +616,8 @@
       els.btnAdd.classList.toggle("active", tool === "add");
       els.btnRemove.classList.toggle("active", tool === "remove");
       els.btnRemove.classList.toggle("remove", tool === "remove");
-      els.pillSelection.textContent = tool === "add" ? "Add" : "Remove";
-      els.pillMode.textContent = tool === "add" ? "Paint +" : "Paint −";
+      setText(els.pillSelection, tool === "add" ? "Add" : "Remove");
+      setText(els.pillMode, tool === "add" ? "Paint +" : "Paint −");
     }
 
     function resizeVisibleCanvases() {
@@ -769,14 +718,14 @@
       els.btnConfirm.disabled = !hasMask;
       els.btnGenerate3D.disabled = !hasMask;
 
-      els.chipImage.textContent = hasImage ? `${state.img.naturalWidth}×${state.img.naturalHeight}` : "None";
-      els.chipMask.textContent = hasMask ? "Ready" : "Empty";
-      els.chipConfirm.textContent = confirmed ? "Yes" : "No";
+      setText(els.chipImage, hasImage ? `${state.img.naturalWidth}×${state.img.naturalHeight}` : "None");
+      setText(els.chipMask, hasMask ? "Ready" : "Empty");
+      setText(els.chipConfirm, confirmed ? "Yes" : "No");
     }
 
     function updateMaskStats() {
       if (!off.mask.width || !off.mask.height) {
-        els.pillMask.textContent = "0%";
+        setText(els.pillMask, "0%");
         return;
       }
 
@@ -788,8 +737,8 @@
       const total = off.mask.width * off.mask.height;
       const pct = total ? ((count / total) * 100).toFixed(1) : "0.0";
       state.hasMask = count > 0;
-      els.pillMask.textContent = `${pct}%`;
-      els.pillBrush.textContent = String(els.brushSize.value);
+      setText(els.pillMask, `${pct}%`);
+      setText(els.pillBrush, String(els.brushSize.value));
       updateUiState();
     }
 
@@ -1094,7 +1043,7 @@
       state.renderer = null;
 
       els.preview3DContainer.innerHTML = `<span id="preview3DPlaceholder" style="color:#9fb1c7;">3D Preview will appear here after Generate 3D</span>`;
-      els.chip3D.textContent = "Not started";
+      setText(els.chip3D, "Not started");
       clearPreviewResultPanel();
     }
 
@@ -1108,7 +1057,7 @@
       els.preview3DContainer.appendChild(canvas);
 
       const width = Math.max(400, els.preview3DContainer.clientWidth);
-      const height = Math.max(280, els.preview3DContainer.clientHeight);
+      const height = Math.max(320, els.preview3DContainer.clientHeight);
 
       const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -1188,7 +1137,7 @@
         controls.dispose();
       };
 
-      els.chip3D.textContent = "Ready";
+      setText(els.chip3D, "Ready");
     }
 
     async function generate3D() {
@@ -1205,7 +1154,7 @@
       setStatus("loading", "Generating 3D model...");
       setSelectionMessage("Uploading cutout to 3D backend...");
       clearPreviewResultPanel();
-      els.chip3D.textContent = "Working";
+      setText(els.chip3D, "Working");
 
       const fd = new FormData();
       const filename = (state.uploadedFile?.name || "cutout").replace(/\.[^.]+$/, "") + "_cutout.png";
@@ -1225,7 +1174,7 @@
         if (!res.ok) {
           setStatus("error", "3D generation failed.", raw.slice(0, 400));
           writePreviewResultPanel(`<strong>3D Error</strong>\n${escapeHtml(raw)}`);
-          els.chip3D.textContent = "Error";
+          setText(els.chip3D, "Error");
           return;
         }
 
@@ -1243,14 +1192,14 @@
         } else {
           setStatus("success", "3D request finished.", "No preview URL found in response.");
           setSelectionMessage("3D request finished. No preview URL found.");
-          els.chip3D.textContent = "No URL";
+          setText(els.chip3D, "No URL");
         }
 
         writePreviewResultPanel(payload);
       } catch (err) {
         setStatus("error", "3D request failed.", err.message || String(err));
         writePreviewResultPanel(`<strong>3D Exception</strong>\n${escapeHtml(err.message || String(err))}`);
-        els.chip3D.textContent = "Error";
+        setText(els.chip3D, "Error");
       }
     }
 
@@ -1313,7 +1262,7 @@
 
       els.overlayOpacity.addEventListener("input", drawAll);
       els.brushSize.addEventListener("input", () => {
-        els.pillBrush.textContent = els.brushSize.value;
+        setText(els.pillBrush, els.brushSize.value);
       });
 
       window.addEventListener("resize", resizeVisibleCanvases);
