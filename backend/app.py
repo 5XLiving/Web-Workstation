@@ -60,7 +60,7 @@ def _serve_frontend_file(filename: str):
 
 @app.get("/xyz_modular_mask_frontend.html")
 def serve_xyz_modular_mask_frontend():
-    return _serve_frontend_file("xyz_frontend_mask_shell.html")
+    return _serve_frontend_file("xyz_modular_mask_frontend.html")
 
 
 @app.get("/xyz_troubleshoot_logbook.html")
