@@ -33,7 +33,7 @@ def _resolve_repo_dir(repo_dir: Optional[str] = None) -> Path:
 
 
 def _find_best_output_file(output_dir: Path) -> Optional[Path]:
-    preferred_exts = [".glb", ".gltf", ".obj", ".ply", ".stl"]
+    preferred_exts = [".glb", ".gltf", ".obj"]
     candidates = [p for p in output_dir.rglob("*") if p.is_file()]
 
     for ext in preferred_exts:
@@ -41,7 +41,7 @@ def _find_best_output_file(output_dir: Path) -> Optional[Path]:
         if matches:
             return max(matches, key=lambda p: p.stat().st_mtime)
 
-    return max(candidates, key=lambda p: p.stat().st_mtime) if candidates else None
+    return None
 
 
 def _copy_or_convert_primary_mesh(found: Path, output_dir: Path) -> Path:
