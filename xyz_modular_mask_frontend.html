@@ -468,7 +468,7 @@
             <div id="lastResult" class="mini">No result yet.</div>
 
             <label class="mini" for="apiBase">API Base</label>
-            <input id="apiBase" type="text" value="http://127.0.0.1:5000" />
+            <input id="apiBase" type="text" value="" />
 
             <div class="mini">Segment: <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/segment</span></div>
             <div class="mini">Generate: <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/model/generate-3d</span></div>
@@ -581,9 +581,10 @@
       controls: null,
     };
 
-    function getApiBase() {
-      return (els.apiBase.value || "").trim().replace(/\/+$/, "");
-    }
+function getApiBase() {
+  const raw = (els.apiBase.value || "").trim().replace(/\/+$/, "");
+  return raw || window.location.origin;
+}
 
     function setStatus(kind, message, extra = "") {
       els.statusBadge.className = "status";
