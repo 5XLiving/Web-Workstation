@@ -43,6 +43,9 @@ app.include_router(model_router, prefix="/api/model", tags=["model"])
 outputs_dir = os.path.join(BASE_DIR, "storage", "outputs")
 os.makedirs(outputs_dir, exist_ok=True)
 app.mount("/outputs", StaticFiles(directory=outputs_dir), name="outputs")
+import os
+assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets"))
+app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
 
 def _serve_frontend_file(filename: str):
@@ -60,7 +63,14 @@ def _serve_frontend_file(filename: str):
 
 @app.get("/xyz_modular_mask_frontend.html")
 def serve_xyz_modular_mask_frontend():
-    return _serve_frontend_file("xyz_modular_mask_frontend.html")
+    # Serve only the live file from frontend/xyz_modular_mask_frontend.html
+    import os
+    from fastapi.responses import FileResponse
+    frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "xyz_modular_mask_frontend.html"))
+    if os.path.exists(frontend_path):
+        return FileResponse(frontend_path, media_type="text/html")
+    from fastapi import HTTPException
+    raise HTTPException(status_code=404, detail="Frontend HTML not found: frontend/xyz_modular_mask_frontend.html")
 
 
 @app.get("/xyz_troubleshoot_logbook.html")
