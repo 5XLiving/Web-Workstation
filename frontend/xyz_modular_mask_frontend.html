@@ -1,34 +1,9 @@
-// Validate mask image: check alpha coverage
-    function validateMaskImage(imageOrCanvas) {
-      const w = imageOrCanvas.width;
-      const h = imageOrCanvas.height;
-      const ctx = imageOrCanvas.getContext ? imageOrCanvas.getContext("2d") : null;
-      if (!ctx) return { valid: false, coverage: 0 };
-      const imgData = ctx.getImageData(0, 0, w, h).data;
-      let count = 0;
-      for (let i = 3; i < imgData.length; i += 4) {
-        if (imgData[i] > 10) count++;
-      }
-      const total = w * h;
-      const pct = total ? (count / total) * 100 : 0;
-      // If mask covers >95% of image, it's suspicious
-      const valid = pct < 95;
-      return { valid, coverage: pct };
-    }
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
-    }
-  }
-  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>XYZ Modular Mask Frontend</title>
+  <title>XYZ Modular Mask Frontend - Clean Base</title>
   <link rel="icon" href="data:," />
   <style>
     :root{
@@ -101,7 +76,7 @@
     .layout{
       min-height:0;
       display:grid;
-      grid-template-columns:360px minmax(0,1fr);
+      grid-template-columns:380px minmax(0,1fr);
       gap:12px;
     }
 
@@ -160,7 +135,7 @@
       gap:10px;
     }
 
-    input,button{ font:inherit; }
+    input,button,textarea{ font:inherit; }
 
     input[type="range"],
     input[type="text"],
@@ -219,13 +194,7 @@
       border-color:rgba(255,77,109,.45);
     }
 
-    .action-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .tool-grid{
+    .action-grid, .tool-grid{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:10px;
@@ -277,16 +246,13 @@
 
     .canvas-shell{
       position:relative;
-      height:260px;
-      min-height:260px;
-      max-height:260px;
+      height:300px;
       overflow:hidden;
-      flex:0 0 260px;
-      contain:layout paint size;
       border-radius:20px;
       border:1px solid var(--line);
       background:#040a14;
       touch-action:none;
+      user-select:none;
     }
 
     .checker{
@@ -304,16 +270,13 @@
     }
 
     #imageCanvas,
-    #maskCanvas{
+    #maskCanvas,
+    #brushPreviewCanvas{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
       display:block;
-      object-fit:contain;
-      aspect-ratio:unset;
-      max-width:100%;
-      max-height:100%;
     }
 
     .overlay-msg{
@@ -337,20 +300,6 @@
       padding:10px 12px;
       border:1px solid var(--line);
       background:rgba(9,16,28,.82);
-    }
-
-    .chip{
-      padding:9px 11px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:rgba(8,14,24,.72);
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    .chip strong{
-      color:var(--mint2);
-      margin-left:6px;
     }
 
     .mini{
@@ -378,13 +327,24 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      overflow:hidden;
+      overflow:auto;
       position:relative;
       padding:12px;
     }
 
-    .hidden-ui{
-      display:none !important;
+    .result-image{
+      max-width:100%;
+      max-height:70vh;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
+      background:#0b1220;
+    }
+
+    pre{
+      margin:0;
+      white-space:pre-wrap;
+      word-break:break-word;
     }
 
     @media (max-width:1080px){
@@ -397,7 +357,7 @@
       .topbar,.head,.body{ padding-left:14px; padding-right:14px; }
       .row,.action-grid,.tool-grid{ grid-template-columns:1fr; }
       .brand strong{ font-size:24px; }
-      .canvas-shell{ min-height:240px; height:240px; }
+      .canvas-shell{ height:260px; }
       .preview-box{ min-height:46vh; }
       .overlay-msg{ display:grid; }
     }
@@ -408,7 +368,7 @@
     <header class="topbar glass">
       <div class="brand">
         <strong>XYZ Modular Mask Frontend</strong>
-        <span>Upload → Auto Detect → Confirm → Generate 3D</span>
+        <span>Upload → Auto Detect → Refine → Confirm → Generate 3D</span>
       </div>
       <div class="pillbar">
         <div class="pill">Mode<strong id="pillMode">Idle</strong></div>
@@ -421,21 +381,22 @@
       <aside class="panel glass">
         <div class="head">
           <strong>Controls</strong>
-          <span class="muted">Left panel for upload, cutout, refine, and status.</span>
+          <span class="muted">Single-file clean base with safer handlers.</span>
         </div>
 
         <div class="body">
           <section class="card">
-            <h3>1. Upload File & Preview Image</h3>
+            <h3>1. Upload File & Preview</h3>
             <div class="drop">
               <input type="file" id="uploadFile" accept="image/*" />
-              <div class="mini">Use a clear subject photo for best results.</div>
+              <div class="mini">Use a clear subject photo. PNG or JPG works best.</div>
             </div>
 
             <div class="canvas-shell" id="canvasShell">
               <div class="checker"></div>
               <canvas id="imageCanvas"></canvas>
               <canvas id="maskCanvas"></canvas>
+              <canvas id="brushPreviewCanvas"></canvas>
 
               <div class="overlay-msg">
                 <div class="callout">
@@ -451,8 +412,7 @@
           </section>
 
           <section class="card">
-            <h3>2. Auto Detect & Generate 3D</h3>
-
+            <h3>2. Auto Detect & Main Actions</h3>
             <div class="action-grid">
               <button id="btnAutoDetect" class="btn btn-primary" disabled>Auto Detect Focus</button>
               <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
@@ -464,17 +424,14 @@
               <label class="mini" for="detectStrength">Detect Strength</label>
               <input id="detectStrength" type="range" min="10" max="90" value="38" />
             </div>
-
-            <div class="tool-grid">
-              <button id="btnAdd" class="btn" disabled>Add +</button>
-              <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
-            </div>
-
-            <div class="mini">Auto Detect is kept intact. Use Add / Remove only when needed.</div>
           </section>
 
           <section class="card">
             <h3>3. Refine Mask</h3>
+            <div class="tool-grid">
+              <button id="btnAdd" class="btn active" disabled>Add +</button>
+              <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
+            </div>
 
             <div class="row">
               <div>
@@ -488,776 +445,676 @@
             </div>
 
             <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
-            <div class="mini">Paint directly on the preview image. Red overlay = selected object.</div>
+            <div class="mini">Red overlay = selected subject. Add or remove by painting on the image.</div>
           </section>
 
           <section class="card">
-            <h3>4. Status</h3>
+            <h3>4. Status & Debug</h3>
             <div id="statusBadge" class="status idle">Idle</div>
             <div id="statusMessage" class="muted">Upload a photo to begin.</div>
             <div id="lastResult" class="mini">No result yet.</div>
 
             <label class="mini" for="apiBase">API Base</label>
-            <input id="apiBase" type="text" value="" />
-            <!-- Backend origin config: set default here if needed -->
+            <input id="apiBase" type="text" value="" placeholder="Leave blank for same origin" />
 
-            <div class="mini">Segment: <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/segment</span></div>
-            <div class="mini">Generate: <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/model/generate-3d</span></div>
+            <div class="mini">Segment endpoint</div>
+            <div class="endpoint">POST /api/segment</div>
+            <div class="mini">3D endpoint</div>
+            <div class="endpoint">POST /api/model/generate-3d</div>
 
-            <!-- Debug panel: visible, monospaced, scrollable -->
             <div style="margin-top:10px;">
               <label class="mini">Backend Debug</label>
-              <pre id="previewResultPanel" style="font-family:ui-monospace,monospace;font-size:12px;max-height:120px;overflow:auto;background:#101624;border-radius:8px;padding:8px 10px;color:#b8e1ff;margin:0;"></pre>
+              <pre id="previewResultPanel" style="font-family:ui-monospace,monospace;font-size:12px;max-height:160px;overflow:auto;background:#101624;border-radius:8px;padding:8px 10px;color:#b8e1ff;"></pre>
             </div>
           </section>
-
-          <div class="hidden-ui" aria-hidden="true">
-            <span id="chipImage"></span>
-            <span id="chipMask"></span>
-            <span id="chipConfirm"></span>
-            <span id="chipApi"></span>
-            <span id="chip3D"></span>
-          </div>
         </div>
       </aside>
 
       <section class="panel glass">
         <div class="head">
-          <strong>3D Viewport</strong>
-          <span class="muted">3D preview temporarily removed for clean reinstall.</span>
+          <strong>Result Panel</strong>
+          <span class="muted">Cutout preview and backend response summary.</span>
         </div>
         <div class="body" style="grid-template-columns:1fr;">
           <div class="preview-box" id="preview3DContainer">
-            <span id="preview3DPlaceholder" style="color:#9fb1c7;">3D preview temporarily removed for clean reinstall.</span>
+            <span id="preview3DPlaceholder" style="color:#9fb1c7;">No output yet.</span>
           </div>
         </div>
       </section>
     </main>
   </div>
 
-
-  <script type="module">
-
+  <script>
     const $ = (id) => document.getElementById(id);
-    const setText = (el, value) => { if (el) el.textContent = value; };
 
     const els = {
       uploadFile: $("uploadFile"),
-      detectStrength: $("detectStrength"),
-      brushSize: $("brushSize"),
-      overlayOpacity: $("overlayOpacity"),
-      apiBase: $("apiBase"),
-
       btnAutoDetect: $("btnAutoDetect"),
+      btnConfirm: $("btnConfirm"),
+      btnGenerate3D: $("btnGenerate3D"),
       btnResetMask: $("btnResetMask"),
       btnAdd: $("btnAdd"),
       btnRemove: $("btnRemove"),
       btnClearEdits: $("btnClearEdits"),
-      btnConfirm: $("btnConfirm"),
-      btnGenerate3D: $("btnGenerate3D"),
+      brushSize: $("brushSize"),
+      overlayOpacity: $("overlayOpacity"),
+      detectStrength: $("detectStrength"),
+      apiBase: $("apiBase"),
 
-      canvasShell: $("canvasShell"),
       imageCanvas: $("imageCanvas"),
       maskCanvas: $("maskCanvas"),
+      brushPreviewCanvas: $("brushPreviewCanvas"),
+      canvasShell: $("canvasShell"),
 
       statusBadge: $("statusBadge"),
       statusMessage: $("statusMessage"),
       lastResult: $("lastResult"),
-      selectionMessage: $("selectionMessage"),
-      preview3DContainer: $("preview3DContainer"),
-      preview3DPlaceholder: $("preview3DPlaceholder"),
       previewResultPanel: $("previewResultPanel"),
-
+      selectionMessage: $("selectionMessage"),
       pillMode: $("pillMode"),
       pillMask: $("pillMask"),
       pillBackend: $("pillBackend"),
       pillBrush: $("pillBrush"),
       pillSelection: $("pillSelection"),
-
-      chipImage: $("chipImage"),
-      chipMask: $("chipMask"),
-      chipConfirm: $("chipConfirm"),
-      chipApi: $("chipApi"),
-      chip3D: $("chip3D"),
+      preview3DContainer: $("preview3DContainer"),
+      preview3DPlaceholder: $("preview3DPlaceholder")
     };
 
     const imageCtx = els.imageCanvas.getContext("2d");
     const maskCtx = els.maskCanvas.getContext("2d");
-
-    // --- Offscreen mask helpers (logbook style, strict separation) ---
-    const off = {
-      image: document.createElement("canvas"),
-      mask: document.createElement("canvas"),
-      baseMask: document.createElement("canvas"),
-      cutout: document.createElement("canvas"),
-    };
-    const offCtx = {
-      image: off.image.getContext("2d", { willReadFrequently: true }),
-      mask: off.mask.getContext("2d", { willReadFrequently: true }),
-      baseMask: off.baseMask.getContext("2d", { willReadFrequently: true }),
-      cutout: off.cutout.getContext("2d", { willReadFrequently: true }),
-    };
-
-    // Defensive: clear only mask overlay, keep preview stable
-    function clearMaskOverlayOnly() {
-      offCtx.mask.clearRect(0, 0, off.mask.width, off.mask.height);
-      maskCtx.clearRect(0, 0, els.maskCanvas.width, els.maskCanvas.height);
-    }
-
-    // Defensive: redraw stable preview (image + mask overlay)
-    function redrawStablePreview() {
-      computeDrawRect();
-      drawImageLayer();
-      drawMaskLayer();
-    }
+    const brushPreviewCtx = els.brushPreviewCanvas.getContext("2d");
 
     const state = {
-      img: null,
-      uploadedFile: null,
-      drawRect: null,
-      currentTool: "add",
-      isDrawing: false,
-      baseMaskLoaded: false,
-      hasMask: false,
+      file: null,
+      originalImage: null,
+      originalImageURL: "",
+      maskLoaded: false,
       confirmed: false,
+      isDrawing: false,
+      brushMode: "add",
+      brushSize: Number(els.brushSize.value),
+      overlayOpacity: Number(els.overlayOpacity.value) / 100,
+      drawRect: { x: 0, y: 0, w: 0, h: 0 },
       cutoutBlob: null,
-      previewStop: null,
-      renderer: null,
-      controls: null,
+      cutoutObjectURL: "",
+      backend3DResult: null,
+      baseMaskImageData: null
     };
 
     function getApiBase() {
-      // Backend origin config: set default here if needed
-      const raw = (els.apiBase.value || "").trim().replace(/\/+$/, "");
-      // Optionally: const DEFAULT_API_BASE = ""; // e.g. "http://localhost:5000"
-      // if (raw) return raw; if (DEFAULT_API_BASE) return DEFAULT_API_BASE;
-      return raw || window.location.origin;
+      return (els.apiBase.value || "").trim().replace(/\/$/, "");
     }
 
-    function setStatus(kind, message, extra = "") {
-      els.statusBadge.className = "status";
-      if (kind === "idle") els.statusBadge.classList.add("idle");
-      if (kind === "loading") els.statusBadge.classList.add("loading");
-      if (kind === "success") els.statusBadge.classList.add("success");
-      if (kind === "error") els.statusBadge.classList.add("error");
-
-      const labelMap = {
-        idle: "Idle",
-        loading: "Loading",
-        success: "Success",
-        error: "Error",
-      };
-
-      els.statusBadge.textContent = labelMap[kind] || kind;
-      els.statusMessage.textContent = message || "";
-      els.lastResult.textContent = extra || "No result yet.";
-
-      setText(els.chipApi, kind === "loading" ? "Working" : kind === "success" ? "Done" : kind === "error" ? "Error" : "Idle");
-      setText(els.pillBackend, kind === "loading" ? "Busy" : kind === "success" ? "OK" : kind === "error" ? "Error" : "Ready");
+    function apiUrl(path) {
+      const base = getApiBase();
+      return base ? `${base}${path}` : path;
     }
 
-    function writePreviewResultPanel(content) {
-      if (!els.previewResultPanel) return;
-      if (typeof content === "string") {
-        els.previewResultPanel.innerHTML = content;
+    function setStatus(kind, message) {
+      els.statusBadge.className = `status ${kind}`;
+      els.statusBadge.textContent = kind.charAt(0).toUpperCase() + kind.slice(1);
+      els.statusMessage.textContent = message;
+      els.pillMode.textContent = kind.charAt(0).toUpperCase() + kind.slice(1);
+      if (kind === "error") els.pillBackend.textContent = "Error";
+      if (kind === "success") els.pillBackend.textContent = "OK";
+      if (kind === "loading") els.pillBackend.textContent = "Busy";
+      if (kind === "idle") els.pillBackend.textContent = "Ready";
+    }
+
+    function setDebug(value) {
+      if (typeof value === "string") {
+        els.previewResultPanel.textContent = value;
       } else {
-        els.previewResultPanel.textContent = JSON.stringify(content, null, 2);
+        els.previewResultPanel.textContent = JSON.stringify(value, null, 2);
       }
     }
 
-    function clearPreviewResultPanel() {
-      if (els.previewResultPanel) els.previewResultPanel.textContent = "";
+    function updateButtons() {
+      const hasImage = !!state.originalImage;
+      const hasMask = state.maskLoaded;
+      els.btnAutoDetect.disabled = !hasImage;
+      els.btnConfirm.disabled = !hasMask;
+      els.btnGenerate3D.disabled = !state.confirmed || !state.cutoutBlob;
+      els.btnResetMask.disabled = !hasMask;
+      els.btnAdd.disabled = !hasMask;
+      els.btnRemove.disabled = !hasMask;
+      els.btnClearEdits.disabled = !hasMask;
+      els.pillSelection.textContent = state.brushMode === "add" ? "Add" : "Remove";
+      els.pillBrush.textContent = String(state.brushSize);
     }
 
-    function setTool(tool) {
-      state.currentTool = tool;
-      els.btnAdd.classList.toggle("active", tool === "add");
-      els.btnRemove.classList.toggle("active", tool === "remove");
-      els.btnRemove.classList.toggle("remove", tool === "remove");
-      setText(els.pillSelection, tool === "add" ? "Add" : "Remove");
-      setText(els.pillMode, tool === "add" ? "Paint +" : "Paint −");
+    function clearCanvas(ctx, canvas) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    function resizeVisibleCanvases() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    function resizeCanvases() {
       const rect = els.canvasShell.getBoundingClientRect();
-      const w = Math.max(1, Math.round(rect.width * dpr));
-      const h = Math.max(1, Math.round(rect.height * dpr));
-
-      if (els.imageCanvas.width !== w || els.imageCanvas.height !== h) {
-        els.imageCanvas.width = w;
-        els.imageCanvas.height = h;
+      for (const canvas of [els.imageCanvas, els.maskCanvas, els.brushPreviewCanvas]) {
+        canvas.width = Math.max(1, Math.round(rect.width));
+        canvas.height = Math.max(1, Math.round(rect.height));
       }
-      if (els.maskCanvas.width !== w || els.maskCanvas.height !== h) {
-        els.maskCanvas.width = w;
-        els.maskCanvas.height = h;
-      }
-
-      drawAll();
     }
 
-    function computeDrawRect() {
-      if (!state.img) {
-        state.drawRect = null;
+    function computeContainRect(imgW, imgH, boxW, boxH) {
+      const scale = Math.min(boxW / imgW, boxH / imgH);
+      const w = imgW * scale;
+      const h = imgH * scale;
+      const x = (boxW - w) / 2;
+      const y = (boxH - h) / 2;
+      return { x, y, w, h, scale };
+    }
+
+    function drawBaseImage() {
+      resizeCanvases();
+      clearCanvas(imageCtx, els.imageCanvas);
+      clearCanvas(maskCtx, els.maskCanvas);
+      clearCanvas(brushPreviewCtx, els.brushPreviewCanvas);
+
+      if (!state.originalImage) return;
+
+      const rect = computeContainRect(
+        state.originalImage.width,
+        state.originalImage.height,
+        els.imageCanvas.width,
+        els.imageCanvas.height
+      );
+      state.drawRect = rect;
+      imageCtx.drawImage(state.originalImage, rect.x, rect.y, rect.w, rect.h);
+
+      if (state.baseMaskImageData) {
+        maskCtx.putImageData(state.baseMaskImageData, 0, 0);
+        renderMaskOverlay();
+      }
+    }
+
+    function renderMaskOverlay() {
+      if (!state.baseMaskImageData) return;
+      const src = state.baseMaskImageData.data;
+      const out = maskCtx.createImageData(state.baseMaskImageData.width, state.baseMaskImageData.height);
+      const alpha = Math.round(255 * state.overlayOpacity);
+      for (let i = 0; i < src.length; i += 4) {
+        const maskAlpha = src[i + 3];
+        if (maskAlpha > 10) {
+          out.data[i] = 255;
+          out.data[i + 1] = 60;
+          out.data[i + 2] = 90;
+          out.data[i + 3] = alpha;
+        }
+      }
+      maskCtx.putImageData(out, 0, 0);
+      updateMaskCoverage();
+    }
+
+    function updateMaskCoverage() {
+      if (!state.baseMaskImageData) {
+        els.pillMask.textContent = "0%";
         return;
       }
-      const cw = els.imageCanvas.width;
-      const ch = els.imageCanvas.height;
-      const iw = state.img.naturalWidth;
-      const ih = state.img.naturalHeight;
-      // Prevent division by zero and negative/NaN
-      if (!iw || !ih || !cw || !ch) {
-        state.drawRect = null;
-        return;
+      const img = state.baseMaskImageData.data;
+      let count = 0;
+      let total = 0;
+      for (let y = 0; y < els.maskCanvas.height; y++) {
+        for (let x = 0; x < els.maskCanvas.width; x++) {
+          const idx = (y * els.maskCanvas.width + x) * 4;
+          total++;
+          if (img[idx + 3] > 10) count++;
+        }
       }
-      const scale = Math.min(cw / iw, ch / ih, 1);
-      const dw = Math.min(iw * scale, cw);
-      const dh = Math.min(ih * scale, ch);
-      const dx = Math.max((cw - dw) / 2, 0);
-      const dy = Math.max((ch - dh) / 2, 0);
-      state.drawRect = { dx, dy, dw, dh, scale };
+      const pct = total ? ((count / total) * 100).toFixed(1) : "0.0";
+      els.pillMask.textContent = `${pct}%`;
     }
 
-    function drawImageLayer() {
-      imageCtx.clearRect(0, 0, els.imageCanvas.width, els.imageCanvas.height);
-      if (!state.img || !state.drawRect) return;
-      const { dx, dy, dw, dh } = state.drawRect;
-      imageCtx.drawImage(state.img, dx, dy, dw, dh);
-    }
-
-    function drawMaskLayer() {
-      maskCtx.clearRect(0, 0, els.maskCanvas.width, els.maskCanvas.height);
-      if (!state.img || !state.drawRect || !state.hasMask) return;
-
-      const { dx, dy, dw, dh } = state.drawRect;
-      const alpha = Number(els.overlayOpacity.value) / 100;
-
-      const temp = document.createElement("canvas");
-      temp.width = off.mask.width;
-      temp.height = off.mask.height;
-      const tctx = temp.getContext("2d");
-
-      tctx.clearRect(0, 0, temp.width, temp.height);
-      tctx.drawImage(off.mask, 0, 0);
-      tctx.globalCompositeOperation = "source-in";
-      tctx.fillStyle = `rgba(255, 77, 109, ${alpha})`;
-      tctx.fillRect(0, 0, temp.width, temp.height);
-      tctx.globalCompositeOperation = "source-over";
-
-      maskCtx.drawImage(temp, dx, dy, dw, dh);
-    }
-
-    function drawAll() {
-      computeDrawRect();
-      drawImageLayer();
-      drawMaskLayer();
-      updateMaskStats();
-    }
-
-    function resetStateForNewImage() {
-      state.baseMaskLoaded = false;
-      state.hasMask = false;
+    function resetStateForNewUpload() {
+      state.maskLoaded = false;
       state.confirmed = false;
       state.cutoutBlob = null;
-
-      offCtx.mask.clearRect(0, 0, off.mask.width, off.mask.height);
-      offCtx.baseMask.clearRect(0, 0, off.baseMask.width, off.baseMask.height);
-
-      clear3DPreview();
-      drawAll();
-      updateUiState();
-    }
-
-    function updateUiState() {
-      const hasImage = !!state.img;
-      const hasMask = state.hasMask;
-      const confirmed = state.confirmed;
-
-      els.btnAutoDetect.disabled = !hasImage;
-      els.btnResetMask.disabled = !state.baseMaskLoaded;
-      els.btnAdd.disabled = !hasImage;
-      els.btnRemove.disabled = !hasImage;
-      els.btnClearEdits.disabled = !hasImage;
-      els.btnConfirm.disabled = !hasMask;
-      els.btnGenerate3D.disabled = !hasMask;
-
-      setText(els.chipImage, hasImage ? `${state.img.naturalWidth}×${state.img.naturalHeight}` : "None");
-      setText(els.chipMask, hasMask ? "Ready" : "Empty");
-      setText(els.chipConfirm, confirmed ? "Yes" : "No");
-    }
-
-    function updateMaskStats() {
-      if (!off.mask.width || !off.mask.height) {
-        setText(els.pillMask, "0%");
-        return;
+      state.backend3DResult = null;
+      state.baseMaskImageData = null;
+      if (state.cutoutObjectURL) {
+        URL.revokeObjectURL(state.cutoutObjectURL);
+        state.cutoutObjectURL = "";
       }
-      const imgData = offCtx.mask.getImageData(0, 0, off.mask.width, off.mask.height).data;
-      let count = 0;
-      for (let i = 3; i < imgData.length; i += 4) {
-        if (imgData[i] > 10) count++;
-      }
-      const total = off.mask.width * off.mask.height;
-      const pct = total ? ((count / total) * 100).toFixed(1) : "0.0";
-      state.hasMask = count > 0 && pct < 95; // Only treat as mask if not suspiciously full
-      setText(els.pillMask, `${pct}%`);
-      setText(els.pillBrush, String(els.brushSize.value));
-      updateUiState();
+      els.selectionMessage.textContent = "Upload one image. Then press Auto Detect.";
+      els.lastResult.textContent = "No result yet.";
+      els.preview3DContainer.innerHTML = '<span id="preview3DPlaceholder" style="color:#9fb1c7;">No output yet.</span>';
+      setDebug("");
+      updateButtons();
     }
 
-    function setSelectionMessage(text) {
-      els.selectionMessage.textContent = text;
-    }
-
-    async function loadFileIntoCanvas(file) {
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => {
-        state.img = img;
-        state.uploadedFile = file;
-
-        off.image.width = img.naturalWidth;
-        off.image.height = img.naturalHeight;
-        off.mask.width = img.naturalWidth;
-        off.mask.height = img.naturalHeight;
-        off.baseMask.width = img.naturalWidth;
-        off.baseMask.height = img.naturalHeight;
-        off.cutout.width = img.naturalWidth;
-        off.cutout.height = img.naturalHeight;
-
-        offCtx.image.clearRect(0, 0, off.image.width, off.image.height);
-        offCtx.image.drawImage(img, 0, 0);
-
-        resetStateForNewImage();
-        resizeVisibleCanvases();
-        setStatus("idle", "Image loaded. Press Auto Detect.", file.name);
-        setSelectionMessage("Image loaded. Press Auto Detect.");
-      };
-      img.onerror = () => {
-        setStatus("error", "Failed to load image.");
-      };
-      img.src = url;
-    }
-
-    function normalizeMaybeBase64Image(str) {
-      if (!str || typeof str !== "string") return null;
-      const trimmed = str.trim();
-
-      if (trimmed.startsWith("data:image/")) return trimmed;
-      if (/^https?:\/\//i.test(trimmed)) return trimmed;
-      if (trimmed.startsWith("/")) return getApiBase() + trimmed;
-      if (/^[A-Za-z0-9+/=\r\n]+$/.test(trimmed) && trimmed.length > 100) {
-        return "data:image/png;base64," + trimmed.replace(/\s+/g, "");
-      }
-      return null;
-    }
-
-    // Strict segment response parsing (logbook style)
-    function extractMaskField(data) {
-      if (!data || typeof data !== "object") return null;
-      return (
-        data.mask_png_base64 ||
-        data.mask_b64 ||
-        data.maskBase64 ||
-        data.mask ||
-        null
-      );
-    }
-
-    // Strict mask field detection: only allow real mask keys
-    function deepFindMaskString(obj, depth = 0) {
-      if (!obj || depth > 5) return null;
-
-      if (typeof obj === "string") {
-        return normalizeMaybeBase64Image(obj);
-      }
-
-      if (Array.isArray(obj)) {
-        for (const item of obj) {
-          const found = deepFindMaskString(item, depth + 1);
-          if (found) return found;
-        }
-        return null;
-      }
-
-      if (typeof obj === "object") {
-        // Only strict mask keys
-        const strictKeys = [
-          "mask_base64","maskBase64","mask_png_base64","maskPngBase64","mask","overlay_mask"
-        ];
-        for (const key of strictKeys) {
-          if (key in obj) {
-            const found = deepFindMaskString(obj[key], depth + 1);
-            if (found) return found;
-          }
-        }
-      }
-      return null;
-    }
-
-    async function fetchJsonOrText(response) {
-      const raw = await response.text();
-      let json = null;
-      try {
-        json = JSON.parse(raw);
-      } catch (_) {}
-      return { raw, json };
-    }
-
-    // Apply mask only if valid, with debug and error handling
-    async function applyMaskFromSource(maskSrc) {
-      // logbook-style mask loading and normalization with debug
+    function loadImageFromFile(file) {
       return new Promise((resolve, reject) => {
-        const m = new Image();
-        m.onload = () => {
-          const temp = document.createElement("canvas");
-          temp.width = off.mask.width;
-          temp.height = off.mask.height;
-          const tctx = temp.getContext("2d");
-          tctx.clearRect(0, 0, temp.width, temp.height);
-          tctx.drawImage(m, 0, 0, temp.width, temp.height);
-          // Binary mask normalization (logbook style)
-          const imgData = tctx.getImageData(0, 0, temp.width, temp.height);
-          let on = 0;
-          let first10Alpha = [];
-          for (let i = 0; i < imgData.data.length; i += 4) {
-            const v = Math.max(
-              imgData.data[i],
-              imgData.data[i + 1],
-              imgData.data[i + 2],
-              imgData.data[i + 3]
-            );
-            const isOn = v > 8 ? 255 : 0;
-            if (isOn) on++;
-            imgData.data[i] = 255;
-            imgData.data[i + 1] = 255;
-            imgData.data[i + 2] = 255;
-            imgData.data[i + 3] = isOn;
-            if (first10Alpha.length < 10) first10Alpha.push(imgData.data[i + 3]);
-          }
-          tctx.putImageData(imgData, 0, 0);
-          const total = temp.width * temp.height;
-          const pct = total ? ((on / total) * 100).toFixed(2) : "0.00";
-          const pctNum = parseFloat(pct);
-          const debugInfo = [
-            `MASK COVERAGE AFTER NORMALIZATION: ${pct}%`,
-            `Image size: ${temp.width}x${temp.height}`,
-            `First 10 alpha: [${first10Alpha.join(", ")}]`,
-            `Rejection triggered: ${pctNum >= 95}`
-          ].join("\n");
-          console.log(debugInfo);
-          if (typeof setText === 'function' && els && els.pillMask) setText(els.pillMask, pct + "%");
-          if (pctNum >= 95) {
-            // Suspicious mask: do NOT apply, clear overlay, keep image, set state, show debug
-            state.baseMaskLoaded = false;
-            state.hasMask = false;
-            state.confirmed = false;
-            state.cutoutBlob = null;
-            clearMaskOverlayOnly();
-            redrawStablePreview();
-            // Write error to debug panel, do not clear previous debug
-            const warnMsg =
-              `Mask coverage is 100%. Backend likely returned a full-image mask.\n` + debugInfo;
-            writePreviewResultPanel((els.previewResultPanel?.textContent || "") + '\n' + warnMsg);
-            setSelectionMessage("Mask coverage is 100%. Backend likely returned a full-image mask.");
-            updateUiState();
-            reject(new Error("Mask coverage is 100%. Backend likely returned a full-image mask."));
-            return;
-          }
-          // Accept mask as normal
-          offCtx.mask.clearRect(0, 0, off.mask.width, off.mask.height);
-          offCtx.baseMask.clearRect(0, 0, off.baseMask.width, off.baseMask.height);
-          offCtx.mask.drawImage(temp, 0, 0);
-          offCtx.baseMask.drawImage(temp, 0, 0);
-          state.baseMaskLoaded = true;
-          state.confirmed = false;
-          state.cutoutBlob = null;
-          drawAll();
-          updateUiState();
-          resolve();
-        };
-        m.onerror = (e) => reject(new Error("Failed to load mask image."));
-        m.crossOrigin = "anonymous";
-        m.src = maskSrc;
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => resolve({ img, url });
+        img.onerror = reject;
+        img.src = url;
       });
     }
 
-    async function autoDetect() {
-      if (!state.uploadedFile) return;
-      setStatus("loading", "Detecting subject...");
-      setSelectionMessage("Running backend segmentation...");
-      // Do not clear debug panel here; keep previous debug until new image is uploaded
-      const fd = new FormData();
-      fd.append("file", state.uploadedFile);
-      fd.append("image", state.uploadedFile);
-      fd.append("upload", state.uploadedFile);
-      fd.append("strength", els.detectStrength.value);
-      try {
-        const res = await fetch(`${getApiBase()}/api/segment`, {
-          method: "POST",
-          body: fd,
-        });
-        const { raw, json } = await fetchJsonOrText(res);
-        // Debug logging
-        console.log("SEGMENT RAW:", raw);
-        console.log("SEGMENT JSON:", json);
-        if (!res.ok) {
-          setStatus("error", "Segment request failed.", raw.slice(0, 300));
-          writePreviewResultPanel(`Segment Error\n${raw}`);
-          return;
+    async function loadImageFromBase64(base64) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = `data:image/png;base64,${base64}`;
+      });
+    }
+
+    function makeMaskFromImage(maskImg) {
+      const temp = document.createElement("canvas");
+      temp.width = els.maskCanvas.width;
+      temp.height = els.maskCanvas.height;
+      const tctx = temp.getContext("2d");
+      tctx.clearRect(0, 0, temp.width, temp.height);
+
+      tctx.drawImage(maskImg, state.drawRect.x, state.drawRect.y, state.drawRect.w, state.drawRect.h);
+
+      const raw = tctx.getImageData(0, 0, temp.width, temp.height);
+      const out = tctx.createImageData(temp.width, temp.height);
+
+      for (let i = 0; i < raw.data.length; i += 4) {
+        const r = raw.data[i];
+        const g = raw.data[i + 1];
+        const b = raw.data[i + 2];
+        const a = raw.data[i + 3];
+        const brightness = (r + g + b) / 3;
+
+        let isObject = false;
+
+        if (a > 180) {
+          isObject = true;
+        } else if (brightness > 210) {
+          isObject = true;
+        } else if (brightness < 25 && a > 20) {
+          isObject = false;
         }
-        let maskSrc = null;
-        let maskField = null;
-        if (json) {
-          if (json.mask_png_base64) { maskSrc = json.mask_png_base64; maskField = 'mask_png_base64'; }
-          else if (json.mask_b64) { maskSrc = json.mask_b64; maskField = 'mask_b64'; }
-          else if (json.maskBase64) { maskSrc = json.maskBase64; maskField = 'maskBase64'; }
-          else if (json.mask) { maskSrc = json.mask; maskField = 'mask'; }
+
+        if (isObject) {
+          out.data[i] = 255;
+          out.data[i + 1] = 255;
+          out.data[i + 2] = 255;
+          out.data[i + 3] = 255;
         }
-        if (!maskSrc) maskSrc = null;
-        if (maskSrc && typeof maskSrc === "string" && !maskSrc.startsWith("data:")) {
-          maskSrc = "data:image/png;base64," + maskSrc;
-        }
-        // Visible debug: show raw, parsed, mask field, and mask coverage
-        let debugMsg = '';
-        debugMsg += 'SEGMENT RAW RESPONSE:\n' + (raw.length > 400 ? raw.slice(0,400)+'...':raw) + '\n\n';
-        debugMsg += 'SEGMENT PARSED JSON:\n' + JSON.stringify(json, null, 2) + '\n\n';
-        debugMsg += 'CHOSEN MASK FIELD: ' + (maskField || 'none') + '\n';
-        writePreviewResultPanel(debugMsg);
-        if (!maskSrc) {
-          setStatus("error", "No valid mask field found in /api/segment response.");
-          writePreviewResultPanel(debugMsg + `No valid mask field found.\n${raw}`);
-          return;
-        }
-        try {
-          await applyMaskFromSource(maskSrc);
-          setStatus("success", "Mask detected. You can refine it now.");
-          setSelectionMessage("Mask loaded. Use Add / Remove to refine.");
-        } catch (maskErr) {
-          setStatus("error", "Mask coverage is 100%. Backend likely returned a full-image mask.");
-          setSelectionMessage("Mask coverage is 100%. Backend likely returned a full-image mask.");
-          redrawStablePreview();
-          // Buttons remain disabled, image remains visible, debug only in debug panel
-          return;
-        }
-        // Mask coverage debug is set in applyMaskFromSource
-      } catch (err) {
-        setStatus("error", "Segment request failed.", err.message || String(err));
-        writePreviewResultPanel(`Segment Exception\n${err.message || String(err)}`);
       }
+
+      return out;
     }
 
-    function resetMaskToBase() {
-      if (!state.baseMaskLoaded) return;
-      offCtx.mask.clearRect(0, 0, off.mask.width, off.mask.height);
-      offCtx.mask.drawImage(off.baseMask, 0, 0);
-      state.confirmed = false;
-      state.cutoutBlob = null;
-      drawAll();
-      setSelectionMessage("Mask reset to backend result.");
-    }
-
-    function clearMask() {
-      if (!state.img) return;
-      offCtx.mask.clearRect(0, 0, off.mask.width, off.mask.height);
-      state.confirmed = false;
-      state.cutoutBlob = null;
-      drawAll();
-      setSelectionMessage("Mask cleared.");
-    }
-
-    function getImagePointFromPointer(ev) {
-      if (!state.drawRect || !state.img) return null;
-
+    function getPointerPos(evt) {
       const rect = els.maskCanvas.getBoundingClientRect();
-      const px = (ev.clientX - rect.left) * (els.maskCanvas.width / rect.width);
-      const py = (ev.clientY - rect.top) * (els.maskCanvas.height / rect.height);
-
-      const { dx, dy, dw, dh } = state.drawRect;
-      if (px < dx || px > dx + dw || py < dy || py > dy + dh) return null;
-
-      const ix = ((px - dx) / dw) * off.mask.width;
-      const iy = ((py - dy) / dh) * off.mask.height;
-      return { x: ix, y: iy };
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+      return {
+        x: (clientX - rect.left) * (els.maskCanvas.width / rect.width),
+        y: (clientY - rect.top) * (els.maskCanvas.height / rect.height)
+      };
     }
 
-    // Strict mask editing logic (logbook style)
-    function paintMaskPoint(point) {
-      if (!point) return;
-      const radius = Number(els.brushSize.value) / 2;
-      offCtx.mask.save();
-      offCtx.mask.beginPath();
-      offCtx.mask.arc(point.x, point.y, radius, 0, Math.PI * 2);
-      if (state.currentTool === "add") {
-        offCtx.mask.globalCompositeOperation = "source-over";
-        offCtx.mask.fillStyle = "rgba(255,255,255,1)";
-      } else {
-        offCtx.mask.globalCompositeOperation = "destination-out";
-        offCtx.mask.fillStyle = "rgba(255,255,255,1)";
+    function pointInsideImage(x, y) {
+      const r = state.drawRect;
+      return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+    }
+
+    function drawBrushPreview(x, y) {
+      clearCanvas(brushPreviewCtx, els.brushPreviewCanvas);
+      if (!state.maskLoaded) return;
+      brushPreviewCtx.beginPath();
+      brushPreviewCtx.arc(x, y, state.brushSize / 2, 0, Math.PI * 2);
+      brushPreviewCtx.strokeStyle = state.brushMode === "add" ? "rgba(148,243,222,.95)" : "rgba(255,77,109,.95)";
+      brushPreviewCtx.lineWidth = 2;
+      brushPreviewCtx.stroke();
+    }
+
+    function applyBrush(x, y) {
+      if (!state.baseMaskImageData) return;
+      const radius = state.brushSize / 2;
+      const data = state.baseMaskImageData.data;
+      for (let py = Math.max(0, Math.floor(y - radius)); py < Math.min(els.maskCanvas.height, Math.ceil(y + radius)); py++) {
+        for (let px = Math.max(0, Math.floor(x - radius)); px < Math.min(els.maskCanvas.width, Math.ceil(x + radius)); px++) {
+          const dx = px - x;
+          const dy = py - y;
+          if (dx * dx + dy * dy <= radius * radius) {
+            const idx = (py * els.maskCanvas.width + px) * 4;
+            const value = state.brushMode === "add" ? 255 : 0;
+            data[idx] = value;
+            data[idx + 1] = value;
+            data[idx + 2] = value;
+            data[idx + 3] = value;
+          }
+        }
       }
-      offCtx.mask.fill();
-      offCtx.mask.restore();
+      renderMaskOverlay();
       state.confirmed = false;
       state.cutoutBlob = null;
-      drawAll();
+      updateButtons();
     }
 
-    // Strict cutout generation (logbook style)
-    function confirmCutout() {
-      if (!state.img || !state.hasMask) return;
-      offCtx.cutout.clearRect(0, 0, off.cutout.width, off.cutout.height);
-      offCtx.cutout.drawImage(off.image, 0, 0);
-      const base = offCtx.cutout.getImageData(0, 0, off.cutout.width, off.cutout.height);
-      const mask = offCtx.mask.getImageData(0, 0, off.mask.width, off.mask.height);
-      for (let i = 0; i < base.data.length; i += 4) {
-        base.data[i + 3] = mask.data[i + 3];
+    function validateMaskImageData(imageData) {
+      const img = imageData.data;
+      let count = 0;
+      let minX = imageData.width;
+      let minY = imageData.height;
+      let maxX = -1;
+      let maxY = -1;
+
+      for (let y = 0; y < imageData.height; y++) {
+        for (let x = 0; x < imageData.width; x++) {
+          const i = (y * imageData.width + x) * 4;
+          if (img[i + 3] > 10) {
+            count++;
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+          }
+        }
       }
-      offCtx.cutout.putImageData(base, 0, 0);
-      off.cutout.toBlob((blob) => {
+
+      const total = imageData.width * imageData.height;
+      const pct = total ? (count / total) * 100 : 0;
+
+      if (count === 0) {
+        return { valid: false, coverage: pct, reason: "empty mask" };
+      }
+
+      const boxW = Math.max(0, maxX - minX + 1);
+      const boxH = Math.max(0, maxY - minY + 1);
+      const boxPctW = (boxW / imageData.width) * 100;
+      const boxPctH = (boxH / imageData.height) * 100;
+
+      const tooWideAndTall = boxPctW > 92 && boxPctH > 92;
+      const tooMuchCoverage = pct > 80;
+      const tooLittleCoverage = pct < 0.3;
+
+      return {
+        valid: !tooWideAndTall && !tooMuchCoverage && !tooLittleCoverage,
+        coverage: pct,
+        boxPctW,
+        boxPctH,
+        reason: tooWideAndTall ? "mask filled almost whole image" : (tooMuchCoverage ? "mask coverage too high" : (tooLittleCoverage ? "mask coverage too low" : "ok"))
+      };
+    }
+
+    async function createCutoutBlob() {
+      if (!state.originalImage || !state.baseMaskImageData) return null;
+      const out = document.createElement("canvas");
+      out.width = state.originalImage.width;
+      out.height = state.originalImage.height;
+      const outCtx = out.getContext("2d");
+      outCtx.drawImage(state.originalImage, 0, 0, out.width, out.height);
+
+      const maskSample = document.createElement("canvas");
+      maskSample.width = out.width;
+      maskSample.height = out.height;
+      const msCtx = maskSample.getContext("2d");
+      msCtx.drawImage(els.maskCanvas, 0, 0, out.width, out.height);
+      const maskData = msCtx.getImageData(0, 0, out.width, out.height).data;
+      const imgData = outCtx.getImageData(0, 0, out.width, out.height);
+
+      for (let i = 0; i < imgData.data.length; i += 4) {
+        const a = maskData[i + 3];
+        if (a < 10) imgData.data[i + 3] = 0;
+      }
+      outCtx.putImageData(imgData, 0, 0);
+
+      return await new Promise((resolve) => out.toBlob(resolve, "image/png"));
+    }
+
+    function showCutoutPreview(blob) {
+      if (state.cutoutObjectURL) URL.revokeObjectURL(state.cutoutObjectURL);
+      state.cutoutObjectURL = URL.createObjectURL(blob);
+      els.preview3DContainer.innerHTML = `
+        <div style="display:grid;gap:12px;justify-items:center;width:100%;text-align:center;">
+          <div class="mini">Object confirmed. Cutout preview removed.</div>
+          <div class="endpoint" style="max-width:520px;">confirmed_object.png ready for /api/model/generate-3d</div>
+        </div>
+      `;
+    }
+
+    async function handleUploadChange(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      try {
+        setStatus("loading", "Loading image...");
+        resetStateForNewUpload();
+        const { img, url } = await loadImageFromFile(file);
+        if (state.originalImageURL) URL.revokeObjectURL(state.originalImageURL);
+        state.originalImage = img;
+        state.originalImageURL = url;
+        state.file = file;
+        drawBaseImage();
+        els.selectionMessage.textContent = "Image loaded. Press Auto Detect.";
+        els.lastResult.textContent = `Loaded ${file.name}`;
+        setStatus("success", "Image loaded.");
+        updateButtons();
+      } catch (error) {
+        setStatus("error", `Failed to load image: ${error.message || error}`);
+        setDebug(String(error));
+      }
+    }
+
+    async function handleAutoDetect() {
+      if (!state.file) return;
+      try {
+        setStatus("loading", "Calling /api/segment...");
+        const fd = new FormData();
+        fd.append("image", state.file);
+        fd.append("detect_strength", els.detectStrength.value);
+
+        const res = await fetch(apiUrl("/api/segment"), {
+          method: "POST",
+          body: fd
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error(`Segment endpoint did not return valid JSON. Response starts with: ${text.slice(0, 120)}`);
+        }
+
+        setDebug(data);
+
+        if (!res.ok) {
+          throw new Error(data.detail || data.error || `Segment request failed with status ${res.status}`);
+        }
+
+        if (!data.mask_png_base64) {
+          throw new Error("No mask_png_base64 returned from backend.");
+        }
+
+        drawBaseImage();
+        const maskImg = await loadImageFromBase64(data.mask_png_base64);
+        state.baseMaskImageData = makeMaskFromImage(maskImg);
+
+        const maskCheck = validateMaskImageData(state.baseMaskImageData);
+        if (!maskCheck.valid) {
+          renderMaskOverlay();
+          state.maskLoaded = true;
+          state.confirmed = false;
+          updateButtons();
+          setStatus("error", `Mask rejected: ${maskCheck.reason}. Coverage ${maskCheck.coverage.toFixed(1)}%, box ${maskCheck.boxPctW?.toFixed?.(1) || 0}% × ${maskCheck.boxPctH?.toFixed?.(1) || 0}%`);
+          els.selectionMessage.textContent = "Auto Detect looks wrong. Use Add/Remove or fix backend segmentation.";
+          return;
+        }
+
+        renderMaskOverlay();
+        state.maskLoaded = true;
+        state.confirmed = false;
+        state.cutoutBlob = null;
+        els.selectionMessage.textContent = "Mask loaded. Refine if needed, then confirm object.";
+        els.lastResult.textContent = `Mask coverage ${maskCheck.coverage.toFixed(1)}%`;
+        setStatus("success", "Mask loaded.");
+        updateButtons();
+      } catch (error) {
+        state.maskLoaded = false;
+        state.confirmed = false;
+        state.baseMaskImageData = null;
+        drawBaseImage();
+        updateButtons();
+        setStatus("error", error.message || String(error));
+      }
+    }
+
+    async function handleConfirmObject() {
+      if (!state.baseMaskImageData) return;
+      try {
+        setStatus("loading", "Building cutout PNG...");
+        const maskCheck = validateMaskImageData(state.baseMaskImageData);
+        if (!maskCheck.valid) {
+          throw new Error(`Mask coverage is not usable: ${maskCheck.coverage.toFixed(1)}%`);
+        }
+        const blob = await createCutoutBlob();
+        if (!blob) throw new Error("Failed to create cutout PNG.");
         state.cutoutBlob = blob;
         state.confirmed = true;
-        updateUiState();
-        setStatus("success", "Object confirmed. Ready to generate 3D.");
-        setSelectionMessage("Object confirmed. Press Generate 3D.");
-      }, "image/png");
+        showCutoutPreview(blob);
+        els.selectionMessage.textContent = "Object confirmed. You can now generate 3D.";
+        els.lastResult.textContent = `Cutout ready (${Math.round(blob.size / 1024)} KB)`;
+        setStatus("success", "Cutout confirmed.");
+        updateButtons();
+      } catch (error) {
+        state.confirmed = false;
+        state.cutoutBlob = null;
+        updateButtons();
+        setStatus("error", error.message || String(error));
+      }
+    }
+
+    async function handleGenerate3D() {
+      if (!state.cutoutBlob) return;
+      try {
+        setStatus("loading", "Calling /api/model/generate-3d...");
+        const fd = new FormData();
+        fd.append("image", state.cutoutBlob, "confirmed_object.png");
+
+        const res = await fetch(apiUrl("/api/model/generate-3d"), {
+          method: "POST",
+          body: fd
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error(`3D endpoint did not return valid JSON. Response starts with: ${text.slice(0, 120)}`);
+        }
+
+        setDebug(data);
+
+        if (!res.ok) {
+          throw new Error(data.detail || data.error || data.traceback || `3D request failed with status ${res.status}`);
+        }
+
+        state.backend3DResult = data;
+        els.lastResult.textContent = "3D generation request completed.";
+        els.preview3DContainer.innerHTML = `
+          <div style="display:grid;gap:12px;width:min(100%,900px);">
+            <div class="mini">Backend 3D response</div>
+            <pre style="background:#101624;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;color:#dff3ff;overflow:auto;max-height:70vh;">${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+          </div>
+        `;
+        setStatus("success", "3D request finished.");
+      } catch (error) {
+        setStatus("error", error.message || String(error));
+      }
     }
 
     function escapeHtml(str) {
-      return String(str).replace(/[&<>"']/g, (m) => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#39;",
-      }[m]));
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
     }
 
-    function collectUrlsDeep(obj, acc = [], depth = 0) {
-      if (!obj || depth > 6) return acc;
-
-      if (typeof obj === "string") {
-        const s = obj.trim();
-        if (/^https?:\/\//i.test(s) || s.startsWith("/")) acc.push(s);
-        return acc;
-      }
-
-      if (Array.isArray(obj)) {
-        for (const item of obj) collectUrlsDeep(item, acc, depth + 1);
-        return acc;
-      }
-
-      if (typeof obj === "object") {
-        const preferredKeys = [
-          "model_url","modelUrl","glb_url","glbUrl","mesh_url","meshUrl",
-          "preview_url","previewUrl","output_url","outputUrl","file_url","fileUrl",
-          "obj_url","objUrl","url","download_url","downloadUrl"
-        ];
-        for (const key of preferredKeys) {
-          if (key in obj) collectUrlsDeep(obj[key], acc, depth + 1);
-        }
-        for (const key of Object.keys(obj)) {
-          collectUrlsDeep(obj[key], acc, depth + 1);
-        }
-      }
-      return acc;
+    function setBrushMode(mode) {
+      state.brushMode = mode;
+      els.btnAdd.classList.toggle("active", mode === "add");
+      els.btnRemove.classList.toggle("active", mode === "remove");
+      els.btnRemove.classList.toggle("remove", mode === "remove");
+      updateButtons();
     }
 
-    function normalizeUrl(url) {
-      if (!url) return null;
-      if (/^https?:\/\//i.test(url)) return url;
-      if (url.startsWith("/")) return getApiBase() + url;
-      return null;
+    function startDraw(event) {
+      if (!state.maskLoaded) return;
+      const pos = getPointerPos(event);
+      if (!pointInsideImage(pos.x, pos.y)) return;
+      state.isDrawing = true;
+      applyBrush(pos.x, pos.y);
+      drawBrushPreview(pos.x, pos.y);
+      event.preventDefault();
     }
 
-    function bestModelUrlFromPayload(payload) {
-      const urls = collectUrlsDeep(payload).map(normalizeUrl).filter(Boolean);
-      // Log all collected candidate URLs before filtering
-      console.log("3D candidate URLs (all):", urls);
-      const supported = urls.find((u) => /\.(glb|gltf|obj)(\?|#|$)/i.test(u));
-      return supported || urls[0] || null;
+    function moveDraw(event) {
+      const pos = getPointerPos(event);
+      drawBrushPreview(pos.x, pos.y);
+      if (!state.isDrawing || !state.maskLoaded) return;
+      if (!pointInsideImage(pos.x, pos.y)) return;
+      applyBrush(pos.x, pos.y);
+      event.preventDefault();
     }
 
-
-
-    async function generate3D() {
-      if (!state.hasMask) return;
-      if (!state.cutoutBlob) confirmCutout();
-
-      await waitFor(() => !!state.cutoutBlob, 1500);
-
-      if (!state.cutoutBlob) {
-        setStatus("error", "Could not create cutout PNG.");
-        return;
-      }
-
-      setStatus("loading", "Generating 3D model...");
-      setSelectionMessage("Uploading cutout to 3D backend...");
-      // Do not clear debug panel here; append 3D debug below segment debug
-      setText(els.chip3D, "Working");
-
-      const fd = new FormData();
-      const filename = (state.uploadedFile?.name || "cutout").replace(/\.[^.]+$/, "") + "_cutout.png";
-      fd.append("file", state.cutoutBlob, filename);
-      fd.append("image", state.cutoutBlob, filename);
-      fd.append("cutout", state.cutoutBlob, filename);
-      fd.append("image_file", state.cutoutBlob, filename);
-
-      try {
-        const res = await fetch(`${getApiBase()}/api/model/generate-3d`, {
-          method: "POST",
-          body: fd,
-        });
-
-        const { raw, json } = await fetchJsonOrText(res);
-        // Debug logging
-        console.log("3D RAW RESPONSE:", raw);
-        console.log("3D JSON RESPONSE:", json);
-
-        let debugMsg = '\n\n--- 3D GENERATION DEBUG ---\n';
-        debugMsg += '3D RAW RESPONSE:\n' + (raw.length > 400 ? raw.slice(0,400)+'...':raw) + '\n\n';
-        debugMsg += '3D PARSED JSON:\n' + JSON.stringify(json, null, 2) + '\n\n';
-
-        if (!res.ok) {
-          setStatus("error", "3D generation failed.", raw.slice(0, 400));
-          writePreviewResultPanel((els.previewResultPanel?.textContent || "") + debugMsg + `3D Error\n${raw}`);
-          setText(els.chip3D, "Error");
-          return;
-        }
-
-        const payload = json || raw;
-        const modelUrl = json ? bestModelUrlFromPayload(json) : null;
-        debugMsg += 'DETECTED MODEL URL: ' + (modelUrl || 'none') + '\n';
-
-        if (modelUrl) {
-          try {
-            await render3DPreview(modelUrl);
-            setStatus("success", "3D model generated.", modelUrl);
-            setSelectionMessage("3D preview loaded.");
-          } catch (previewErr) {
-            setStatus("error", "3D response received, but preview failed.", previewErr.message || String(previewErr));
-          }
-        } else {
-          setStatus("success", "3D request finished.", "No preview URL found in response.");
-          setSelectionMessage("3D request finished. No preview URL found.");
-          setText(els.chip3D, "No URL");
-          debugMsg += '3D finished but no direct preview model URL was found in response.\n';
-        }
-
-        writePreviewResultPanel((els.previewResultPanel?.textContent || "") + debugMsg);
-      } catch (err) {
-        setStatus("error", "3D generation failed.", err.message || String(err));
-        writePreviewResultPanel(`3D Generation Exception\n${err.message || String(err)}`);
-      }
+    function endDraw() {
+      state.isDrawing = false;
     }
 
-    // TEMP: Auto Detect is disabled for clean reinstall
-    function autoDetect() {
-      setStatus("idle", "Auto Detect temporarily removed for clean reinstall.");
-      setSelectionMessage("Auto Detect temporarily removed for clean reinstall.");
+    function clearMaskEdits() {
+      if (!state.maskLoaded) return;
+      maskCtx.clearRect(0, 0, els.maskCanvas.width, els.maskCanvas.height);
+      state.baseMaskImageData = maskCtx.createImageData(els.maskCanvas.width, els.maskCanvas.height);
+      renderMaskOverlay();
+      state.confirmed = false;
+      state.cutoutBlob = null;
+      els.selectionMessage.textContent = "Mask cleared. Auto detect again or repaint it.";
+      updateButtons();
     }
 
-    els.overlayOpacity.addEventListener("input", drawAll);
+    function resetMaskOnly() {
+      state.maskLoaded = false;
+      state.confirmed = false;
+      state.cutoutBlob = null;
+      state.baseMaskImageData = null;
+      drawBaseImage();
+      els.selectionMessage.textContent = "Mask reset. Press Auto Detect again.";
+      els.lastResult.textContent = "Mask reset.";
+      setStatus("idle", "Mask reset.");
+      updateButtons();
+    }
+
+    els.uploadFile.addEventListener("change", handleUploadChange);
+    els.btnAutoDetect.addEventListener("click", handleAutoDetect);
+    els.btnConfirm.addEventListener("click", handleConfirmObject);
+    els.btnGenerate3D.addEventListener("click", handleGenerate3D);
+    els.btnResetMask.addEventListener("click", resetMaskOnly);
+    els.btnClearEdits.addEventListener("click", clearMaskEdits);
+    els.btnAdd.addEventListener("click", () => setBrushMode("add"));
+    els.btnRemove.addEventListener("click", () => setBrushMode("remove"));
+
     els.brushSize.addEventListener("input", () => {
-      setText(els.pillBrush, els.brushSize.value);
+      state.brushSize = Number(els.brushSize.value);
+      updateButtons();
     });
 
-    window.addEventListener("resize", resizeVisibleCanvases);
+    els.overlayOpacity.addEventListener("input", () => {
+      state.overlayOpacity = Number(els.overlayOpacity.value) / 100;
+      renderMaskOverlay();
+    });
+
+    els.maskCanvas.addEventListener("mousedown", startDraw);
+    els.maskCanvas.addEventListener("mousemove", moveDraw);
+    window.addEventListener("mouseup", endDraw);
+    els.maskCanvas.addEventListener("mouseleave", () => clearCanvas(brushPreviewCtx, els.brushPreviewCanvas));
+
+    els.maskCanvas.addEventListener("touchstart", startDraw, { passive: false });
+    els.maskCanvas.addEventListener("touchmove", moveDraw, { passive: false });
+    window.addEventListener("touchend", endDraw, { passive: true });
+
+    window.addEventListener("resize", drawBaseImage);
+
+    updateButtons();
+    setStatus("idle", "Upload a photo to begin.");
+  </script>
+</body>
+</html>
