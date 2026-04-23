@@ -1,3 +1,20 @@
+    // Validate mask image: check alpha coverage
+    function validateMaskImage(imageOrCanvas) {
+      const w = imageOrCanvas.width;
+      const h = imageOrCanvas.height;
+      const ctx = imageOrCanvas.getContext ? imageOrCanvas.getContext("2d") : null;
+      if (!ctx) return { valid: false, coverage: 0 };
+      const imgData = ctx.getImageData(0, 0, w, h).data;
+      let count = 0;
+      for (let i = 3; i < imgData.length; i += 4) {
+        if (imgData[i] > 10) count++;
+      }
+      const total = w * h;
+      const pct = total ? (count / total) * 100 : 0;
+      // If mask covers >95% of image, it's suspicious
+      const valid = pct < 95;
+      return { valid, coverage: pct };
+    }
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -469,9 +486,16 @@
 
             <label class="mini" for="apiBase">API Base</label>
             <input id="apiBase" type="text" value="" />
+            <!-- Backend origin config: set default here if needed -->
 
             <div class="mini">Segment: <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/segment</span></div>
             <div class="mini">Generate: <span class="endpoint" style="display:inline-block;padding:2px 6px;">POST /api/model/generate-3d</span></div>
+
+            <!-- Debug panel: visible, monospaced, scrollable -->
+            <div style="margin-top:10px;">
+              <label class="mini">Backend Debug</label>
+              <pre id="previewResultPanel" style="font-family:ui-monospace,monospace;font-size:12px;max-height:120px;overflow:auto;background:#101624;border-radius:8px;padding:8px 10px;color:#b8e1ff;margin:0;"></pre>
+            </div>
           </section>
 
           <div class="hidden-ui" aria-hidden="true">
@@ -480,7 +504,6 @@
             <span id="chipConfirm"></span>
             <span id="chipApi"></span>
             <span id="chip3D"></span>
-            <div id="previewResultPanel"></div>
           </div>
         </div>
       </aside>
@@ -581,10 +604,13 @@
       controls: null,
     };
 
-function getApiBase() {
-  const raw = (els.apiBase.value || "").trim().replace(/\/+$/, "");
-  return raw || window.location.origin;
-}
+    function getApiBase() {
+      // Backend origin config: set default here if needed
+      const raw = (els.apiBase.value || "").trim().replace(/\/+$/, "");
+      // Optionally: const DEFAULT_API_BASE = ""; // e.g. "http://localhost:5000"
+      // if (raw) return raw; if (DEFAULT_API_BASE) return DEFAULT_API_BASE;
+      return raw || window.location.origin;
+    }
 
     function setStatus(kind, message, extra = "") {
       els.statusBadge.className = "status";
@@ -738,7 +764,6 @@ function getApiBase() {
         setText(els.pillMask, "0%");
         return;
       }
-
       const imgData = offCtx.mask.getImageData(0, 0, off.mask.width, off.mask.height).data;
       let count = 0;
       for (let i = 3; i < imgData.length; i += 4) {
@@ -746,7 +771,7 @@ function getApiBase() {
       }
       const total = off.mask.width * off.mask.height;
       const pct = total ? ((count / total) * 100).toFixed(1) : "0.0";
-      state.hasMask = count > 0;
+      state.hasMask = count > 0 && pct < 95; // Only treat as mask if not suspiciously full
       setText(els.pillMask, `${pct}%`);
       setText(els.pillBrush, String(els.brushSize.value));
       updateUiState();
@@ -799,6 +824,7 @@ function getApiBase() {
       return null;
     }
 
+    // Strict mask field detection: only allow real mask keys
     function deepFindMaskString(obj, depth = 0) {
       if (!obj || depth > 5) return null;
 
@@ -815,22 +841,17 @@ function getApiBase() {
       }
 
       if (typeof obj === "object") {
-        const priorityKeys = [
-          "mask_base64","maskBase64","mask_png_base64","maskPngBase64","mask",
-          "image_base64","imageBase64","image","png","result","data","overlay","overlay_mask"
+        // Only strict mask keys
+        const strictKeys = [
+          "mask_base64","maskBase64","mask_png_base64","maskPngBase64","mask","overlay_mask"
         ];
-        for (const key of priorityKeys) {
+        for (const key of strictKeys) {
           if (key in obj) {
             const found = deepFindMaskString(obj[key], depth + 1);
             if (found) return found;
           }
         }
-        for (const key of Object.keys(obj)) {
-          const found = deepFindMaskString(obj[key], depth + 1);
-          if (found) return found;
-        }
       }
-
       return null;
     }
 
@@ -843,16 +864,28 @@ function getApiBase() {
       return { raw, json };
     }
 
+    // Apply mask only if valid, with debug and error handling
     async function applyMaskFromSource(maskSrc) {
       return new Promise((resolve, reject) => {
         const m = new Image();
         m.onload = () => {
+          // Draw to temp canvas for validation
+          const temp = document.createElement("canvas");
+          temp.width = off.mask.width;
+          temp.height = off.mask.height;
+          const tctx = temp.getContext("2d");
+          tctx.clearRect(0, 0, temp.width, temp.height);
+          tctx.drawImage(m, 0, 0, temp.width, temp.height);
+          const { valid, coverage } = validateMaskImage(temp);
+          console.log("MASK VALIDATION: coverage=", coverage.toFixed(2), "% valid:", valid);
+          if (!valid) {
+            reject(new Error(`Returned mask covers almost the whole image (${coverage.toFixed(1)}%). Likely wrong response field or backend issue.`));
+            return;
+          }
           offCtx.mask.clearRect(0, 0, off.mask.width, off.mask.height);
           offCtx.baseMask.clearRect(0, 0, off.baseMask.width, off.baseMask.height);
-
-          offCtx.mask.drawImage(m, 0, 0, off.mask.width, off.mask.height);
-          offCtx.baseMask.drawImage(m, 0, 0, off.baseMask.width, off.baseMask.height);
-
+          offCtx.mask.drawImage(temp, 0, 0);
+          offCtx.baseMask.drawImage(temp, 0, 0);
           state.baseMaskLoaded = true;
           state.confirmed = false;
           state.cutoutBlob = null;
@@ -860,7 +893,7 @@ function getApiBase() {
           updateUiState();
           resolve();
         };
-        m.onerror = reject;
+        m.onerror = (e) => reject(new Error("Failed to load mask image."));
         m.crossOrigin = "anonymous";
         m.src = maskSrc;
       });
@@ -886,28 +919,53 @@ function getApiBase() {
         });
 
         const { raw, json } = await fetchJsonOrText(res);
+        // Debug logging
+        console.log("SEGMENT RAW:", raw);
+        console.log("SEGMENT JSON:", json);
 
         if (!res.ok) {
           setStatus("error", "Segment request failed.", raw.slice(0, 300));
-          writePreviewResultPanel(`<strong>Segment Error</strong>\n${escapeHtml(raw)}`);
+          writePreviewResultPanel(`Segment Error\n${raw}`);
           return;
         }
 
-        const maskSrc = json ? deepFindMaskString(json) : normalizeMaybeBase64Image(raw);
+        let maskSrc = null;
+        let maskKey = null;
+        if (json) {
+          // Only strict mask keys
+          const strictKeys = ["mask_base64","maskBase64","mask_png_base64","maskPngBase64","mask","overlay_mask"];
+          for (const k of strictKeys) {
+            if (k in json) {
+              maskSrc = deepFindMaskString({[k]: json[k]});
+              maskKey = k;
+              break;
+            }
+          }
+          if (!maskSrc) maskSrc = deepFindMaskString(json);
+        } else {
+          maskSrc = normalizeMaybeBase64Image(raw);
+        }
+        console.log("SEGMENT MASK SRC:", maskKey, maskSrc ? (maskSrc.slice ? maskSrc.slice(0,40)+"..." : maskSrc) : null);
 
         if (!maskSrc) {
-          setStatus("error", "No usable mask returned.", raw.slice(0, 300));
-          writePreviewResultPanel(`<strong>Segment Response</strong>\n${escapeHtml(raw)}`);
+          setStatus("error", "No valid mask field found in /api/segment response.");
+          writePreviewResultPanel(`No valid mask field found.\n${raw}`);
           return;
         }
 
-        await applyMaskFromSource(maskSrc);
-        setStatus("success", "Mask detected. You can refine it now.");
-        setSelectionMessage("Mask loaded. Use Add / Remove to refine.");
+        try {
+          await applyMaskFromSource(maskSrc);
+          setStatus("success", "Mask detected. You can refine it now.");
+          setSelectionMessage("Mask loaded. Use Add / Remove to refine.");
+        } catch (maskErr) {
+          setStatus("error", maskErr.message);
+          writePreviewResultPanel(`Mask Error\n${maskErr.message}\n${raw}`);
+          return;
+        }
         writePreviewResultPanel(json || raw);
       } catch (err) {
         setStatus("error", "Segment request failed.", err.message || String(err));
-        writePreviewResultPanel(`<strong>Segment Exception</strong>\n${escapeHtml(err.message || String(err))}`);
+        writePreviewResultPanel(`Segment Exception\n${err.message || String(err)}`);
       }
     }
 
@@ -1180,10 +1238,13 @@ function getApiBase() {
         });
 
         const { raw, json } = await fetchJsonOrText(res);
+        // Debug logging
+        console.log("3D RAW RESPONSE:", raw);
+        console.log("3D JSON RESPONSE:", json);
 
         if (!res.ok) {
           setStatus("error", "3D generation failed.", raw.slice(0, 400));
-          writePreviewResultPanel(`<strong>3D Error</strong>\n${escapeHtml(raw)}`);
+          writePreviewResultPanel(`3D Error\n${raw}`);
           setText(els.chip3D, "Error");
           return;
         }
@@ -1208,7 +1269,7 @@ function getApiBase() {
         writePreviewResultPanel(payload);
       } catch (err) {
         setStatus("error", "3D request failed.", err.message || String(err));
-        writePreviewResultPanel(`<strong>3D Exception</strong>\n${escapeHtml(err.message || String(err))}`);
+        writePreviewResultPanel(`3D Exception\n${err.message || String(err)}`);
         setText(els.chip3D, "Error");
       }
     }
