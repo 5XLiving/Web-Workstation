@@ -1,3 +1,4 @@
+```python id="8u7d2n"
 import os
 import numpy as np
 from PIL import Image, ImageFilter
@@ -30,31 +31,29 @@ def _clean_mask(mask: np.ndarray) -> np.ndarray:
 
 
 def segment_main_object(image_path: str) -> dict:
-    import sys
-    print(f"[BACKEND DEBUG] segment_main_object entered, image_path: {image_path}", file=sys.stderr)
     img = image_service.load_image(image_path).convert("RGB")
-    print(f"[BACKEND DEBUG] image loaded", file=sys.stderr)
     arr = np.array(img, dtype=np.float32)
     h, w = arr.shape[:2]
-    print(f"[BACKEND DEBUG] image shape: {arr.shape}", file=sys.stderr)
+
     bg_color = _estimate_background_color(arr)
-    print(f"[BACKEND DEBUG] bg_color: {bg_color}", file=sys.stderr)
+
     dist = np.linalg.norm(arr - bg_color, axis=2)
     brightness = arr.mean(axis=2)
+
     mask = ((dist > 32) & (brightness > 24)).astype(np.uint8) * 255
-    print(f"[BACKEND DEBUG] mask computed", file=sys.stderr)
     mask = _clean_mask(mask)
-    print(f"[BACKEND DEBUG] mask cleaned", file=sys.stderr)
+
     mask_img = Image.fromarray(mask, mode="L")
+
     image_id = os.path.splitext(os.path.basename(image_path))[0]
     mask_path = os.path.join(MASKS_DIR, f"{image_id}_mask.png")
     image_service.save_png(mask_img, mask_path)
-    print(f"[BACKEND DEBUG] mask saved to: {mask_path}", file=sys.stderr)
+
     mask_b64 = image_service.image_to_base64(mask_img)
-    print(f"[BACKEND DEBUG] mask base64 encoded", file=sys.stderr)
-    print(f"[BACKEND DEBUG] segment_main_object returning", file=sys.stderr)
+
     return {
         "mask_png_base64": mask_b64,
         "width": w,
         "height": h,
     }
+```
