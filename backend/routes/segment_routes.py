@@ -1,3 +1,4 @@
+
 import os
 from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import JSONResponse
@@ -7,6 +8,10 @@ UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "..", "storage", "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 router = APIRouter()
+
+@router.get("/__segment_ping")
+async def __segment_ping():
+    return {"ok": True, "route": "segment_routes"}
 
 
 @router.post("/")
@@ -41,4 +46,9 @@ async def segment_endpoint(image: UploadFile = File(...)):
         return JSONResponse(result)
 
     except Exception as e:
+        import traceback
+        import sys
+        tb_str = traceback.format_exc()
+        print(f"[SEGMENT] exception: {e}", file=sys.stderr)
+        print(tb_str, file=sys.stderr)
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
