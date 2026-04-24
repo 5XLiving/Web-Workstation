@@ -58,10 +58,13 @@ def segment_main_object(image_path: str) -> dict:
     # Clean mask (morphology)
     mask_clean = _clean_mask((fg.astype(np.uint8) * 255))
     fg_clean = mask_clean > 0
-    coverage = float(fg_clean.mean())
+    cleaned_coverage = float(fg_clean.mean())
     # Safety: if mask is still too large, try stricter threshold once
     tried_strict = False
-    if coverage > 0.90:
+    rejected_reason = None
+    warning = None
+    # Try stricter threshold if coverage is very high
+    if cleaned_coverage > 0.90:
         tried_strict = True
         mask2 = ((dist > STRICT_DIST_THRESHOLD) & (brightness > STRICT_BRIGHTNESS_THRESHOLD)).astype(np.uint8)
         fg2 = mask2 > 0
@@ -74,15 +77,16 @@ def segment_main_object(image_path: str) -> dict:
         fg2 = fg2 & (~border_connected2)
         mask_clean2 = _clean_mask((fg2.astype(np.uint8) * 255))
         fg_clean2 = mask_clean2 > 0
-        coverage2 = float(fg_clean2.mean())
-        if coverage2 < 0.90:
+        cleaned_coverage2 = float(fg_clean2.mean())
+        if cleaned_coverage2 < 0.90:
             fg_clean = fg_clean2
             mask_clean = mask_clean2
-            coverage = coverage2
+            cleaned_coverage = cleaned_coverage2
         else:
             fg_clean = np.zeros_like(fg_clean)
             mask_clean = np.zeros_like(mask_clean)
-            coverage = 0.0
+            cleaned_coverage = 0.0
+            rejected_reason = "strict threshold still too high coverage"
     # Connected components
     labeled, num = ndi.label(fg_clean)
     component_count = int(num)
@@ -98,23 +102,35 @@ def segment_main_object(image_path: str) -> dict:
         mask_final = (labeled == main_label).astype(np.uint8) * 255
         # Fill holes in main object
         mask_final = ndi.binary_fill_holes(mask_final > 0).astype(np.uint8) * 255
-        final_fg_coverage = float((mask_final > 0).mean())
+        returned_mask_coverage = float((mask_final > 0).mean())
     else:
         mask_final = np.zeros_like(mask_clean, dtype=np.uint8)
-        final_fg_coverage = 0.0
+        returned_mask_coverage = 0.0
+    # FINAL SAFETY: If returned mask covers too much, reject and return empty mask
+    if returned_mask_coverage > 0.70:
+        mask_final = np.zeros_like(mask_final, dtype=np.uint8)
+        warning = "mask rejected: coverage too high"
+        rejected_reason = "final mask coverage > 0.70"
+        returned_mask_coverage = 0.0
     mask_img = Image.fromarray(mask_final, mode="L")
     image_id = os.path.splitext(os.path.basename(image_path))[0]
     mask_path = os.path.join(MASKS_DIR, f"{image_id}_mask.png")
     image_service.save_png(mask_img, mask_path)
-    mask_b64 = image_service.image_to_base64(mask_img)
-    return {
+    mask_b64 = image_service.image_to_base64(mask_img) if returned_mask_coverage > 0 else image_service.image_to_base64(Image.fromarray(np.zeros_like(mask_final, dtype=np.uint8), mode="L"))
+    # Compose result
+    result = {
+        "ok": True,
         "mask_png_base64": mask_b64,
         "width": w,
         "height": h,
-        "mask_coverage": final_fg_coverage,
+        "mask_coverage": returned_mask_coverage,
         "bg_color": [float(x) for x in bg_color],
         "initial_foreground_coverage": initial_coverage,
-        "final_foreground_coverage": coverage,
+        "cleaned_foreground_coverage": cleaned_coverage,
+        "returned_mask_coverage": returned_mask_coverage,
         "component_count": component_count,
         "strict_threshold_used": tried_strict,
+        "rejected_reason": rejected_reason,
+        "warning": warning,
     }
+    return result
