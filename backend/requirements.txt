@@ -1,3 +1,6 @@
+rembg
+onnxruntime
+scipy
 # Required for segmentation
 scipy
 fastapi==0.115.0

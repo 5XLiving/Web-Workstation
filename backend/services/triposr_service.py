@@ -49,7 +49,7 @@ def _run_real_generator(job_cutout_path: str, job_dir: str) -> tuple[str, str]:
         result = run_triposr(
             image_path=job_cutout_path,
             output_dir=job_dir,
-            repo_dir=os.getenv("TRIPOSR_REPO_DIR"),
+            repo_dir=None,
             bake_texture=os.getenv("TRIPOSR_BAKE_TEXTURE", "0").strip().lower() in {"1", "true", "yes", "on"},
             texture_resolution=int(os.getenv("TRIPOSR_TEXTURE_RESOLUTION", "0") or 0) or None,
             timeout_seconds=int(os.getenv("TRIPOSR_TIMEOUT_SECONDS", "1800")),

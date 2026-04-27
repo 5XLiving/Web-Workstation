@@ -1,31 +1,13 @@
-DIST_THRESHOLD = 40
-BRIGHTNESS_THRESHOLD = 30
-STRICT_DIST_THRESHOLD = 56
-STRICT_BRIGHTNESS_THRESHOLD = 40
- 
 import os
+import io
 import numpy as np
 from PIL import Image, ImageFilter
+from rembg import remove
+from scipy import ndimage as ndi
 from backend.services import image_service
 
 MASKS_DIR = os.path.join(os.path.dirname(__file__), "..", "storage", "masks")
 os.makedirs(MASKS_DIR, exist_ok=True)
-
-
-def _estimate_background_color(arr: np.ndarray) -> np.ndarray:
-    h, w = arr.shape[:2]
-    patch = max(1, min(h, w) // 20)
-
-    patches = [
-        arr[:patch, :patch],
-        arr[:patch, w - patch:w],
-        arr[h - patch:h, :patch],
-        arr[h - patch:h, w - patch:w],
-    ]
-
-    samples = np.concatenate([p.reshape(-1, 3) for p in patches], axis=0)
-    return samples.mean(axis=0)
-
 
 def _clean_mask(mask: np.ndarray) -> np.ndarray:
     mask_img = Image.fromarray(mask, mode="L")
@@ -33,104 +15,77 @@ def _clean_mask(mask: np.ndarray) -> np.ndarray:
     mask_img = mask_img.filter(ImageFilter.MinFilter(size=5))
     return np.array(mask_img, dtype=np.uint8)
 
+def _largest_center_component(mask_bool: np.ndarray):
+    h, w = mask_bool.shape
+    labeled, num = ndi.label(mask_bool)
+    if num == 0:
+        return np.zeros_like(mask_bool, dtype=bool), 0
+
+    center = (h // 2, w // 2)
+    sizes = ndi.sum(mask_bool, labeled, range(1, num + 1))
+    centroids = ndi.center_of_mass(mask_bool, labeled, range(1, num + 1))
+    max_dist = max(np.hypot(h, w) / 2, 1)
+
+    scores = []
+    for size, centroid in zip(sizes, centroids):
+        dist_to_center = np.hypot(centroid[0] - center[0], centroid[1] - center[1])
+        center_score = max(0.0, 1.0 - (dist_to_center / max_dist)) ** 2
+        scores.append(float(size) * center_score)
+
+    best_idx = int(np.argmax(scores)) + 1
+    final_bool = labeled == best_idx
+    final_bool = ndi.binary_fill_holes(final_bool)
+    return final_bool, int(num)
 
 def segment_main_object(image_path: str) -> dict:
-    from scipy import ndimage as ndi
-    img = image_service.load_image(image_path).convert("RGB")
-    arr = np.array(img, dtype=np.float32)
-    h, w = arr.shape[:2]
-    bg_color = _estimate_background_color(arr)
-    dist = np.linalg.norm(arr - bg_color, axis=2)
-    brightness = arr.mean(axis=2)
-    # Initial mask: color/brightness threshold (tighter)
-    mask = ((dist > DIST_THRESHOLD) & (brightness > BRIGHTNESS_THRESHOLD)).astype(np.uint8)
-    initial_fg = mask > 0
-    initial_coverage = float(initial_fg.mean())
-    # Remove border-connected foreground using binary propagation
-    fg = initial_fg.copy()
-    seed = np.zeros_like(fg, dtype=bool)
-    seed[0, :] = fg[0, :]
-    seed[-1, :] = fg[-1, :]
-    seed[:, 0] = fg[:, 0]
-    seed[:, -1] = fg[:, -1]
-    border_connected = ndi.binary_propagation(seed, mask=fg)
-    fg = fg & (~border_connected)
-    # Clean mask (morphology)
-    mask_clean = _clean_mask((fg.astype(np.uint8) * 255))
-    fg_clean = mask_clean > 0
-    cleaned_coverage = float(fg_clean.mean())
-    # Safety: if mask is still too large, try stricter threshold once
-    tried_strict = False
-    rejected_reason = None
-    warning = None
-    # Try stricter threshold if coverage is very high
-    if cleaned_coverage > 0.90:
-        tried_strict = True
-        mask2 = ((dist > STRICT_DIST_THRESHOLD) & (brightness > STRICT_BRIGHTNESS_THRESHOLD)).astype(np.uint8)
-        fg2 = mask2 > 0
-        seed2 = np.zeros_like(fg2, dtype=bool)
-        seed2[0, :] = fg2[0, :]
-        seed2[-1, :] = fg2[-1, :]
-        seed2[:, 0] = fg2[:, 0]
-        seed2[:, -1] = fg2[:, -1]
-        border_connected2 = ndi.binary_propagation(seed2, mask=fg2)
-        fg2 = fg2 & (~border_connected2)
-        mask_clean2 = _clean_mask((fg2.astype(np.uint8) * 255))
-        fg_clean2 = mask_clean2 > 0
-        cleaned_coverage2 = float(fg_clean2.mean())
-        if cleaned_coverage2 < 0.90:
-            fg_clean = fg_clean2
-            mask_clean = mask_clean2
-            cleaned_coverage = cleaned_coverage2
-        else:
-            fg_clean = np.zeros_like(fg_clean)
-            mask_clean = np.zeros_like(mask_clean)
-            cleaned_coverage = 0.0
-            rejected_reason = "strict threshold still too high coverage"
-    # Connected components
-    labeled, num = ndi.label(fg_clean)
-    component_count = int(num)
-    if num > 0:
-        # Find largest component near image center
-        center = (h // 2, w // 2)
-        sizes = ndi.sum(fg_clean, labeled, range(1, num + 1))
-        centroids = ndi.center_of_mass(fg_clean, labeled, range(1, num + 1))
-        max_dist = np.hypot(h, w)
-        scores = [s * (1 - (np.hypot(c[0] - center[0], c[1] - center[1]) / max_dist)) for s, c in zip(sizes, centroids)]
-        best_idx = int(np.argmax(scores))
-        main_label = best_idx + 1
-        mask_final = (labeled == main_label).astype(np.uint8) * 255
-        # Fill holes in main object
-        mask_final = ndi.binary_fill_holes(mask_final > 0).astype(np.uint8) * 255
-        returned_mask_coverage = float((mask_final > 0).mean())
-    else:
-        mask_final = np.zeros_like(mask_clean, dtype=np.uint8)
-        returned_mask_coverage = 0.0
-    # FINAL SAFETY: If returned mask covers too much, reject and return empty mask
-    if returned_mask_coverage > 0.70:
-        mask_final = np.zeros_like(mask_final, dtype=np.uint8)
-        warning = "mask rejected: coverage too high"
-        rejected_reason = "final mask coverage > 0.70"
-        returned_mask_coverage = 0.0
-    mask_img = Image.fromarray(mask_final, mode="L")
     image_id = os.path.splitext(os.path.basename(image_path))[0]
+    debug_dir = os.path.join(MASKS_DIR, f"{image_id}_debug")
+    os.makedirs(debug_dir, exist_ok=True)
+
+    img_rgba = image_service.load_image(image_path).convert("RGBA")
+    img_rgba.save(os.path.join(debug_dir, "original_image.png"))
+
+    warning = None
+    rejected_reason = None
+    component_count = 0
+
+    buf = io.BytesIO()
+    img_rgba.save(buf, format="PNG")
+    removed = remove(buf.getvalue())
+
+    rembg_img = Image.open(io.BytesIO(removed)).convert("RGBA")
+    alpha = np.array(rembg_img.getchannel("A"), dtype=np.uint8)
+    Image.fromarray(alpha, mode="L").save(os.path.join(debug_dir, "rembg_mask.png"))
+
+    mask_clean = _clean_mask(alpha)
+    mask_bool = mask_clean > 8
+    final_bool, component_count = _largest_center_component(mask_bool)
+    final_mask = final_bool.astype(np.uint8) * 255
+
+    returned_mask_coverage = float((final_mask > 0).mean())
+    if returned_mask_coverage > 0.60:
+        final_mask = np.zeros_like(final_mask, dtype=np.uint8)
+        rejected_reason = f"final mask coverage {returned_mask_coverage:.3f} > 0.60"
+        warning = "mask rejected: coverage too high"
+        returned_mask_coverage = 0.0
+
+    Image.fromarray(final_mask, mode="L").save(os.path.join(debug_dir, "final_mask.png"))
+
+    mask_img = Image.fromarray(final_mask, mode="L")
     mask_path = os.path.join(MASKS_DIR, f"{image_id}_mask.png")
     image_service.save_png(mask_img, mask_path)
-    mask_b64 = image_service.image_to_base64(mask_img) if returned_mask_coverage > 0 else image_service.image_to_base64(Image.fromarray(np.zeros_like(mask_final, dtype=np.uint8), mode="L"))
-    # Compose result
-    result = {
+    mask_b64 = image_service.image_to_base64(mask_img)
+
+    return {
         "ok": True,
         "mask_png_base64": mask_b64,
-        "width": w,
-        "height": h,
+        "width": img_rgba.width,
+        "height": img_rgba.height,
         "mask_coverage": returned_mask_coverage,
-        "bg_color": [float(x) for x in bg_color],
-        "initial_foreground_coverage": initial_coverage,
-        "cleaned_foreground_coverage": cleaned_coverage,
         "returned_mask_coverage": returned_mask_coverage,
         "component_count": component_count,
-        "strict_threshold_used": tried_strict,
         "rejected_reason": rejected_reason,
         "warning": warning,
+        "debug_dir": debug_dir,
+        "segment_version": "REMBG_PRIMARY_V1",
     }
-    return result

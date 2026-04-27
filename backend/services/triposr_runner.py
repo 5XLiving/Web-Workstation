@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import shutil
 import subprocess
@@ -11,19 +12,46 @@ class TripoSRError(RuntimeError):
 
 
 def _resolve_python_bin() -> str:
-    return os.getenv("TRIPOSR_PYTHON_BIN") or sys.executable
+    value = (os.getenv("TRIPOSR_PYTHON_BIN") or "").strip()
+    if value and re.match(r"^[A-Za-z]:\\", value):
+        return sys.executable
+    return value or sys.executable
+
+
+def _looks_like_windows_path(value: str) -> bool:
+    return bool(re.match(r"^[A-Za-z]:\\", value.strip()))
+
+
+def _default_repo_dir() -> Path:
+    # backend/services/triposr_runner.py -> project root -> TripoSR
+    return Path(__file__).resolve().parents[2] / "TripoSR"
 
 
 def _resolve_repo_dir(repo_dir: Optional[str] = None) -> Path:
-    value = repo_dir or os.getenv("TRIPOSR_REPO_DIR")
-    if not value:
-        raise TripoSRError(
-            "TRIPOSR_REPO_DIR is not set. Point it to your cloned TripoSR repo."
-        )
+    raw_value = (repo_dir or os.getenv("TRIPOSR_REPO_DIR") or "").strip()
+    fallback = _default_repo_dir()
 
-    path = Path(value).expanduser().resolve()
+    # On Linux server, ignore stale Windows paths and fall back to local repo
+    if raw_value and _looks_like_windows_path(raw_value):
+        if fallback.exists():
+            path = fallback
+        else:
+            raise TripoSRError(
+                f"TRIPOSR_REPO_DIR is a Windows path on Linux: {raw_value}\n"
+                f"Fallback repo also not found: {fallback}"
+            )
+    elif raw_value:
+        path = Path(raw_value).expanduser().resolve()
+    else:
+        path = fallback.resolve()
+
     if not path.exists():
-        raise TripoSRError(f"TripoSR repo not found: {path}")
+        raise TripoSRError(
+            f"TripoSR repo not found: {path}\n"
+            f"repo_dir arg: {repo_dir}\n"
+            f"TRIPOSR_REPO_DIR env: {os.getenv('TRIPOSR_REPO_DIR')}\n"
+            f"default fallback: {fallback}"
+        )
 
     run_py = path / "run.py"
     if not run_py.exists():
@@ -102,6 +130,7 @@ def run_triposr(
         raise TripoSRError(
             "TripoSR inference failed.\n"
             f"Command: {' '.join(cmd)}\n"
+            f"Repo: {repo}\n"
             f"Exit code: {proc.returncode}\n"
             f"STDOUT:\n{stdout}\n"
             f"STDERR:\n{stderr}"

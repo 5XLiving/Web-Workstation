@@ -1,17 +1,3 @@
-// Draws the mask overlay with current opacity setting
-function renderMaskOverlay() {
-  // Clear overlay
-  maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-  // Draw mask overlay
-  const opacity = parseInt(overlayOpacityInput.value, 10) / 100;
-  maskCtx.save();
-  maskCtx.globalAlpha = opacity;
-  maskCtx.drawImage(maskDataCanvas, 0, 0, maskCanvas.width, maskCanvas.height);
-  maskCtx.globalCompositeOperation = "source-in";
-  maskCtx.fillStyle = "#ff4d6d";
-  maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-  maskCtx.restore();
-}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -151,6 +137,15 @@ function renderMaskOverlay() {
           </div>
         </section>
 
+        <!-- Mini Image Preview Card -->
+        <section class="card" id="imagePreviewCard">
+          <h3>1.5 Image Preview</h3>
+          <div class="miniPreviewShell">
+            <canvas id="miniImageCanvas"></canvas>
+          </div>
+          <div class="mini">Shows uploaded image preview before Auto Detect.</div>
+        </section>
+
         <section class="card">
           <h3>2. Auto Detect</h3>
           <div class="row">
@@ -190,7 +185,7 @@ function renderMaskOverlay() {
           </div>
           <div class="mini">Sends cutout to backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/model/generate-3d</span>.</div>
           <label class="mini" for="apiBase">API Base</label>
-          <input id="apiBase" type="text" value="http://127.0.0.1:5000" />
+          <input id="apiBase" type="text" value="" />
         </section>
 
         <section class="card">
@@ -305,8 +300,54 @@ let painting = false;
 let activeRenderer = null;
 let activeSceneStop = null;
 
-if (!apiBaseInput.value || apiBaseInput.value.includes(":8000")) {
-  apiBaseInput.value = "http://127.0.0.1:5000";
+if (apiBaseInput.value.includes(":8000")) {
+  apiBaseInput.value = "";
+}
+
+// --- MASK HELPER LAYER RESTORED ---
+function renderMaskOverlay() {
+  maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+  const opacity = parseInt(overlayOpacityInput.value, 10) / 100;
+  maskCtx.save();
+  maskCtx.globalAlpha = opacity;
+  maskCtx.drawImage(maskDataCanvas, 0, 0, maskCanvas.width, maskCanvas.height);
+  maskCtx.globalCompositeOperation = "source-in";
+  maskCtx.fillStyle = "#ff4d6d";
+  maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+  maskCtx.restore();
+
+  const imgPixels = Math.max(1, maskDataCanvas.width * maskDataCanvas.height);
+  const data = maskDataCtx.getImageData(0, 0, maskDataCanvas.width, maskDataCanvas.height).data;
+  let on = 0;
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] > 0) on++;
+  }
+  const pct = Math.round((on / imgPixels) * 100);
+  chipMask.textContent = pct > 0 ? "Loaded" : "Empty";
+  pillMask.textContent = `${pct}%`;
+}
+
+function copyMaskToOriginal() {
+  originalMaskCanvas.width = maskDataCanvas.width;
+  originalMaskCanvas.height = maskDataCanvas.height;
+  originalMaskCtx.clearRect(0, 0, originalMaskCanvas.width, originalMaskCanvas.height);
+  originalMaskCtx.drawImage(maskDataCanvas, 0, 0);
+}
+
+function restoreOriginalMask() {
+  maskDataCanvas.width = originalMaskCanvas.width;
+  maskDataCanvas.height = originalMaskCanvas.height;
+  maskDataCtx.clearRect(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  maskDataCtx.drawImage(originalMaskCanvas, 0, 0);
+  renderMaskOverlay();
+}
+
+function clearMaskCanvases() {
+  maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+  maskDataCtx.clearRect(0, 0, maskDataCanvas.width, maskDataCanvas.height);
+  originalMaskCtx.clearRect(0, 0, originalMaskCanvas.width, originalMaskCanvas.height);
+  chipMask.textContent = "Empty";
+  pillMask.textContent = "0%";
 }
 
 function setStatus(kind, msg, extra = "No result yet.") {
@@ -347,10 +388,7 @@ function resetSessionKeepImage() {
   clear3DPreview();
 }
 
-function clearMaskCanvases() {
-  maskDataCtx.clearRect(0, 0, maskDataCanvas.width, maskDataCanvas.height);
-  renderMaskOverlay();
-}
+// ...existing code...
 
 function loadImageToCanvas(file) {
   return new Promise((resolve, reject) => {
@@ -387,9 +425,9 @@ function buildBinaryMaskFromImage(maskImg) {
     const r = data.data[i];
     const g = data.data[i + 1];
     const b = data.data[i + 2];
-    const a = data.data[i + 3];
-    const v = Math.max(r, g, b, a);
-    const on = v > 8 ? 255 : 0;
+    // Only use RGB for thresholding, ignore alpha
+    const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+    const on = luminance > 16 ? 255 : 0;
 
     data.data[i] = 255;
     data.data[i + 1] = 255;
