@@ -222,15 +222,6 @@
       #debugBox{order:7; max-height:180px}
       .workspace-foot{order:8; padding:0 0 6px; display:grid}
 
-      #uploadSection{order:1}
-      #imagePreviewSection{order:2}
-      #maskControlSection{order:3}
-      #generateSection{order:4}
-      #preview3DSection{order:5}
-      #statusSection{order:6}
-      #debugBox{order:7}
-      .workspace-foot{order:8}
-
       input[type="range"],input[type="text"],input[type="file"]{min-height:42px}
     }
   </style>
@@ -667,7 +658,13 @@ function clear3DPreview() {
     try { activeRenderer.dispose(); } catch (_) {}
     activeRenderer = null;
   }
-  preview3DContainer.innerHTML = '<span style="color:#9fb1c7">3D Preview will appear here after Generate 3D</span>';
+preview3DContainer.innerHTML = `
+  <div style="text-align:center;color:#9fb1c7;line-height:1.6">
+    <div style="font-size:34px;margin-bottom:10px">⬡</div>
+    <strong style="color:#d8fff5">3D Preview Standby</strong><br>
+    Upload image → Auto Detect → Confirm Object → Generate 3D
+  </div>
+`;
 }
 
 uploadInput.addEventListener("change", async () => {
@@ -716,6 +713,7 @@ btnAutoDetect.addEventListener("click", async () => {
     }
 
     if (!res.ok || data.ok === false) {
+      stopFake3DProgress();
       throw new Error(data.error || data.detail || data.message || `Segment failed (${res.status})`);
     }
 
@@ -826,6 +824,91 @@ btnConfirm.addEventListener("click", () => {
   }, "image/png");
 });
 
+let fakeProgressTimer = null;
+
+function startFake3DProgress() {
+  let pct = 0;
+  clearInterval(fakeProgressTimer);
+
+  preview3DContainer.innerHTML = `
+    <div style="width:min(420px,80%);text-align:center;color:#9fb1c7;line-height:1.6">
+      <strong style="color:#d8fff5">Generating 3D Model</strong>
+      <div id="fakeProgressText" style="margin:10px 0">Preparing...</div>
+      <div style="height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden">
+        <div id="fakeProgressBar" style="height:100%;width:0%;background:#94f3de;border-radius:999px"></div>
+      </div>
+    </div>
+  `;
+
+  fakeProgressTimer = setInterval(() => {
+    pct = Math.min(92, pct + Math.random() * 4);
+    const bar = document.getElementById("fakeProgressBar");
+    const text = document.getElementById("fakeProgressText");
+    if (bar) bar.style.width = `${pct.toFixed(0)}%`;
+    if (text) {
+      if (pct < 30) text.textContent = "Uploading cutout...";
+      else if (pct < 70) text.textContent = "Building geometry...";
+      else text.textContent = "Refining mesh...";
+    }
+  }, 900);
+}
+
+function stopFake3DProgress() {
+  clearInterval(fakeProgressTimer);
+  fakeProgressTimer = null;
+}
+
+function resizeBlobImage(blob, maxSize = 768) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+
+      const c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+
+      const ctx = c.getContext("2d");
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+
+      c.toBlob((out) => {
+        if (!out) reject(new Error("Failed to resize cutout."));
+        else resolve(out);
+      }, "image/png");
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(blob);
+  });
+}
+
+function createMirrorImage(blob) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    img.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = img.width;
+      c.height = img.height;
+
+      const ctx = c.getContext("2d");
+      ctx.translate(img.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(img, 0, 0);
+
+      c.toBlob((out) => {
+        if (!out) reject(new Error("Failed to create mirror image."));
+        else resolve(out);
+      }, "image/png");
+    };
+
+    img.onerror = reject;
+    img.src = URL.createObjectURL(blob);
+  });
+}
+
 btnGenerate3D.addEventListener("click", async () => {
   if (!lastCutoutBlob || !currentImageId) {
     setStatus("Error", "Cutout not ready.");
@@ -835,10 +918,14 @@ btnGenerate3D.addEventListener("click", async () => {
   chip3D.textContent = "Uploading";
   setStatus("Loading", "Uploading cutout to 3D backend...", "Waiting for /api/model/generate-3d");
   selectionMessage.textContent = "Backend is processing the 3D generation request...";
-
+  startFake3DProgress();
   const fd = new FormData();
   fd.append("image_id", currentImageId);
-  fd.append("cutout_png", lastCutoutBlob, "cutout.png");
+  const resizedCutoutBlob = await resizeBlobImage(lastCutoutBlob, 512);
+  const mirrorBlob = await createMirrorImage(resizedCutoutBlob);
+
+  fd.append("cutout_png", resizedCutoutBlob, "cutout.png");
+  fd.append("cutout_mirror", mirrorBlob, "cutout_mirror.png");
 
   const apiBase = apiBaseInput.value.replace(/\/+$/, "");
 
@@ -869,6 +956,7 @@ btnGenerate3D.addEventListener("click", async () => {
     );
 
     if (modelUrl) {
+      stopFake3DProgress();
       chip3D.textContent = "Ready";
       await render3DPreview(modelUrl);
       selectionMessage.textContent = "3D model loaded successfully.";
@@ -877,6 +965,7 @@ btnGenerate3D.addEventListener("click", async () => {
     }
 
     if (data.job_id) {
+      stopFake3DProgress();
       chip3D.textContent = "Queued";
       preview3DContainer.innerHTML =
         `<span style="color:#9fb1c7">Job created: ${data.job_id}<br>Status: ${data.status || "queued"}<br>No preview yet.</span>`;
@@ -884,10 +973,12 @@ btnGenerate3D.addEventListener("click", async () => {
       return;
     }
 
+    stopFake3DProgress();
     chip3D.textContent = "Error";
     preview3DContainer.innerHTML = '<span style="color:#ff4d6d">No preview available.</span>';
     setStatus("3D Error", "No model URL or usable job result returned.", raw.slice(0, 200));
   } catch (err) {
+    stopFake3DProgress();
     chip3D.textContent = "Error";
     preview3DContainer.innerHTML = '<span style="color:#ff4d6d">3D backend network error.</span>';
     setStatus("3D Error", err.message || "3D backend network error.");
@@ -942,9 +1033,15 @@ async function ensureThree() {
 }
 
 async function render3DPreview(modelUrl) {
-
   clear3DPreview();
   debugLog("render3DPreview modelUrl:", modelUrl);
+
+  // Show placeholder while loading
+  const placeholder = document.getElementById("preview3DPlaceholder");
+  if (placeholder) {
+    placeholder.style.display = "block";
+    placeholder.textContent = "Loading 3D model...";
+  }
 
   const canvas = document.createElement("canvas");
   canvas.style.width = "100%";
@@ -954,8 +1051,8 @@ async function render3DPreview(modelUrl) {
 
   const { THREE, GLTFLoader, OBJLoader, OrbitControls } = await ensureThree();
 
-  const width = Math.max(400, preview3DContainer.clientWidth);
-  const height = Math.max(300, preview3DContainer.clientHeight);
+  let width = Math.max(400, preview3DContainer.clientWidth);
+  let height = Math.max(300, preview3DContainer.clientHeight);
 
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -968,31 +1065,43 @@ async function render3DPreview(modelUrl) {
   activeRenderer = renderer;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-  camera.position.set(0, 1.2, 4);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+  // Default lighting
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 0.7));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  dirLight.position.set(3, 6, 8);
+  dirLight.castShadow = true;
+  scene.add(dirLight);
 
-  const light1 = new THREE.DirectionalLight(0xffffff, 1.2);
-  light1.position.set(3, 4, 5);
-  scene.add(light1);
-
-  const light2 = new THREE.DirectionalLight(0xffffff, 0.8);
-  light2.position.set(-3, 2, -4);
-  scene.add(light2);
-
-  scene.add(new THREE.GridHelper(10, 10));
+  // Environment helpers
+  scene.add(new THREE.GridHelper(10, 10, 0x37536f, 0x243547));
   scene.add(new THREE.AxesHelper(2));
 
-  // --- OrbitControls Setup ---
+  // Camera
+  const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+  camera.position.set(0, 1.5, 3);
+
+  // OrbitControls
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
-  controls.screenSpacePanning = true;
-  controls.minDistance = 0.5;
-  controls.maxDistance = 50;
+  controls.enableRotate = true;
+  controls.enableZoom = true;
+  controls.enablePan = true;
+  controls.target.set(0, 0, 0);
+  controls.update();
 
-  // --- Tool Controls ---
+  // Responsive resize
+  function handleResize() {
+    width = Math.max(400, preview3DContainer.clientWidth);
+    height = Math.max(300, preview3DContainer.clientHeight);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height, false);
+  }
+  window.addEventListener("resize", handleResize);
+
+  // --- Tool Controls (unchanged) ---
   let currentTool = "orbit";
   function setTool(tool) {
     currentTool = tool;
@@ -1015,41 +1124,36 @@ async function render3DPreview(modelUrl) {
       controls.enableZoom = true;
     }
   }
-
-  // --- Button Events ---
   $("toolOrbit")?.addEventListener("click", () => setTool("orbit"));
   $("toolPan")?.addEventListener("click", () => setTool("pan"));
   $("toolZoom")?.addEventListener("click", () => setTool("zoom"));
   $("toolResetView")?.addEventListener("click", () => {
-    camera.position.set(0, 1.2, 4);
+    camera.position.set(0, 1.5, 3);
     controls.target.set(0, 0, 0);
     controls.update();
   });
+  setTool("orbit");
 
-  setTool("orbit"); // Default tool
-
+  // Model loading
   const ext = (modelUrl.split("?")[0].split(".").pop() || "").toLowerCase();
   debugLog("Preview extension:", ext);
 
   function mountModel(model) {
+    model.rotation.x = -Math.PI / 2;
     scene.add(model);
-
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
-
     debugLog("Model bounds:", { size, center });
-
     model.position.sub(center);
-
+    const boxAfter = new THREE.Box3().setFromObject(model);
+    model.position.y -= boxAfter.min.y;
     const maxDim = Math.max(size.x, size.y, size.z, 1);
     camera.position.set(0, maxDim * 0.8, maxDim * 2.2);
     camera.lookAt(0, 0, 0);
     controls.target.set(0, 0, 0);
     controls.update();
-
     let stopped = false;
-
     function animate() {
       if (stopped) return;
       requestAnimationFrame(animate);
@@ -1057,8 +1161,9 @@ async function render3DPreview(modelUrl) {
       renderer.render(scene, camera);
     }
     animate();
-
-    activeSceneStop = () => { stopped = true; };
+    activeSceneStop = () => { stopped = true; window.removeEventListener("resize", handleResize); };
+    // Hide placeholder after model loads
+    if (placeholder) placeholder.style.display = "none";
   }
 
   return new Promise((resolve, reject) => {
@@ -1075,12 +1180,12 @@ async function render3DPreview(modelUrl) {
         undefined,
         (err) => {
           debugLog("OBJ load failed:", err.message || String(err));
+          if (placeholder) placeholder.textContent = "Failed to load 3D model.";
           reject(err);
         }
       );
       return;
     }
-
     if (ext === "glb" || ext === "gltf") {
       debugLog("Using GLTFLoader");
       const loader = new GLTFLoader();
@@ -1094,17 +1199,16 @@ async function render3DPreview(modelUrl) {
         undefined,
         (err) => {
           debugLog("GLTF load failed:", err.message || String(err));
+          if (placeholder) placeholder.textContent = "Failed to load 3D model.";
           reject(err);
         }
       );
       return;
     }
-
+    if (placeholder) placeholder.textContent = `Unsupported preview format: .${ext}`;
     reject(new Error(`Unsupported preview format: .${ext}`));
   });
 }
-
-
 </script>
 </body>
 </html>
