@@ -1,20 +1,16 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 
-def load_env(env_path: str | None = None) -> None:
-    path = Path(env_path or ".env").resolve()
-    if not path.exists():
-        return
+def load_env():
+    project_root = Path(__file__).resolve().parents[1]
+    env_path = project_root / ".env"
 
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path, override=True)
+        print(f"[ENV] Loaded: {env_path}")
+    else:
+        print(f"[ENV] Missing: {env_path}")
 
-        key, value = line.split("=", 1)
-        key = key.strip()
-        value = value.strip().strip('"').strip("'")
-
-        if key and key not in os.environ:
-            os.environ[key] = value
+    return env_path

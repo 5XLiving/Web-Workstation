@@ -1,0 +1,11 @@
+[0;1;32m●[0m 5xliving-backend.service - 5xLiving FastAPI Backend
+     Loaded: loaded (]8;;file://workstation1/etc/systemd/system/5xliving-backend.service/etc/systemd/system/5xliving-backend.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Wed 2026-05-06 15:52:32 UTC; 111ms ago
+   Main PID: 314125 (uvicorn)
+      Tasks: 1 (limit: 2256)
+     Memory: 4.7M (peak: 4.9M)
+        CPU: 45ms
+     CGroup: /system.slice/5xliving-backend.service
+             └─[0;38;5;245m314125 /var/www/5xliving/Web-Workstation/.venv/bin/python3 /var/www/5xliving/Web-Workstation/.venv/bin/uvicorn backend.app:app --host 0.0.0.0 --port 5000[0m
+
+May 06 15:52:32 workstation1 systemd[1]: Started 5xliving-backend.service - 5xLiving FastAPI Backend.

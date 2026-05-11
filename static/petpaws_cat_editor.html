@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>PetPaws Low Poly Cat Editor</title>
+  <style>
+    body { margin:0; background:#223544; overflow:hidden; font-family:Arial; }
+    #ui {
+      position:absolute; inset:0; pointer-events:none;
+    }
+    .btn {
+      pointer-events:auto;
+      position:absolute;
+      background:#222;
+      color:white;
+      border-radius:10px;
+      padding:16px;
+      font-size:20px;
+      text-align:center;
+    }
+    #menu { top:25px; left:25px; }
+    #undo { top:25px; right:25px; }
+    #tools {
+      position:absolute;
+      bottom:0; left:0; right:0;
+      display:flex;
+      pointer-events:auto;
+      background:#222;
+    }
+    .tool {
+      flex:1;
+      color:white;
+      padding:14px 8px;
+      text-align:center;
+      border-right:1px solid #444;
+      font-size:16px;
+    }
+    .active { background:#00ff66; color:#000; }
+  </style>
+</head>
+<body>
+
+<div id="ui">
+  <div id="menu" class="btn">☰</div>
+  <div id="undo" class="btn">↶</div>
+
+  <div id="tools">
+    <div class="tool">Create face<br>by vertices</div>
+    <div class="tool">Merge</div>
+    <div class="tool">Target<br>merge</div>
+    <div class="tool">Connect</div>
+    <div class="tool active">●</div>
+    <div class="tool">Delete</div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x34495a);
+
+const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 1000);
+camera.position.set(4, 3, 7);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1, 0);
+controls.update();
+
+const light = new THREE.DirectionalLight(0xffffff, 2);
+light.position.set(5, 8, 5);
+scene.add(light);
+scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+
+const grid = new THREE.GridHelper(20, 20, 0x9aaab5, 0x607080);
+scene.add(grid);
+
+function lowPolyMat() {
+  return new THREE.MeshStandardMaterial({
+    color: 0xbfbfbf,
+    flatShading: true,
+    roughness: 0.7
+  });
+}
+
+function addPart(geo, pos, scale, rot = [0,0,0]) {
+  geo = geo.toNonIndexed();
+  const mesh = new THREE.Mesh(geo, lowPolyMat());
+  mesh.position.set(...pos);
+  mesh.scale.set(...scale);
+  mesh.rotation.set(...rot);
+  scene.add(mesh);
+
+  const wire = new THREE.WireframeGeometry(geo);
+  const line = new THREE.LineSegments(wire, new THREE.LineBasicMaterial({ color:0x111111 }));
+  line.position.copy(mesh.position);
+  line.scale.copy(mesh.scale);
+  line.rotation.copy(mesh.rotation);
+  scene.add(line);
+
+  return mesh;
+}
+
+// body
+addPart(new THREE.SphereGeometry(1.4, 8, 6), [0,1.15,0], [1.6,0.8,0.75]);
+
+// chest
+addPart(new THREE.SphereGeometry(0.8, 8, 6), [1.15,1.25,0], [0.85,1.05,0.75]);
+
+// head
+addPart(new THREE.SphereGeometry(0.72, 8, 6), [2.0,1.85,0], [1,0.9,0.85]);
+
+// snout
+addPart(new THREE.ConeGeometry(0.35, 0.65, 5), [2.62,1.73,0], [1,0.75,0.75], [0,0,Math.PI/2]);
+
+// ears
+addPart(new THREE.ConeGeometry(0.32, 0.9, 4), [1.65,2.55,-0.35], [1,1,1], [0.35,0,0.2]);
+addPart(new THREE.ConeGeometry(0.32, 0.9, 4), [1.65,2.55,0.35], [1,1,1], [-0.35,0,0.2]);
+
+// legs
+addPart(new THREE.CylinderGeometry(0.22,0.28,1.35,6), [-0.75,0.55,-0.45], [1,1,1]);
+addPart(new THREE.CylinderGeometry(0.22,0.28,1.35,6), [-0.75,0.55,0.45], [1,1,1]);
+addPart(new THREE.CylinderGeometry(0.22,0.28,1.45,6), [1.05,0.55,-0.42], [1,1,1]);
+addPart(new THREE.CylinderGeometry(0.22,0.28,1.45,6), [1.05,0.55,0.42], [1,1,1]);
+
+// paws
+addPart(new THREE.SphereGeometry(0.28, 6, 4), [-0.75,0.05,-0.45], [1.25,0.45,1]);
+addPart(new THREE.SphereGeometry(0.28, 6, 4), [-0.75,0.05,0.45], [1.25,0.45,1]);
+addPart(new THREE.SphereGeometry(0.28, 6, 4), [1.05,0.05,-0.42], [1.25,0.45,1]);
+addPart(new THREE.SphereGeometry(0.28, 6, 4), [1.05,0.05,0.42], [1.25,0.45,1]);
+
+// tail
+addPart(new THREE.CylinderGeometry(0.13,0.16,1.8,6), [-1.9,1.25,0], [1,1,1], [0,0,Math.PI/2]);
+
+// eye
+const eye = new THREE.Mesh(
+  new THREE.SphereGeometry(0.06, 8, 8),
+  new THREE.MeshBasicMaterial({ color:0x000000 })
+);
+eye.position.set(2.45,1.95,-0.28);
+scene.add(eye);
+
+// whiskers
+for (let i=-1;i<=1;i++) {
+  const mat = new THREE.LineBasicMaterial({ color:0x000000 });
+  const pts = [
+    new THREE.Vector3(2.55,1.78,0.22),
+    new THREE.Vector3(3.1,1.78 + i*0.08,0.42)
+  ];
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat));
+}
+
+// green selected vertex cube
+const cube = new THREE.Mesh(
+  new THREE.BoxGeometry(0.18,0.18,0.18),
+  new THREE.MeshBasicMaterial({ color:0x00ff55 })
+);
+cube.position.set(1.05,0.02,-0.42);
+scene.add(cube);
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+
+</body>
+</html>

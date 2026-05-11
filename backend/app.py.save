@@ -7,6 +7,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+
 
 from backend.routes.segment_routes import router as segment_router
 from backend.routes.model_routes import router as model_router
@@ -18,15 +20,6 @@ PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))
 
 APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
 APP_PORT = int(os.getenv("APP_PORT", "5000"))
-
-FRONTEND_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, "frontend"))
-OUTPUTS_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, "storage", "outputs"))
-STATIC_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, "static"))
-
-os.makedirs(FRONTEND_DIR, exist_ok=True)
-os.makedirs(OUTPUTS_DIR, exist_ok=True)
-os.makedirs(STATIC_DIR, exist_ok=True)
-
 
 app = FastAPI(
     title="5xLiving 3D Workstation Backend",
@@ -65,22 +58,13 @@ app.include_router(model_router, prefix="/api/model", tags=["model"])
 app.include_router(meta3d_router, prefix="/api/meta3d", tags=["meta3d"])
 
 
+outputs_dir = os.path.abspath(os.path.join(PROJECT_ROOT, "storage", "outputs"))
+os.makedirs(outputs_dir, exist_ok=True)
+
 app.mount(
     "/outputs",
-    StaticFiles(directory=OUTPUTS_DIR),
+    StaticFiles(directory=outputs_dir),
     name="outputs",
-)
-
-app.mount(
-    "/static",
-    StaticFiles(directory=STATIC_DIR),
-    name="static",
-)
-
-app.mount(
-    "/assets",
-    StaticFiles(directory=os.path.join(FRONTEND_DIR, "assets")),
-    name="frontend_assets",
 )
 
 
@@ -93,9 +77,10 @@ def _serve_frontend_file(filename: str):
     if normalized.startswith("..") or os.path.isabs(normalized):
         raise HTTPException(status_code=400, detail="Invalid filename")
 
-    frontend_path = os.path.abspath(os.path.join(FRONTEND_DIR, normalized))
+    frontend_base = os.path.abspath(os.path.join(PROJECT_ROOT, "frontend"))
+    frontend_path = os.path.abspath(os.path.join(frontend_base, normalized))
 
-    if not frontend_path.startswith(FRONTEND_DIR):
+    if not frontend_path.startswith(frontend_base):
         raise HTTPException(status_code=400, detail="Invalid frontend path")
 
     if os.path.exists(frontend_path):
@@ -116,27 +101,7 @@ def serve_5xliving_3d_workstation():
 
 @app.get("/xyz_modular_mask_frontend.html")
 def serve_xyz_modular_mask_frontend():
-    return _serve_frontend_file("xyz_modular_mask_frontend.html")
-
-
-@app.get("/mask_frontend_backup.html")
-def serve_mask_frontend_backup():
-    return _serve_frontend_file("mask_frontend_backup.html")
-
-
-@app.get("/mask_frontend_v2_backup.html")
-def serve_mask_frontend_v2_backup():
-    return _serve_frontend_file("mask_frontend_v2_backup.html")
-
-
-@app.get("/procedural_mech_live.html")
-def serve_procedural_mech_live():
-    return _serve_frontend_file("procedural_mech_live.html")
-
-
-@app.get("/xyz_frontend_mask_shell.html")
-def serve_xyz_frontend_mask_shell():
-    return _serve_frontend_file("xyz_frontend_mask_shell.html")
+    return _serve_frontend_file("5xLiving_3D_Workstation.html")
 
 
 @app.get("/xyz_troubleshoot_logbook.html")
@@ -161,9 +126,7 @@ def which_app():
         "marker": "5xliving-3d-workstation-backend",
         "base_dir": BASE_DIR,
         "project_root": PROJECT_ROOT,
-        "frontend_dir": FRONTEND_DIR,
-        "outputs_dir": OUTPUTS_DIR,
-        "static_dir": STATIC_DIR,
+        "outputs_dir": outputs_dir,
         "host": APP_HOST,
         "port": APP_PORT,
         "engine": os.getenv("IMAGE3D_ENGINE", "meta3d"),
