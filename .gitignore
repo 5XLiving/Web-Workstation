@@ -1,29 +1,43 @@
-# OS
-Thumbs.db
-.DS_Store
-
-# Editors
-.vscode/
-.idea/
-
-# Logs
-*.log
-
 # Python
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
 .venv/
-venv/
+env/
 
-# Node
-node_modules/
-dist/
-build/
+# VSCode
+.vscode/
 
-# Unity
-Library/
-Temp/
-Obj/
-Build/
-Builds/
-Logs/
-UserSettings/
+# ENV
+.env
+backend/.env
+
+# Runtime storage
+backend/storage/
+output/
+outputs/
+storage/
+
+# AI generated
+*.glb
+*.obj
+*.ply
+*.stl
+*.fbx
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.mp4
+*.json
+
+# Debug
+*_debug/
+logs/
+*.log
+
+# AI repos
+InstantMesh/
+TripoSR/
+meta-3d/
