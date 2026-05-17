@@ -41,3 +41,21 @@ logs/
 InstantMesh/
 TripoSR/
 meta-3d/
+
+# Python / AI envs
+.venv/
+venv/
+*/venv/
+*/.venv/
+__pycache__/
+*.pyc
+
+# Big AI repos / generated files
+InstantMesh/
+meta-3d/
+Hunyuan3D-2/
+triposr/
+storage/outputs/
+storage/temp/
+storage/uploads/
+storage/masks/
