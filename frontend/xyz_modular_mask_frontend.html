@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>XYZ Modular Mask Frontend</title>
+  <title>3d Model Maker</title>
   <link rel="icon" href="data:,">
   <style>
     :root{
@@ -11,16 +11,29 @@
       --text:#eef4ff; --muted:#9fb1c7; --mint:#94f3de; --mint2:#d8fff5; --danger:#ff4d6d; --danger2:rgba(255,77,109,.34);
       --good:#90f0cf; --warn:#ffd37a; --accent:#7fb7ff;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; color:var(--text); font-family:Inter,Arial,sans-serif;
-      background:
-        radial-gradient(circle at 10% 10%, rgba(95,122,255,.14), transparent 24%),
-        radial-gradient(circle at 88% 12%, rgba(85,220,196,.10), transparent 22%),
-        linear-gradient(180deg,#030814,#071221 54%,#0a1728);
-    }
-    .app{min-height:100vh; display:grid; grid-template-rows:auto 1fr; gap:12px; padding:12px}
+*{box-sizing:border-box}
+html,body{height:100%}
+
+body{
+  margin:0;
+  color:var(--text);
+  font-family:Inter,Arial,sans-serif;
+  overflow:auto;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(95,122,255,.14), transparent 24%),
+    radial-gradient(circle at 88% 12%, rgba(85,220,196,.10), transparent 22%),
+    linear-gradient(180deg,#030814,#071221 54%,#0a1728);
+}
+
+.app{
+  min-height:100vh;
+  min-width:1220px;
+  display:grid;
+  grid-template-rows:auto 1fr;
+  gap:12px;
+  padding:12px;
+}
+
     .glass{
       border:1px solid var(--line);
       background:
@@ -30,18 +43,18 @@
       backdrop-filter:blur(16px) saturate(135%);
       border-radius:24px;
     }
-    .topbar{padding:16px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
-    .brand strong{display:block; font-size:28px; font-weight:800}
+    .topbar{padding:10px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
+    .brand strong{display:block; font-size:24px; font-weight:800}
     .brand span,.muted{color:var(--muted)}
     .brand span{font-size:12px; letter-spacing:.16em; text-transform:uppercase}
-    .layout{
-      min-height:0;
-      height:calc(100vh - 110px);
-      display:grid;
-      grid-template-columns:340px minmax(520px,1fr) 320px;
-      gap:12px;
-      align-items:stretch;
-    }
+.layout{
+  min-height:0;
+  height:calc(100vh - 88px);
+  display:grid;
+  grid-template-columns:360px minmax(520px,1fr) 320px;
+  gap:12px;
+  align-items:stretch;
+}
     .panel,
     .desktop-center,
     .desktop-right{
@@ -49,12 +62,60 @@
       height:100%;
       overflow:hidden;
     }
-    .panel .body,
-    .desktop-center .body,
+
+.panel .body{
+  height:100%;
+  overflow:auto;
+  display:block;
+}
+
+.panel .card{
+  margin-bottom:12px;
+}
+
+#imagePreviewSection{
+  min-height:520px;
+}
+
+#imagePreviewSection .canvas-shell{
+  height:460px;
+  min-height:460px;
+}
+
+#uploadSection{
+  flex:0 0 auto;
+}
+
+#imagePreviewSection{
+  display:flex;
+  flex-direction:column;
+  min-height:320px;
+}
+
+#imagePreviewSection .canvas-shell{
+  flex:1;
+  min-height:280px;
+  height:auto;
+}
+
+#maskControlSection,
+#generateSection{
+  flex:0 0 auto;
+}
+
+    .desktop-center .body{
+      height:100%;
+      overflow:hidden;
+    }
+
     .desktop-right .body{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
       height:100%;
       overflow:auto;
     }
+
     .desktop-center.glass,
     .desktop-right.glass{
       border:1px solid var(--line);
@@ -103,7 +164,17 @@
     .workspace{min-height:0; display:grid; grid-template-rows:auto 1fr auto; overflow:hidden}
     .workspace-head{padding:16px 18px 0; display:grid; gap:12px}
     .note{padding:12px 14px; border-radius:18px; border:1px solid var(--line); background:rgba(6,12,22,.74); display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap}
-    .canvas-shell{position:relative; min-height:420px; margin:0 16px; border-radius:24px; overflow:hidden; border:1px solid var(--line); background:#040a14; touch-action:none}
+.canvas-shell{
+  position:relative;
+  height:60vh;
+  min-height:600px;
+  margin:0 16px;
+  border-radius:24px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  background:#040a14;
+  touch-action:none;
+}
     .checker{
       position:absolute; inset:0;
       background-image:
@@ -128,14 +199,33 @@
 
     /* IMPORTANT: image preview and mask editing use the SAME main viewport.
        The old separate mini preview card is hidden to avoid duplicate/ugly mobile layout. */
-    @media (max-width:1080px){
-      .layout{grid-template-columns:1fr}
-      .canvas-shell{min-height:50vh}
-    }
+@media (max-width:1080px){
+  .layout{
+    grid-template-columns:1fr;
+    height:auto;
+  }
 
-    #preview3DContainer{
+  .app{
+    min-width:0;
+  }
+
+  .panel,
+  .desktop-center,
+  .desktop-right{
+    height:auto;
+    overflow:visible;
+  }
+
+  .canvas-shell{
+    height:55vh;
+    min-height:360px;
+  }
+}
+
+#preview3DContainer{
   width:100%;
-  height:800px;
+  height:calc(100vh - 190px);
+  min-height:360px;
   margin:0;
   background:
     radial-gradient(circle at 50% 35%, rgba(127,183,255,.12), transparent 38%),
@@ -149,6 +239,7 @@
 }
 
 #statusSection{
+  flex:0 0 auto;
   grid-template-columns:auto 1fr;
   align-items:center;
 }
@@ -162,8 +253,13 @@
 }
 
 #debugBox{
-  width:100%;
-  margin:0!important;
+  min-height:260px!important;
+  max-height:420px!important;
+  overflow:auto;
+}
+
+.workspace-foot{
+  flex:0 0 auto;
 }
 
 .preview-head{
@@ -198,7 +294,14 @@
 
     /* PHONE MODE: turn the page into one clean vertical workflow */
     @media (max-width:640px){
-      .app{padding:10px; gap:10px}
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-rows:auto 1fr;
+      gap:12px;
+      padding:12px;
+    }
+
       .topbar{padding:14px}
       .brand strong{font-size:22px; line-height:1.15}
       .brand span{font-size:10px; letter-spacing:.08em}
@@ -241,119 +344,135 @@
   </header>
 
   <main class="layout">
-    <aside class="panel glass">
-      <div class="head"><strong>Controls</strong><span class="muted">Modular mask editing for 3D pipeline.</span></div>
-      <div class="body">
-        <!-- UPLOAD SECTION -->
-        <section class="card" id="uploadSection">
-          <h3>1. Upload Photo</h3>
-          <div class="drop">
-            <input type="file" id="uploadFile" accept="image/*" />
-            <div class="mini">Use a clear subject photo for best results.</div>
-          </div>
-        </section>
+  <aside class="panel glass">
+    <div class="head">
+      <strong>Controls</strong>
+      <span class="muted">Modular mask editing for 3D pipeline.</span>
+    </div>
 
-        <!-- IMAGE PREVIEW + MASK EDITING SECTION -->
-        <section class="card" id="imagePreviewSection">
-          <h3>2. Image Preview / Mask Editing</h3>
-          <div class="canvas-shell" id="canvasShell">
-            <div class="checker"></div>
-            <canvas id="imageCanvas"></canvas>
-            <canvas id="maskCanvas"></canvas>
-            <div class="overlay-msg">
-              <div class="callout">
-                <strong style="display:block;color:var(--mint2);font-size:13px;letter-spacing:.04em;text-transform:uppercase">
-                  Current Stage
-                </strong>
-                <span id="selectionMessage" class="muted">
-                  Upload one image. Then press Auto Detect.
-                </span>
-              </div>
-              <div class="pillbar" style="pointer-events:none; justify-content:flex-end">
-                <div class="pill">Brush <strong id="pillBrush">28</strong></div>
-                <div class="pill">Selection <strong id="pillSelection">None</strong></div>
-              </div>
+    <div class="body">
+      <section class="card" id="uploadSection">
+        <h3>1. Upload Photo</h3>
+        <div class="drop">
+          <input type="file" id="uploadFile" accept="image/*" />
+          <div class="mini">Use a clear subject photo for best results.</div>
+        </div>
+      </section>
+
+      <section class="card" id="imagePreviewSection">
+        <h3>2. Image Preview / Mask Editing</h3>
+        <div class="canvas-shell" id="canvasShell">
+          <div class="checker"></div>
+          <canvas id="imageCanvas"></canvas>
+          <canvas id="maskCanvas"></canvas>
+
+          <div class="overlay-msg">
+            <div class="callout">
+              <strong style="display:block;color:var(--mint2);font-size:13px;letter-spacing:.04em;text-transform:uppercase">
+                Current Stage
+              </strong>
+              <span id="selectionMessage" class="muted">
+                Upload one image. Then press Auto Detect.
+              </span>
             </div>
-          </div>
-        </section>
-      </div>
-    </aside>
-    <section class="desktop-center glass">
-      <div class="body">
-        <section class="card" id="preview3DSection">
-          <div class="preview-head">
-            <h3>5. 3D Preview</h3>
-            <div class="toolbar3d">
-              <button class="tool3d active" id="toolOrbit">Orbit</button>
-              <button class="tool3d" id="toolPan">Pan</button>
-              <button class="tool3d" id="toolZoom">Zoom</button>
-              <button class="tool3d" id="toolResetView">Reset</button>
+
+            <div class="pillbar" style="pointer-events:none; justify-content:flex-end">
+              <div class="pill">Brush <strong id="pillBrush">28</strong></div>
+              <div class="pill">Selection <strong id="pillSelection">None</strong></div>
             </div>
-          </div>
-          <div id="preview3DContainer">
-            <span id="preview3DPlaceholder">3D Preview will appear here after Generate 3D</span>
-          </div>
-        </section>
-      </div>
-    </section>
-    <aside class="desktop-right glass">
-      <div class="body">
-        <section class="card" id="maskControlSection">
-          <h3>3. Auto Detect / Refine Mask</h3>
-          <div class="row">
-            <button id="btnAutoDetect" class="btn btn-primary" disabled>Auto Detect Focus</button>
-            <button id="btnResetMask" class="btn btn-quiet" disabled>Reset Mask</button>
-          </div>
-          <div class="row3">
-            <button id="btnAdd" class="btn" disabled>Add +</button>
-            <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
-            <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
-          </div>
-          <div class="row">
-            <div>
-              <label class="mini" for="brushSize">Brush Size</label>
-              <input id="brushSize" type="range" min="6" max="120" value="28" />
-            </div>
-            <div>
-              <label class="mini" for="overlayOpacity">Red Overlay</label>
-              <input id="overlayOpacity" type="range" min="10" max="90" value="60" />
-            </div>
-          </div>
-          <div class="mini">Paint on the image. Red = selected object.</div>
-          <div class="mini">Calls backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/segment</span>.</div>
-        </section>
-        <section class="card" id="generateSection">
-          <h3>4. Confirm & Generate</h3>
-          <div class="row">
-            <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
-            <button id="btnGenerate3D" class="btn btn-primary" disabled>Generate 3D</button>
-          </div>
-          <div class="mini">Sends cutout to backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/model/generate-3d</span>.</div>
-          <label class="mini" for="apiBase">API Base</label>
-          <input id="apiBase" type="text" value="" />
-        </section>
-        <section class="card" id="statusSection">
-          <h3>6. Status</h3>
-          <div id="statusBadge" class="status idle">Idle</div>
-          <div id="statusMessage" class="muted">Upload a photo to begin.</div>
-          <div id="lastResult" class="mini">No result yet.</div>
-        </section>
-        <div id="debugBox" style="margin:12px 0 16px 0; padding:12px; min-height:120px; max-height:220px; overflow:auto; background:#0b1220; border:1px solid rgba(255,255,255,.08); border-radius:14px; color:#cfe7ff; font:12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre-wrap;">[debug] ready</div>
-        <div class="workspace-foot">
-          <div class="chips">
-            <div class="chip">Image<strong id="chipImage">None</strong></div>
-            <div class="chip">Mask<strong id="chipMask">Empty</strong></div>
-            <div class="chip">Confirm<strong id="chipConfirm">No</strong></div>
-          </div>
-          <div class="chips">
-            <div class="chip">API<strong id="chipApi">Idle</strong></div>
-            <div class="chip">3D<strong id="chip3D">Not started</strong></div>
           </div>
         </div>
+      </section>
+
+      <section class="card" id="maskControlSection">
+        <h3>3. Auto Detect / Refine Mask</h3>
+        <div class="row">
+          <button id="btnAutoDetect" class="btn btn-primary" disabled>Auto Detect Focus</button>
+          <button id="btnResetMask" class="btn btn-quiet" disabled>Reset Mask</button>
+        </div>
+
+        <div class="row3">
+          <button id="btnAdd" class="btn" disabled>Add +</button>
+          <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
+          <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
+        </div>
+
+        <div class="row">
+          <div>
+            <label class="mini" for="brushSize">Brush Size</label>
+            <input id="brushSize" type="range" min="6" max="120" value="28" />
+          </div>
+          <div>
+            <label class="mini" for="overlayOpacity">Red Overlay</label>
+            <input id="overlayOpacity" type="range" min="10" max="90" value="60" />
+          </div>
+        </div>
+
+        <div class="mini">Paint on the image. Red = selected object.</div>
+        <div class="mini">Calls backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/segment</span>.</div>
+      </section>
+
+      <section class="card" id="generateSection">
+        <h3>4. Confirm & Generate</h3>
+        <div class="row">
+          <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
+          <button id="btnGenerate3D" class="btn btn-primary" disabled>Generate 3D</button>
+        </div>
+
+        <div class="mini">Sends image to humanoid mesh-skin backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/universal-cage/generate</span>.</div>
+        <label class="mini" for="apiBase">API Base</label>
+        <input id="apiBase" type="text" value="" />
+      </section>
+    </div>
+  </aside>
+
+  <!-- CENTER PANEL -->
+  <section class="desktop-center glass">
+    <div class="body">
+      <section class="card" id="preview3DSection">
+        <div class="preview-head">
+          <h3>5. 3D Preview</h3>
+          <div class="toolbar3d">
+            <button class="tool3d active" id="toolOrbit">Orbit</button>
+            <button class="tool3d" id="toolPan">Pan</button>
+            <button class="tool3d" id="toolZoom">Zoom</button>
+            <button class="tool3d" id="toolResetView">Reset</button>
+          </div>
+        </div>
+
+        <div id="preview3DContainer">
+          <span id="preview3DPlaceholder">3D Preview will appear here after Generate 3D</span>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- RIGHT: Status -->
+  <aside class="desktop-right glass">
+    <div class="body">
+      <section class="card" id="statusSection">
+        <h3>6. Status</h3>
+        <div id="statusBadge" class="status idle">Idle</div>
+        <div id="statusMessage" class="muted">Upload a photo to begin.</div>
+        <div id="lastResult" class="mini">No result yet.</div>
+      </section>
+
+      <div id="debugBox" style="margin:12px 0 16px 0; padding:12px; min-height:120px; max-height:220px; overflow:auto; background:#0b1220; border:1px solid rgba(255,255,255,.08); border-radius:14px; color:#cfe7ff; font:12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre-wrap;">[debug] ready</div>
+
+      <div class="workspace-foot">
+        <div class="chips">
+          <div class="chip">Image<strong id="chipImage">None</strong></div>
+          <div class="chip">Mask<strong id="chipMask">Empty</strong></div>
+          <div class="chip">Confirm<strong id="chipConfirm">No</strong></div>
+        </div>
+        <div class="chips">
+          <div class="chip">API<strong id="chipApi">Idle</strong></div>
+          <div class="chip">3D<strong id="chip3D">Not started</strong></div>
+        </div>
       </div>
-    </aside>
-  </main>
-</div>
+    </div>
+  </aside>
+</main>
 
 <script>
 const $ = (id) => document.getElementById(id);
@@ -909,79 +1028,261 @@ function createMirrorImage(blob) {
   });
 }
 
+
+async function runDebugCageAuto() {
+  if (!currentFile) {
+    throw new Error("No image file loaded.");
+  }
+
+  const apiBase = apiBaseInput.value.replace(/\/+$/, "");
+  const fd = new FormData();
+  fd.append("image", currentFile);
+
+  const res = await fetch(`${apiBase}/api/universal-cage/debug-detect`, {
+    method: "POST",
+    body: fd
+  });
+
+  let data;
+  try {
+    data = await res.json();
+  } catch (err) {
+    throw new Error("Invalid JSON from /api/universal-cage/debug-detect");
+  }
+
+  debugLog("AUTO DEBUG CAGE RESPONSE:", data);
+
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.error || data.detail || "Auto debug cage failed");
+  }
+
+  return data;
+}
+
+function renderMultiviewPanel(cageData) {
+  const views =
+    cageData?.multiview?.views ||
+    cageData?.views ||
+    null;
+
+  if (!views) {
+    return false;
+  }
+
+  window.lastMultiviewViews = views;
+
+  saveMultiviewToBackend(views)
+  .then((saved) => {
+    window.lastMultiviewJobId = saved.job_id;
+    debugLog("MULTIVIEW SAVED JOB:", saved.job_id);
+    selectionMessage.textContent =
+      `AI multiview saved. Job ID: ${saved.job_id}. Ready for cage / texture bake.`;
+  })
+  .catch((err) => {
+    debugLog("SAVE MULTIVIEW ERROR:", err);
+    selectionMessage.textContent =
+      "AI multiview generated but save failed.";
+  });
+  
+  saveMultiviewToBackend(views).catch(err => {
+    debugLog("SAVE MULTIVIEW ERROR:", err);
+  });
+
+  preview3DContainer.innerHTML = `
+    <div style="
+      width:100%;
+      height:100%;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      color:#9fb1c7;
+      line-height:1.6;
+      padding:24px;
+    ">
+      <div>
+        <div style="font-size:42px;margin-bottom:10px">✅</div>
+        <strong style="color:#d8fff5;font-size:18px">
+          AI Multiview Generated
+        </strong><br>
+        Front / Side / Back / Top / Bottom saved for backend texture bake.<br>
+        Next step: cage build → shell mount → texture baking.
+      </div>
+    </div>
+  `;
+
+  setStatus(
+    "3D Ready",
+    "Multiview generated successfully.",
+    "5 AI views saved for backend texture baking."
+  );
+
+  selectionMessage.textContent =
+    "AI multiview generated. Backend can now use 5 views for texture baking.";
+
+  return true;
+}
+
+function renderCagePreviewPanel(cageData) {
+  const previewUrl =
+    cageData.iso_texture_preview_url ||
+    cageData.cage_preview_url ||
+    null;
+
+  if (!previewUrl) {
+    return false;
+  }
+
+  const imgUrl = makeAbsoluteUrl(previewUrl);
+
+  preview3DContainer.innerHTML = `
+    <img src="${imgUrl}?t=${Date.now()}"
+      style="
+        max-width:100%;
+        max-height:100%;
+        object-fit:contain;
+        border-radius:14px;
+      " />
+  `;
+
+  setStatus(
+    "3D Ready",
+    "Iso cage generated successfully.",
+    imgUrl
+  );
+
+  selectionMessage.textContent =
+    "Iso cage generated. Skeleton mount next.";
+
+  return true;
+}
+
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      resolve(result.split(",")[1]);
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function runWorkerMultiview() {
+  if (!currentFile) {
+    throw new Error("No image file loaded.");
+  }
+
+  const imageBase64 = await fileToBase64(currentFile);
+
+  const res = await fetch("https://throbbing-lab-1440.hello5xliving.workers.dev/multiview", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      image_base64: imageBase64,
+      mime_type: "image/png"
+    })
+  });
+
+  const data = await res.json();
+
+  debugLog("WORKER MULTIVIEW RESPONSE:", data);
+
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.error || data.msg || "Worker multiview failed");
+  }
+
+  return data;
+}
+
+async function saveMultiviewToBackend(views) {
+  const apiBase = apiBaseInput.value.replace(/\/+$/, "");
+
+  const res = await fetch(`${apiBase}/api/multiview/save`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ views })
+  });
+
+  const data = await res.json();
+  debugLog("SAVE MULTIVIEW RESPONSE:", data);
+
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.detail?.error || data.error || "Save multiview failed");
+  }
+
+  window.lastMultiviewJobId = data.job_id;
+  return data;
+}
+
 btnGenerate3D.addEventListener("click", async () => {
-  if (!lastCutoutBlob || !currentImageId) {
-    setStatus("Error", "Cutout not ready.");
+  if (!currentFile) {
+    setStatus("Error", "No image file loaded.");
     return;
   }
 
-  chip3D.textContent = "Uploading";
-  setStatus("Loading", "Uploading cutout to 3D backend...", "Waiting for /api/model/generate-3d");
-  selectionMessage.textContent = "Backend is processing the 3D generation request...";
-  startFake3DProgress();
-  const fd = new FormData();
-  fd.append("image_id", currentImageId);
-  const resizedCutoutBlob = await resizeBlobImage(lastCutoutBlob, 512);
-  const mirrorBlob = await createMirrorImage(resizedCutoutBlob);
-
-  fd.append("cutout_png", resizedCutoutBlob, "cutout.png");
-  fd.append("cutout_mirror", mirrorBlob, "cutout_mirror.png");
-
-  const apiBase = apiBaseInput.value.replace(/\/+$/, "");
-
   try {
-    const res = await fetch(`${apiBase}/api/model/generate-3d`, {
-      method: "POST",
-      body: fd
-    });
+    chip3D.textContent = "Detecting";
+    chipApi.textContent = "Debug Cage";
+    pillBackend.textContent = "Debug";
 
-    const raw = await res.text();
-    let data;
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      throw new Error(`Bad JSON from /api/model/generate-3d: ${raw.slice(0, 200)}`);
-    }
-
-    if (!res.ok || data.ok === false) {
-      const msg = data.error || data.detail || data.message || `3D backend error (${res.status})`;
-      chip3D.textContent = "Error";
-      preview3DContainer.innerHTML = '<span style="color:#ff4d6d">3D backend error.</span>';
-      setStatus("3D Error", msg, raw.slice(0, 200));
-      return;
-    }
-
-    const modelUrl = makeAbsoluteUrl(
-      data.model_url || data.url || data.glb_url || data.gltf_url || data.preview_url || null
+    setStatus(
+      "Loading",
+      "Generating multiview cage...",
+      "Calling /api/universal-cage/debug-detect"
     );
 
-    if (modelUrl) {
-      stopFake3DProgress();
-      chip3D.textContent = "Ready";
-      await render3DPreview(modelUrl);
-      selectionMessage.textContent = "3D model loaded successfully.";
-      setStatus("3D Ready", "3D model received.", modelUrl);
-      return;
-    }
+    selectionMessage.textContent =
+      "Creating multiview and baking iso cage...";
 
-    if (data.job_id) {
-      stopFake3DProgress();
-      chip3D.textContent = "Queued";
-      preview3DContainer.innerHTML =
-        `<span style="color:#9fb1c7">Job created: ${data.job_id}<br>Status: ${data.status || "queued"}<br>No preview yet.</span>`;
-      setStatus("Success", data.message || "3D job created.", `job_id: ${data.job_id} | status: ${data.status || "queued"}`);
-      return;
-    }
+    startFake3DProgress();
+
+    const cageData = await runWorkerMultiview();
 
     stopFake3DProgress();
-    chip3D.textContent = "Error";
-    preview3DContainer.innerHTML = '<span style="color:#ff4d6d">No preview available.</span>';
-    setStatus("3D Error", "No model URL or usable job result returned.", raw.slice(0, 200));
+
+    debugLog("AUTO CAGE:", cageData);
+
+    const showedMultiview = renderMultiviewPanel(cageData);
+    if (showedMultiview) {
+      chip3D.textContent = "Cage Ready";
+      chipApi.textContent = "Multiview";
+      pillBackend.textContent = "Multiview";
+      return;
+    }
+
+    const showedCage = renderCagePreviewPanel(cageData);
+    if (showedCage) {
+      chip3D.textContent = "Cage Ready";
+      chipApi.textContent = "Debug Cage";
+      pillBackend.textContent = "Debug";
+      return;
+    }
+
+    throw new Error("Backend returned no multiview or cage preview.");
+
   } catch (err) {
     stopFake3DProgress();
+
     chip3D.textContent = "Error";
-    preview3DContainer.innerHTML = '<span style="color:#ff4d6d">3D backend network error.</span>';
-    setStatus("3D Error", err.message || "3D backend network error.");
+    chipApi.textContent = "Error";
+    pillBackend.textContent = "Error";
+
+    setStatus(
+      "3D Error",
+      err.message || "Debug cage failed."
+    );
+
+    selectionMessage.textContent =
+      "Multiview generation failed.";
+
+    debugLog("MULTIVIEW ERROR:", err);
   }
 });
 
@@ -1032,21 +1333,139 @@ async function ensureThree() {
   };
 }
 
-async function render3DPreview(modelUrl) {
+// Render simple wireframe debug cages for an array of objects.
+// Each object should have `scale_3d` and `center_3d` as [x,y,z].
+async function renderDebugCages(objects) {
   clear3DPreview();
-  debugLog("render3DPreview modelUrl:", modelUrl);
 
-  // Show placeholder while loading
-  const placeholder = document.getElementById("preview3DPlaceholder");
-  if (placeholder) {
-    placeholder.style.display = "block";
-    placeholder.textContent = "Loading 3D model...";
-  }
+  const { THREE, OrbitControls } = await ensureThree();
 
   const canvas = document.createElement("canvas");
   canvas.style.width = "100%";
   canvas.style.height = "100%";
-  preview3DContainer.innerHTML = "";
+  canvas.style.display = "block";
+  preview3DContainer.appendChild(canvas);
+
+  let width = Math.max(400, preview3DContainer.clientWidth);
+  let height = Math.max(300, preview3DContainer.clientHeight);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(width, height, false);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x1a2230, 1);
+  activeRenderer = renderer;
+
+  const scene = new THREE.Scene();
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 0.7));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+  dirLight.position.set(3, 6, 8);
+  scene.add(dirLight);
+
+  scene.add(new THREE.GridHelper(10, 10, 0x37536f, 0x243547));
+  scene.add(new THREE.AxesHelper(2));
+
+  const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+  camera.position.set(0, 1.5, 3);
+
+  const controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.enableRotate = true;
+  controls.enableZoom = true;
+  controls.enablePan = true;
+
+  const group = new THREE.Group();
+
+  objects.forEach(obj => {
+    const [sx, sy, sz] = obj.scale_3d;
+    const [cx, cy, cz] = obj.center_3d;
+
+    const geo = new THREE.BoxGeometry(sx, sy, sz);
+    const wire = new THREE.WireframeGeometry(geo);
+    const cage = new THREE.LineSegments(
+      wire,
+      new THREE.LineBasicMaterial({ color: 0x94f3de })
+    );
+
+    cage.position.set(cx, cy, cz);
+    group.add(cage);
+  });
+
+  scene.add(group);
+
+  const box = new THREE.Box3().setFromObject(group);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  group.position.sub(center);
+
+  const maxDim = Math.max(size.x, size.y, size.z, 1);
+  camera.position.set(0, maxDim * 0.8, maxDim * 2.2);
+  camera.lookAt(0, 0, 0);
+  controls.target.set(0, 0, 0);
+  controls.update();
+
+  function handleResize() {
+    width = Math.max(400, preview3DContainer.clientWidth);
+    height = Math.max(300, preview3DContainer.clientHeight);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height, false);
+  }
+  window.addEventListener("resize", handleResize);
+
+  let stopped = false;
+  function animate() {
+    if (stopped) return;
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  activeSceneStop = () => {
+    stopped = true;
+    window.removeEventListener("resize", handleResize);
+  };
+}
+
+async function render3DPreview(modelUrl) {
+  clear3DPreview();
+  debugLog("render3DPreview modelUrl:", modelUrl);
+
+  preview3DContainer.style.position = "relative";
+  preview3DContainer.innerHTML = `
+    <div id="modelLoadingOverlay" style="
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:50;
+      background:rgba(3,8,20,.88);
+      color:#d8fff5;
+      text-align:center;
+      font-weight:800;
+      line-height:1.6;
+      border-radius:18px;
+    ">
+      <div style="width:min(420px,80%)">
+        <div style="font-size:34px;margin-bottom:10px">⬡</div>
+        <div>Loading 3D model…</div>
+        <div id="modelLoadText" style="color:#9fb1c7;font-size:13px;margin:8px 0 12px">
+          Downloading GLB and preparing preview.
+        </div>
+        <div style="height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden">
+          <div id="modelLoadBar" style="height:100%;width:8%;background:#94f3de;border-radius:999px;transition:width .25s"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const canvas = document.createElement("canvas");
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  canvas.style.display = "block";
   preview3DContainer.appendChild(canvas);
 
   const { THREE, GLTFLoader, OBJLoader, OrbitControls } = await ensureThree();
@@ -1065,23 +1484,18 @@ async function render3DPreview(modelUrl) {
   activeRenderer = renderer;
 
   const scene = new THREE.Scene();
-
-  // Default lighting
   scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 0.7));
+
   const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
   dirLight.position.set(3, 6, 8);
-  dirLight.castShadow = true;
   scene.add(dirLight);
 
-  // Environment helpers
   scene.add(new THREE.GridHelper(10, 10, 0x37536f, 0x243547));
   scene.add(new THREE.AxesHelper(2));
 
-  // Camera
   const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
   camera.position.set(0, 1.5, 3);
 
-  // OrbitControls
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
@@ -1091,7 +1505,6 @@ async function render3DPreview(modelUrl) {
   controls.target.set(0, 0, 0);
   controls.update();
 
-  // Responsive resize
   function handleResize() {
     width = Math.max(400, preview3DContainer.clientWidth);
     height = Math.max(300, preview3DContainer.clientHeight);
@@ -1101,29 +1514,30 @@ async function render3DPreview(modelUrl) {
   }
   window.addEventListener("resize", handleResize);
 
-  // --- Tool Controls (unchanged) ---
+  function updateModelLoading(pct, msg) {
+    const bar = document.getElementById("modelLoadBar");
+    const text = document.getElementById("modelLoadText");
+    if (bar) bar.style.width = `${Math.max(8, Math.min(98, pct))}%`;
+    if (text && msg) text.textContent = msg;
+  }
+
+  function hideModelLoading() {
+    const el = document.getElementById("modelLoadingOverlay");
+    if (el) el.remove();
+  }
+
   let currentTool = "orbit";
   function setTool(tool) {
     currentTool = tool;
     document.querySelectorAll(".tool3d").forEach(btn => btn.classList.remove("active"));
     const btn = document.getElementById("tool" + tool.charAt(0).toUpperCase() + tool.slice(1));
     if (btn) btn.classList.add("active");
-    if (tool === "orbit") {
-      controls.enableRotate = true;
-      controls.enablePan = true;
-      controls.enableZoom = true;
-    }
-    if (tool === "pan") {
-      controls.enableRotate = false;
-      controls.enablePan = true;
-      controls.enableZoom = false;
-    }
-    if (tool === "zoom") {
-      controls.enableRotate = false;
-      controls.enablePan = false;
-      controls.enableZoom = true;
-    }
+
+    controls.enableRotate = tool === "orbit";
+    controls.enablePan = tool === "orbit" || tool === "pan";
+    controls.enableZoom = tool === "orbit" || tool === "zoom";
   }
+
   $("toolOrbit")?.addEventListener("click", () => setTool("orbit"));
   $("toolPan")?.addEventListener("click", () => setTool("pan"));
   $("toolZoom")?.addEventListener("click", () => setTool("zoom"));
@@ -1134,25 +1548,42 @@ async function render3DPreview(modelUrl) {
   });
   setTool("orbit");
 
-  // Model loading
   const ext = (modelUrl.split("?")[0].split(".").pop() || "").toLowerCase();
   debugLog("Preview extension:", ext);
 
   function mountModel(model) {
-    model.rotation.x = -Math.PI / 2;
+    updateModelLoading(96, "Finalizing preview…");
+    model.rotation.set(0, 0, 0);
+
+    model.traverse((child) => {
+      if (child.isMesh && child.material) {
+        child.material.transparent = false;
+        child.material.opacity = 1.0;
+        child.material.side = THREE.DoubleSide;
+        child.material.needsUpdate = true;
+      }
+    });
+
     scene.add(model);
+
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
     debugLog("Model bounds:", { size, center });
+
     model.position.sub(center);
+
     const boxAfter = new THREE.Box3().setFromObject(model);
     model.position.y -= boxAfter.min.y;
+
     const maxDim = Math.max(size.x, size.y, size.z, 1);
     camera.position.set(0, maxDim * 0.8, maxDim * 2.2);
     camera.lookAt(0, 0, 0);
     controls.target.set(0, 0, 0);
     controls.update();
+
+    hideModelLoading();
+
     let stopped = false;
     function animate() {
       if (stopped) return;
@@ -1161,31 +1592,37 @@ async function render3DPreview(modelUrl) {
       renderer.render(scene, camera);
     }
     animate();
-    activeSceneStop = () => { stopped = true; window.removeEventListener("resize", handleResize); };
-    // Hide placeholder after model loads
-    if (placeholder) placeholder.style.display = "none";
+
+    activeSceneStop = () => {
+      stopped = true;
+      window.removeEventListener("resize", handleResize);
+    };
   }
 
   return new Promise((resolve, reject) => {
-    if (ext === "obj") {
-      debugLog("Using OBJLoader");
-      const loader = new OBJLoader();
-      loader.load(
-        modelUrl,
-        (obj) => {
-          debugLog("OBJ loaded successfully");
-          mountModel(obj);
-          resolve();
-        },
-        undefined,
-        (err) => {
-          debugLog("OBJ load failed:", err.message || String(err));
-          if (placeholder) placeholder.textContent = "Failed to load 3D model.";
-          reject(err);
-        }
-      );
-      return;
-    }
+    const onProgress = (xhr) => {
+      if (xhr && xhr.lengthComputable) {
+        const pct = Math.round((xhr.loaded / xhr.total) * 88) + 8;
+        updateModelLoading(pct, `Loading model… ${pct}%`);
+      } else {
+        updateModelLoading(45, "Loading model…");
+      }
+    };
+
+    const onError = (err) => {
+      debugLog("3D load failed:", err?.message || String(err));
+      const el = document.getElementById("modelLoadingOverlay");
+      if (el) {
+        el.innerHTML = `
+          <div style="color:#ff95a8;text-align:center;line-height:1.6">
+            <strong>Failed to load 3D model.</strong><br>
+            <span style="font-size:13px;color:#9fb1c7">Check GLB URL, file size, or backend output.</span>
+          </div>
+        `;
+      }
+      reject(err);
+    };
+
     if (ext === "glb" || ext === "gltf") {
       debugLog("Using GLTFLoader");
       const loader = new GLTFLoader();
@@ -1196,17 +1633,29 @@ async function render3DPreview(modelUrl) {
           mountModel(gltf.scene);
           resolve();
         },
-        undefined,
-        (err) => {
-          debugLog("GLTF load failed:", err.message || String(err));
-          if (placeholder) placeholder.textContent = "Failed to load 3D model.";
-          reject(err);
-        }
+        onProgress,
+        onError
       );
       return;
     }
-    if (placeholder) placeholder.textContent = `Unsupported preview format: .${ext}`;
-    reject(new Error(`Unsupported preview format: .${ext}`));
+
+    if (ext === "obj") {
+      debugLog("Using OBJLoader");
+      const loader = new OBJLoader();
+      loader.load(
+        modelUrl,
+        (obj) => {
+          debugLog("OBJ loaded successfully");
+          mountModel(obj);
+          resolve();
+        },
+        onProgress,
+        onError
+      );
+      return;
+    }
+
+    onError(new Error(`Unsupported preview format: .${ext}`));
   });
 }
 </script>
