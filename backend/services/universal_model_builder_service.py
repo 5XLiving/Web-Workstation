@@ -15,18 +15,27 @@ def make_material(name, color):
     )
 
 
-def apply_transform(mesh, part):
-    mesh.apply_scale(part.get("scale", [1, 1, 1]))
+def _to_vec3(value, default=None):
+    if default is None:
+        default = [0, 0, 0]
 
-    rotation = part.get("rotation", [0, 0, 0])
-    if isinstance(rotation, dict):
-        rotation = [
-            rotation.get("x", 0),
-            rotation.get("y", 0),
-            rotation.get("z", 0),
+    if isinstance(value, dict):
+        return [
+            float(value.get("x", default[0])),
+            float(value.get("y", default[1])),
+            float(value.get("z", default[2])),
         ]
 
-    rx, ry, rz = [math.radians(float(v)) for v in rotation]
+    if isinstance(value, (list, tuple)) and len(value) >= 3:
+        return [float(value[0]), float(value[1]), float(value[2])]
+
+    return default
+
+
+def apply_transform(mesh, part):
+    mesh.apply_scale(_to_vec3(part.get("scale"), [1, 1, 1]))
+
+    rx, ry, rz = [math.radians(v) for v in _to_vec3(part.get("rotation"), [0, 0, 0])]
 
     if rx:
         mesh.apply_transform(trimesh.transformations.rotation_matrix(rx, [1, 0, 0]))
@@ -35,50 +44,32 @@ def apply_transform(mesh, part):
     if rz:
         mesh.apply_transform(trimesh.transformations.rotation_matrix(rz, [0, 0, 1]))
 
-    position = part.get("position", [0, 0, 0])
-    if isinstance(position, dict):
-        position = [
-            position.get("x", 0),
-            position.get("y", 0),
-            position.get("z", 0),
-        ]
-
-    mesh.apply_translation(position)
+    mesh.apply_translation(_to_vec3(part.get("position"), [0, 0, 0]))
     return mesh
 
 
 def build_box(part):
-    mesh = trimesh.creation.box(extents=[1, 1, 1])
-    return apply_transform(mesh, part)
+    return apply_transform(trimesh.creation.box(extents=[1, 1, 1]), part)
 
 
 def build_sphere(part):
-    mesh = trimesh.creation.icosphere(subdivisions=2, radius=1.0)
-    return apply_transform(mesh, part)
+    return apply_transform(trimesh.creation.icosphere(subdivisions=2, radius=1.0), part)
 
 
 def build_cylinder(part):
-    mesh = trimesh.creation.cylinder(radius=0.5, height=1.0, sections=16)
-    return apply_transform(mesh, part)
+    return apply_transform(trimesh.creation.cylinder(radius=0.5, height=1.0, sections=16), part)
 
 
 def build_capsule(part):
-    mesh = trimesh.creation.capsule(radius=0.35, height=1.0, count=[12, 12])
-    return apply_transform(mesh, part)
+    return apply_transform(trimesh.creation.capsule(radius=0.35, height=1.0, count=[12, 12]), part)
 
 
 def build_flat_plate(part):
-    mesh = trimesh.creation.box(extents=[1, 0.08, 1])
-    return apply_transform(mesh, part)
-
-
-def build_armor_plate(part):
-    mesh = trimesh.creation.box(extents=[1, 0.12, 1])
-    return apply_transform(mesh, part)
+    return apply_transform(trimesh.creation.box(extents=[1, 0.08, 1]), part)
 
 
 def build_tapered_box(part):
-    sx, sy, sz = part.get("scale", [1, 1, 1])
+    sx, sy, sz = _to_vec3(part.get("scale"), [1, 1, 1])
     taper_top = float(part.get("taper_top", 0.65))
 
     bottom = np.array([
@@ -124,7 +115,7 @@ def build_shape(part):
     if shape == "flat_plate":
         return build_flat_plate(part)
     if shape == "armor_plate":
-        return build_armor_plate(part)
+        return build_flat_plate(part)
     if shape == "tapered_box":
         return build_tapered_box(part)
 
@@ -144,17 +135,17 @@ def build_universal_model(plan: Dict[str, Any], output_dir: str) -> Dict[str, An
     if not all_parts:
         return {
             "ok": False,
-            "error": "No parts/details found in universal model plan",
+            "error": "No parts/details found in plan",
             "model_glb": None,
+            "part_count": 0,
             "style": plan.get("style", "lowpoly_universal_builder_v2"),
-            "plan": plan,
         }
 
     for index, part in enumerate(all_parts):
         mesh = build_shape(part)
 
-        color = part.get("color", [0.6, 0.6, 0.6, 1])
         name = part.get("name", f"part_{index + 1}")
+        color = part.get("color", [0.6, 0.6, 0.6, 1])
 
         mesh.visual.material = make_material(name, color)
         scene.add_geometry(mesh, node_name=name)
@@ -165,8 +156,6 @@ def build_universal_model(plan: Dict[str, Any], output_dir: str) -> Dict[str, An
     return {
         "ok": True,
         "model_glb": str(model_path),
-        "model_url": f"{output_dir.name}/model.glb",
-        "style": plan.get("style", "lowpoly_universal_builder_v2"),
         "part_count": len(all_parts),
-        "plan": plan,
+        "style": plan.get("style", "lowpoly_universal_builder_v2"),
     }

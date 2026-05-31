@@ -48,7 +48,7 @@ def load_mask_polygon(image_path):
     if not merged.is_valid:
         merged = merged.buffer(0)
 
-    merged = merged.simplify(1.2, preserve_topology=True)
+    merged = merged.simplify(2.5, preserve_topology=True)
 
     if merged.is_empty or merged.area <= 0:
         raise RuntimeError("Silhouette polygon became empty after simplify")
@@ -107,13 +107,8 @@ def generate_modular_pet(image_path: str, output_dir: str):
 
     mesh = extrude_polygon(
         polygon,
-        height=1.8
+        height=0.8
     )
-
-    try:
-        mesh = mesh.smoothed()
-    except Exception as e:
-        print("[WARN] smooth skipped:", e)
 
     mesh = normalize_mesh(mesh, img_shape)
     mesh = safe_lowpoly_cleanup(mesh)

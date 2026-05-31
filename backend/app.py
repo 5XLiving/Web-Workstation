@@ -11,6 +11,20 @@ from fastapi.staticfiles import StaticFiles
 from backend.routes.segment_routes import router as segment_router
 from backend.routes.model_routes import router as model_router
 from backend.routes.meta3d_routes import router as meta3d_router
+from backend.routes import ai_scan_routes
+from backend.routes import build_form_3d_routes
+from backend.routes import world_fixture_routes
+from backend.routes.universal_asset_routes import router as universal_asset_router
+from backend.routes.auto_asset_routes import router as auto_asset_router
+from backend.routes.humanoid_mesh_routes import router as humanoid_mesh_router
+from backend.routes.final_mesh_routes import router as final_mesh_router
+from backend.routes import universal_cage_routes
+from backend.routes.universal_cage_debug_routes import router as universal_cage_debug_router
+from backend.routes.universal_multiview_routes import router as universal_multiview_router
+from backend.routes.universal_cage_diamond_grid_routes import router as universal_cage_diamond_grid_router
+from backend.routes.multiview_storage_routes import router as multiview_storage_router
+from backend.routes.diamond_texture_bake_routes import router as diamond_texture_bake_router
+from backend.routes.diamond_cage_glb_routes import router as diamond_cage_glb_router
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -21,11 +35,15 @@ APP_PORT = int(os.getenv("APP_PORT", "5000"))
 
 FRONTEND_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, "frontend"))
 OUTPUTS_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, "storage", "outputs"))
+UPLOADS_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, "storage", "uploads"))
 STATIC_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, "static"))
+FRONTEND_ASSETS_DIR = os.path.join(FRONTEND_DIR, "assets")
 
 os.makedirs(FRONTEND_DIR, exist_ok=True)
 os.makedirs(OUTPUTS_DIR, exist_ok=True)
+os.makedirs(UPLOADS_DIR, exist_ok=True)
 os.makedirs(STATIC_DIR, exist_ok=True)
+os.makedirs(FRONTEND_ASSETS_DIR, exist_ok=True)
 
 
 app = FastAPI(
@@ -63,12 +81,63 @@ def health():
 app.include_router(segment_router, prefix="/api/segment", tags=["segment"])
 app.include_router(model_router, prefix="/api/model", tags=["model"])
 app.include_router(meta3d_router, prefix="/api/meta3d", tags=["meta3d"])
+app.include_router(humanoid_mesh_router)
+app.include_router(auto_asset_router)
+app.include_router(universal_cage_debug_router)
+app.include_router(universal_multiview_router)
+app.include_router(universal_cage_diamond_grid_router)
+app.include_router(multiview_storage_router)
+app.include_router(diamond_texture_bake_router)
+app.include_router(diamond_cage_glb_router)
+
+
+app.include_router(
+    universal_cage_routes.router,
+    prefix="/api/universal-cage",
+    tags=["universal-cage"],
+)
+
+app.include_router(
+    final_mesh_router,
+    prefix="/api/final-mesh",
+    tags=["final-mesh"],
+)
+
+app.include_router(
+    ai_scan_routes.router,
+    prefix="/api/scan",
+    tags=["ai-scan"],
+)
+
+app.include_router(
+    build_form_3d_routes.router,
+    prefix="/api/build-form",
+    tags=["build-form-3d"],
+)
+
+app.include_router(
+    universal_asset_router,
+    prefix="/api/universal-asset",
+    tags=["universal-asset"],
+)
+
+app.include_router(
+    world_fixture_routes.router,
+    prefix="/api/world-fixture",
+    tags=["world-fixture"],
+)
 
 
 app.mount(
     "/outputs",
     StaticFiles(directory=OUTPUTS_DIR),
     name="outputs",
+)
+
+app.mount(
+    "/uploads",
+    StaticFiles(directory=UPLOADS_DIR),
+    name="uploads",
 )
 
 app.mount(
@@ -79,7 +148,7 @@ app.mount(
 
 app.mount(
     "/assets",
-    StaticFiles(directory=os.path.join(FRONTEND_DIR, "assets")),
+    StaticFiles(directory=FRONTEND_ASSETS_DIR),
     name="frontend_assets",
 )
 
@@ -163,6 +232,7 @@ def which_app():
         "project_root": PROJECT_ROOT,
         "frontend_dir": FRONTEND_DIR,
         "outputs_dir": OUTPUTS_DIR,
+        "uploads_dir": UPLOADS_DIR,
         "static_dir": STATIC_DIR,
         "host": APP_HOST,
         "port": APP_PORT,

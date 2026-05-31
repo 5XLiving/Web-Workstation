@@ -11,16 +11,29 @@
       --text:#eef4ff; --muted:#9fb1c7; --mint:#94f3de; --mint2:#d8fff5; --danger:#ff4d6d; --danger2:rgba(255,77,109,.34);
       --good:#90f0cf; --warn:#ffd37a; --accent:#7fb7ff;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; color:var(--text); font-family:Inter,Arial,sans-serif;
-      background:
-        radial-gradient(circle at 10% 10%, rgba(95,122,255,.14), transparent 24%),
-        radial-gradient(circle at 88% 12%, rgba(85,220,196,.10), transparent 22%),
-        linear-gradient(180deg,#030814,#071221 54%,#0a1728);
-    }
-    .app{min-height:100vh; display:grid; grid-template-rows:auto 1fr; gap:12px; padding:12px}
+*{box-sizing:border-box}
+html,body{height:100%}
+
+body{
+  margin:0;
+  color:var(--text);
+  font-family:Inter,Arial,sans-serif;
+  overflow:auto;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(95,122,255,.14), transparent 24%),
+    radial-gradient(circle at 88% 12%, rgba(85,220,196,.10), transparent 22%),
+    linear-gradient(180deg,#030814,#071221 54%,#0a1728);
+}
+
+.app{
+  min-height:100vh;
+  min-width:1220px;
+  display:grid;
+  grid-template-rows:auto 1fr;
+  gap:12px;
+  padding:12px;
+}
+
     .glass{
       border:1px solid var(--line);
       background:
@@ -30,18 +43,18 @@
       backdrop-filter:blur(16px) saturate(135%);
       border-radius:24px;
     }
-    .topbar{padding:16px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
-    .brand strong{display:block; font-size:28px; font-weight:800}
+    .topbar{padding:10px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
+    .brand strong{display:block; font-size:24px; font-weight:800}
     .brand span,.muted{color:var(--muted)}
     .brand span{font-size:12px; letter-spacing:.16em; text-transform:uppercase}
-    .layout{
-      min-height:0;
-      height:calc(100vh - 110px);
-      display:grid;
-      grid-template-columns:340px minmax(520px,1fr) 320px;
-      gap:12px;
-      align-items:stretch;
-    }
+.layout{
+  min-height:0;
+  height:calc(100vh - 88px);
+  display:grid;
+  grid-template-columns:360px minmax(520px,1fr) 320px;
+  gap:12px;
+  align-items:stretch;
+}
     .panel,
     .desktop-center,
     .desktop-right{
@@ -49,12 +62,60 @@
       height:100%;
       overflow:hidden;
     }
-    .panel .body,
-    .desktop-center .body,
+
+.panel .body{
+  height:100%;
+  overflow:auto;
+  display:block;
+}
+
+.panel .card{
+  margin-bottom:12px;
+}
+
+#imagePreviewSection{
+  min-height:520px;
+}
+
+#imagePreviewSection .canvas-shell{
+  height:460px;
+  min-height:460px;
+}
+
+#uploadSection{
+  flex:0 0 auto;
+}
+
+#imagePreviewSection{
+  display:flex;
+  flex-direction:column;
+  min-height:320px;
+}
+
+#imagePreviewSection .canvas-shell{
+  flex:1;
+  min-height:280px;
+  height:auto;
+}
+
+#maskControlSection,
+#generateSection{
+  flex:0 0 auto;
+}
+
+    .desktop-center .body{
+      height:100%;
+      overflow:hidden;
+    }
+
     .desktop-right .body{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
       height:100%;
       overflow:auto;
     }
+
     .desktop-center.glass,
     .desktop-right.glass{
       border:1px solid var(--line);
@@ -103,7 +164,17 @@
     .workspace{min-height:0; display:grid; grid-template-rows:auto 1fr auto; overflow:hidden}
     .workspace-head{padding:16px 18px 0; display:grid; gap:12px}
     .note{padding:12px 14px; border-radius:18px; border:1px solid var(--line); background:rgba(6,12,22,.74); display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap}
-    .canvas-shell{position:relative; min-height:420px; margin:0 16px; border-radius:24px; overflow:hidden; border:1px solid var(--line); background:#040a14; touch-action:none}
+.canvas-shell{
+  position:relative;
+  height:60vh;
+  min-height:600px;
+  margin:0 16px;
+  border-radius:24px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  background:#040a14;
+  touch-action:none;
+}
     .checker{
       position:absolute; inset:0;
       background-image:
@@ -128,14 +199,33 @@
 
     /* IMPORTANT: image preview and mask editing use the SAME main viewport.
        The old separate mini preview card is hidden to avoid duplicate/ugly mobile layout. */
-    @media (max-width:1080px){
-      .layout{grid-template-columns:1fr}
-      .canvas-shell{min-height:50vh}
-    }
+@media (max-width:1080px){
+  .layout{
+    grid-template-columns:1fr;
+    height:auto;
+  }
 
-    #preview3DContainer{
+  .app{
+    min-width:0;
+  }
+
+  .panel,
+  .desktop-center,
+  .desktop-right{
+    height:auto;
+    overflow:visible;
+  }
+
+  .canvas-shell{
+    height:55vh;
+    min-height:360px;
+  }
+}
+
+#preview3DContainer{
   width:100%;
-  height:800px;
+  height:calc(100vh - 190px);
+  min-height:360px;
   margin:0;
   background:
     radial-gradient(circle at 50% 35%, rgba(127,183,255,.12), transparent 38%),
@@ -149,6 +239,7 @@
 }
 
 #statusSection{
+  flex:0 0 auto;
   grid-template-columns:auto 1fr;
   align-items:center;
 }
@@ -162,8 +253,13 @@
 }
 
 #debugBox{
-  width:100%;
-  margin:0!important;
+  min-height:260px!important;
+  max-height:420px!important;
+  overflow:auto;
+}
+
+.workspace-foot{
+  flex:0 0 auto;
 }
 
 .preview-head{
@@ -198,7 +294,14 @@
 
     /* PHONE MODE: turn the page into one clean vertical workflow */
     @media (max-width:640px){
-      .app{padding:10px; gap:10px}
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-rows:auto 1fr;
+      gap:12px;
+      padding:12px;
+    }
+
       .topbar{padding:14px}
       .brand strong{font-size:22px; line-height:1.15}
       .brand span{font-size:10px; letter-spacing:.08em}
@@ -241,119 +344,135 @@
   </header>
 
   <main class="layout">
-    <aside class="panel glass">
-      <div class="head"><strong>Controls</strong><span class="muted">Modular mask editing for 3D pipeline.</span></div>
-      <div class="body">
-        <!-- UPLOAD SECTION -->
-        <section class="card" id="uploadSection">
-          <h3>1. Upload Photo</h3>
-          <div class="drop">
-            <input type="file" id="uploadFile" accept="image/*" />
-            <div class="mini">Use a clear subject photo for best results.</div>
-          </div>
-        </section>
+  <aside class="panel glass">
+    <div class="head">
+      <strong>Controls</strong>
+      <span class="muted">Modular mask editing for 3D pipeline.</span>
+    </div>
 
-        <!-- IMAGE PREVIEW + MASK EDITING SECTION -->
-        <section class="card" id="imagePreviewSection">
-          <h3>2. Image Preview / Mask Editing</h3>
-          <div class="canvas-shell" id="canvasShell">
-            <div class="checker"></div>
-            <canvas id="imageCanvas"></canvas>
-            <canvas id="maskCanvas"></canvas>
-            <div class="overlay-msg">
-              <div class="callout">
-                <strong style="display:block;color:var(--mint2);font-size:13px;letter-spacing:.04em;text-transform:uppercase">
-                  Current Stage
-                </strong>
-                <span id="selectionMessage" class="muted">
-                  Upload one image. Then press Auto Detect.
-                </span>
-              </div>
-              <div class="pillbar" style="pointer-events:none; justify-content:flex-end">
-                <div class="pill">Brush <strong id="pillBrush">28</strong></div>
-                <div class="pill">Selection <strong id="pillSelection">None</strong></div>
-              </div>
+    <div class="body">
+      <section class="card" id="uploadSection">
+        <h3>1. Upload Photo</h3>
+        <div class="drop">
+          <input type="file" id="uploadFile" accept="image/*" />
+          <div class="mini">Use a clear subject photo for best results.</div>
+        </div>
+      </section>
+
+      <section class="card" id="imagePreviewSection">
+        <h3>2. Image Preview / Mask Editing</h3>
+        <div class="canvas-shell" id="canvasShell">
+          <div class="checker"></div>
+          <canvas id="imageCanvas"></canvas>
+          <canvas id="maskCanvas"></canvas>
+
+          <div class="overlay-msg">
+            <div class="callout">
+              <strong style="display:block;color:var(--mint2);font-size:13px;letter-spacing:.04em;text-transform:uppercase">
+                Current Stage
+              </strong>
+              <span id="selectionMessage" class="muted">
+                Upload one image. Then press Auto Detect.
+              </span>
             </div>
-          </div>
-        </section>
-      </div>
-    </aside>
-    <section class="desktop-center glass">
-      <div class="body">
-        <section class="card" id="preview3DSection">
-          <div class="preview-head">
-            <h3>5. 3D Preview</h3>
-            <div class="toolbar3d">
-              <button class="tool3d active" id="toolOrbit">Orbit</button>
-              <button class="tool3d" id="toolPan">Pan</button>
-              <button class="tool3d" id="toolZoom">Zoom</button>
-              <button class="tool3d" id="toolResetView">Reset</button>
+
+            <div class="pillbar" style="pointer-events:none; justify-content:flex-end">
+              <div class="pill">Brush <strong id="pillBrush">28</strong></div>
+              <div class="pill">Selection <strong id="pillSelection">None</strong></div>
             </div>
-          </div>
-          <div id="preview3DContainer">
-            <span id="preview3DPlaceholder">3D Preview will appear here after Generate 3D</span>
-          </div>
-        </section>
-      </div>
-    </section>
-    <aside class="desktop-right glass">
-      <div class="body">
-        <section class="card" id="maskControlSection">
-          <h3>3. Auto Detect / Refine Mask</h3>
-          <div class="row">
-            <button id="btnAutoDetect" class="btn btn-primary" disabled>Auto Detect Focus</button>
-            <button id="btnResetMask" class="btn btn-quiet" disabled>Reset Mask</button>
-          </div>
-          <div class="row3">
-            <button id="btnAdd" class="btn" disabled>Add +</button>
-            <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
-            <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
-          </div>
-          <div class="row">
-            <div>
-              <label class="mini" for="brushSize">Brush Size</label>
-              <input id="brushSize" type="range" min="6" max="120" value="28" />
-            </div>
-            <div>
-              <label class="mini" for="overlayOpacity">Red Overlay</label>
-              <input id="overlayOpacity" type="range" min="10" max="90" value="60" />
-            </div>
-          </div>
-          <div class="mini">Paint on the image. Red = selected object.</div>
-          <div class="mini">Calls backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/segment</span>.</div>
-        </section>
-        <section class="card" id="generateSection">
-          <h3>4. Confirm & Generate</h3>
-          <div class="row">
-            <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
-            <button id="btnGenerate3D" class="btn btn-primary" disabled>Generate 3D</button>
-          </div>
-          <div class="mini">Sends cutout to backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/model/generate-3d</span>.</div>
-          <label class="mini" for="apiBase">API Base</label>
-          <input id="apiBase" type="text" value="" />
-        </section>
-        <section class="card" id="statusSection">
-          <h3>6. Status</h3>
-          <div id="statusBadge" class="status idle">Idle</div>
-          <div id="statusMessage" class="muted">Upload a photo to begin.</div>
-          <div id="lastResult" class="mini">No result yet.</div>
-        </section>
-        <div id="debugBox" style="margin:12px 0 16px 0; padding:12px; min-height:120px; max-height:220px; overflow:auto; background:#0b1220; border:1px solid rgba(255,255,255,.08); border-radius:14px; color:#cfe7ff; font:12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre-wrap;">[debug] ready</div>
-        <div class="workspace-foot">
-          <div class="chips">
-            <div class="chip">Image<strong id="chipImage">None</strong></div>
-            <div class="chip">Mask<strong id="chipMask">Empty</strong></div>
-            <div class="chip">Confirm<strong id="chipConfirm">No</strong></div>
-          </div>
-          <div class="chips">
-            <div class="chip">API<strong id="chipApi">Idle</strong></div>
-            <div class="chip">3D<strong id="chip3D">Not started</strong></div>
           </div>
         </div>
+      </section>
+
+      <section class="card" id="maskControlSection">
+        <h3>3. Auto Detect / Refine Mask</h3>
+        <div class="row">
+          <button id="btnAutoDetect" class="btn btn-primary" disabled>Auto Detect Focus</button>
+          <button id="btnResetMask" class="btn btn-quiet" disabled>Reset Mask</button>
+        </div>
+
+        <div class="row3">
+          <button id="btnAdd" class="btn" disabled>Add +</button>
+          <button id="btnRemove" class="btn btn-danger" disabled>Remove −</button>
+          <button id="btnClearEdits" class="btn btn-quiet" disabled>Clear Mask</button>
+        </div>
+
+        <div class="row">
+          <div>
+            <label class="mini" for="brushSize">Brush Size</label>
+            <input id="brushSize" type="range" min="6" max="120" value="28" />
+          </div>
+          <div>
+            <label class="mini" for="overlayOpacity">Red Overlay</label>
+            <input id="overlayOpacity" type="range" min="10" max="90" value="60" />
+          </div>
+        </div>
+
+        <div class="mini">Paint on the image. Red = selected object.</div>
+        <div class="mini">Calls backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/segment</span>.</div>
+      </section>
+
+      <section class="card" id="generateSection">
+        <h3>4. Confirm & Generate</h3>
+        <div class="row">
+          <button id="btnConfirm" class="btn" disabled>Confirm Object</button>
+          <button id="btnGenerate3D" class="btn btn-primary" disabled>Generate 3D</button>
+        </div>
+
+        <div class="mini">Sends cutout to backend <span class="endpoint" style="display:inline-block; padding:2px 6px">POST /api/model/generate-3d</span>.</div>
+        <label class="mini" for="apiBase">API Base</label>
+        <input id="apiBase" type="text" value="" />
+      </section>
+    </div>
+  </aside>
+
+  <!-- CENTER PANEL -->
+  <section class="desktop-center glass">
+    <div class="body">
+      <section class="card" id="preview3DSection">
+        <div class="preview-head">
+          <h3>5. 3D Preview</h3>
+          <div class="toolbar3d">
+            <button class="tool3d active" id="toolOrbit">Orbit</button>
+            <button class="tool3d" id="toolPan">Pan</button>
+            <button class="tool3d" id="toolZoom">Zoom</button>
+            <button class="tool3d" id="toolResetView">Reset</button>
+          </div>
+        </div>
+
+        <div id="preview3DContainer">
+          <span id="preview3DPlaceholder">3D Preview will appear here after Generate 3D</span>
+      </section>
+    </div>
+  </section>
+
+  <!-- RIGHT: Status -->
+  <aside class="desktop-right glass">
+    <div class="body">
+      <section class="card" id="statusSection">
+        <h3>6. Status</h3>
+        <div id="statusBadge" class="status idle">Idle</div>
+        <div id="statusMessage" class="muted">Upload a photo to begin.</div>
+        <div id="lastResult" class="mini">No result yet.</div>
+      </section>
+
+      <div id="debugBox" style="margin:12px 0 16px 0; padding:12px; min-height:120px; max-height:220px; overflow:auto; background:#0b1220; border:1px solid rgba(255,255,255,.08); border-radius:14px; color:#cfe7ff; font:12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre-wrap;">[debug] ready</div>
+
+      <div class="workspace-foot">
+        <div class="chips">
+          <div class="chip">Image<strong id="chipImage">None</strong></div>
+          <div class="chip">Mask<strong id="chipMask">Empty</strong></div>
+          <div class="chip">Confirm<strong id="chipConfirm">No</strong></div>
+        </div>
+        <div class="chips">
+          <div class="chip">API<strong id="chipApi">Idle</strong></div>
+          <div class="chip">3D<strong id="chip3D">Not started</strong></div>
+        </div>
       </div>
-    </aside>
-  </main>
-</div>
+    </div>
+  </section>
+ </aside> 
+</main>
 
 <script>
 const $ = (id) => document.getElementById(id);
