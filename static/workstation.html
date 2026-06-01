@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>5xLiving Workstation</title>
+<style>
+
+:root{
+  --bg:#07111f;
+  --bg2:#0d1b2f;
+  --panel:rgba(10,18,33,.88);
+  --panel2:rgba(8,15,28,.92);
+  --panel3:rgba(14,24,42,.95);
+  --line:rgba(255,255,255,.08);
+  --line2:rgba(127,183,255,.22);
+  --text:#eef4ff;
+  --muted:#9fb1c7;
+  --soft:#7f8da3;
+  --accent:#7fb7ff;
+  --mint:#94f3de;
+  --mint2:#d8fff5;
+  --danger:#ff4d6d;
+  --danger2:rgba(255,77,109,.34);
+  --ok:#90f0cf;
+  --warn:#ffd37a;
+  --shadow:0 18px 60px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  color:var(--text);
+  font-family:Inter,Arial,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(95,122,255,.14), transparent 24%),
+    radial-gradient(circle at 88% 12%, rgba(85,220,196,.10), transparent 22%),
+    linear-gradient(180deg,#030814,#071221 54%,#0a1728);
+}
+button,input,textarea,select{font:inherit}
+button{
+  min-height:34px;
+  border-radius:10px;
+  border:1px solid rgba(127,183,255,.24);
+  background:rgba(127,183,255,.08);
+  color:#eef4ff;
+  padding:7px 11px;
+  cursor:pointer;
+  font-weight:800;
+}
+button:hover{background:rgba(127,183,255,.14);transform:translateY(-1px)}
+button.danger{border-color:rgba(255,77,109,.35);background:rgba(255,77,109,.12);color:#ffb2c0}
+button.ok{border-color:rgba(148,243,222,.35);background:rgba(148,243,222,.10);color:#d8fff5}
+button.ghost{background:rgba(255,255,255,.03);color:#eef4ff}
+input,select,textarea{
+  background:rgba(8,14,24,.92);
+  color:var(--text);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:10px;
+  outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:rgba(127,183,255,.55);box-shadow:0 0 0 2px rgba(127,183,255,.12)}
+input,select{height:34px;padding:6px 10px}
+textarea{resize:none;padding:10px;line-height:1.45}
+.app{
+  height:100vh;
+  display:grid;
+  grid-template-rows:56px minmax(0,1fr) 150px 30px;
+}
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  padding:0 14px;
+  background:rgba(5,10,18,.94);
+  backdrop-filter:blur(16px) saturate(135%);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:34px;height:34px;border-radius:10px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#b8fff0,#86efd8);
+  color:#08221d;
+  font-weight:950;
+  box-shadow:0 0 24px rgba(148,243,222,.18);
+}
+.title{color:#ffffff;font-weight:950;letter-spacing:.02em}
+.subtitle{font-size:12px;color:var(--muted);margin-top:1px}
+.top-actions{display:flex;align-items:center;gap:8px}
+.layout{
+  min-height:0;
+  display:grid;
+  grid-template-columns:280px minmax(520px,1fr) 430px;
+  gap:0;
+}
+.panel{
+  min-height:0;
+  background:rgba(10,18,33,.88);
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+}
+.panel.right{border-right:none;border-left:1px solid var(--line)}
+.panel-head{
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:8px 10px;
+  border-bottom:1px solid var(--line);
+  background:rgba(14,24,42,.95);
+}
+.panel-title{font-weight:900;color:#ffffff;font-size:13px}
+.small{font-size:12px;color:var(--muted)}
+.body{min-height:0;overflow:auto;padding:10px}
+.project-box{
+  display:grid;
+  gap:8px;
+  padding:10px;
+  border-bottom:1px solid var(--line);
+  background:rgba(6,12,22,.70);
+}
+.row{display:flex;gap:8px;align-items:center}
+.row input,.row select{width:100%}
+.file-tree{font-size:13px}
+.file-item{
+  padding:7px 8px;
+  border-radius:9px;
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  gap:7px;
+  cursor:pointer;
+  user-select:none;
+}
+.file-item:hover,.file-item.active{background:rgba(127,183,255,.12);color:#ffffff}
+.file-item.folder{color:var(--mint2);font-weight:800}
+.file-meta{color:var(--soft);font-size:11px;margin-left:auto}
+.editor-panel{
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-rows:46px minmax(0,1fr);
+  background:rgba(5,10,18,.72);
+}
+.editor-tabs{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  background:rgba(14,24,42,.95);
+}
+.tab-name{padding:0 12px;color:#ffffff;font-weight:900;font-size:13px}
+.editor-actions{display:flex;gap:7px;padding-right:10px}
+.editor-wrap{
+  min-height:0;
+  display:grid;
+  grid-template-columns:52px 1fr;
+}
+.lines{
+  background:#06101d;
+  border-right:1px solid var(--line);
+  color:#71829a;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:13px;
+  line-height:1.55;
+  padding:12px 8px;
+  text-align:right;
+  overflow:hidden;
+  white-space:pre;
+}
+#editor{
+  width:100%;height:100%;
+  border:0;border-radius:0;
+  background:#030814;
+  color:#eef4ff;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:13px;
+  line-height:1.55;
+  tab-size:2;
+}
+.right-grid{
+  min-height:0;
+  height:100%;
+  display:grid;
+  grid-template-rows:minmax(0,1fr);
+}
+.chat{min-height:0;height:100%;display:flex;flex-direction:column}
+.messages{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+.msg{
+  border:1px solid var(--line);
+  background:rgba(6,12,22,.82);
+  border-radius:12px;
+  padding:10px 11px;
+  font-size:13px;
+  line-height:1.48;
+}
+.msg.user{border-color:rgba(127,183,255,.35)}
+.msg.ai{border-color:rgba(148,243,222,.28)}
+.msg .who{font-size:11px;color:var(--muted);font-weight:900;margin-bottom:4px}
+.chat-input{
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  padding:10px;
+  border-top:1px solid var(--line);
+  background:rgba(5,10,18,.94);
+}
+.chat-input textarea{
+  height:118px;
+  min-height:118px;
+  max-height:220px;
+  overflow:auto;
+}
+.butler-overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.54);
+  backdrop-filter:blur(8px);
+  z-index:50;
+}
+.butler-overlay.active{display:flex}
+.butler-modal{
+  width:min(680px,calc(100vw - 40px));
+  max-height:78vh;
+  overflow:auto;
+  border:1px solid rgba(127,183,255,.30);
+  border-radius:18px;
+  background:
+    radial-gradient(circle at top right, rgba(148,243,222,.08), transparent 25%),
+    linear-gradient(180deg, rgba(14,24,42,.98), rgba(8,15,28,.98));
+  box-shadow:0 28px 90px rgba(0,0,0,.60);
+  padding:16px;
+}
+.butler-modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:12px;
+}
+.butler-title{font-size:16px;font-weight:950;color:#ffffff}
+.butler-card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(6,12,22,.86);
+  padding:12px;
+  margin-bottom:10px;
+}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  border:1px solid rgba(127,183,255,.24);
+  border-radius:999px;
+  padding:3px 8px;
+  color:#ffffff;
+  background:rgba(127,183,255,.08);
+  font-size:11px;
+  font-weight:900;
+}
+.codebox{
+  background:#030814;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  margin:8px 0;
+  color:#dce9ff;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12px;
+  white-space:pre-wrap;
+  overflow:auto;
+}
+.card-actions{display:flex;gap:8px;margin-top:10px}
+.terminal{
+  min-height:0;
+  border-top:1px solid var(--line);
+  background:#030814;
+  display:grid;
+  grid-template-rows:38px minmax(0,1fr);
+}
+.terminal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 10px;
+  background:rgba(14,24,42,.95);
+  border-bottom:1px solid var(--line);
+}
+.term-actions{display:flex;gap:7px;align-items:center}
+#terminalOut{
+  margin:0;
+  padding:10px 12px;
+  overflow:auto;
+  color:#dce9ff;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12px;
+  line-height:1.45;
+  white-space:pre-wrap;
+}
+.statusbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;
+  border-top:1px solid var(--line);
+  background:#06101d;
+  color:var(--muted);
+  font-size:12px;
+}
+.kbd{border:1px solid var(--line);border-radius:6px;padding:1px 5px;color:var(--soft)}
+.hidden{display:none!important}
+
+.history-tools{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  margin-bottom:10px;
+}
+.history-tabs{
+  display:flex;
+  gap:7px;
+  margin-bottom:10px;
+}
+.history-tabs button.active{
+  background:rgba(148,243,222,.14);
+  border-color:rgba(148,243,222,.45);
+  color:#d8fff5;
+}
+.chat-history-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:14px;
+}
+.chat-history-item{
+  border:1px solid rgba(127,183,255,.16);
+  background:rgba(6,12,22,.76);
+  border-radius:12px;
+  padding:9px;
+  cursor:pointer;
+}
+.chat-history-item:hover,
+.chat-history-item.active{
+  border-color:rgba(148,243,222,.38);
+  background:rgba(127,183,255,.10);
+}
+.chat-history-title{
+  color:#fff;
+  font-weight:900;
+  font-size:12px;
+  line-height:1.35;
+  word-break:break-word;
+}
+.chat-history-date{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:4px;
+}
+.chat-history-actions{
+  display:flex;
+  gap:6px;
+  margin-top:8px;
+}
+.chat-history-actions button{
+  min-height:28px;
+  padding:4px 8px;
+  font-size:11px;
+}
+.left-section-label{
+  color:var(--mint2);
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin:14px 0 8px;
+}
+
+.chat-memory-panel{
+  flex:0 0 auto;
+  padding:10px;
+  border-bottom:1px solid var(--line);
+  background:rgba(5,10,18,.78);
+}
+.chat-memory-panel .chat-history-list{
+  max-height:180px;
+  overflow:auto;
+  margin-bottom:0;
+}
+.chat-memory-panel .history-tools{
+  grid-template-columns:1fr auto;
+}
+
+
+.chat-workspace{
+  min-height:0;
+  height:100%;
+  display:grid;
+  grid-template-columns:170px minmax(0,1fr);
+}
+.chat-project-panel{
+  min-height:0;
+  border-right:1px solid var(--line);
+  background:rgba(5,10,18,.84);
+  display:flex;
+  flex-direction:column;
+  padding:8px;
+  overflow:hidden;
+}
+.mini-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+.topics-head{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid var(--line);
+}
+.chat-project-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:160px;
+  overflow:auto;
+  padding-right:2px;
+}
+.chat-project-item{
+  border:1px solid rgba(127,183,255,.14);
+  background:rgba(6,12,22,.70);
+  border-radius:10px;
+  padding:8px;
+  cursor:pointer;
+}
+.chat-project-item:hover,
+.chat-project-item.active{
+  border-color:rgba(148,243,222,.42);
+  background:rgba(127,183,255,.10);
+}
+.chat-project-name{
+  font-size:12px;
+  font-weight:950;
+  color:#fff;
+  word-break:break-word;
+}
+.chat-project-count{
+  font-size:10px;
+  color:var(--muted);
+  margin-top:3px;
+}
+.project-actions,
+.topic-actions{
+  display:flex;
+  gap:5px;
+  margin-top:6px;
+  flex-wrap:wrap;
+}
+.project-actions button,
+.topic-actions button{
+  min-height:24px;
+  padding:3px 6px;
+  font-size:10px;
+}
+.topic-list{
+  min-height:0;
+  overflow:auto;
+  margin-bottom:0;
+  padding-right:2px;
+}
+.chat-history-item.dragging{
+  opacity:.45;
+}
+.chat-history-item.drop-target,
+.chat-project-item.drop-target{
+  outline:2px solid rgba(148,243,222,.55);
+}
+#activeChatTitle{
+  max-width:220px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+@media(max-width:1100px){
+  .layout{grid-template-columns:240px 1fr 420px}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">5X</div>
+      <div>
+        <div class="title">5xLiving Workstation</div>
+        <div class="subtitle">AI Worker plans. GitHub stores memory. Server runs execution.</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button onclick="apiGit('pull')">Git Pull</button>
+      <button onclick="apiGit('status')">Git Status</button>
+      <button onclick="apiGit('push')">Git Push</button>
+      <button class="ghost" onclick="openSettings()">API</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Workspace Explorer</div>
+          <div class="small">GitHub Memory Bank + Server Control</div>
+        </div>
+        <button class="ghost" onclick="resetWorkspaceInputs()">↻</button>
+      </div>
+
+      <div class="project-box">
+        <label class="small">Backend Target</label>
+        <select id="backendMode">
+          <option value="server">5xLiving Server</option>
+          <option value="local">Local PC Backend</option>
+          <option value="team">Team Cloud Workspace</option>
+        </select>
+
+        <label class="small">Backend API Base</label>
+        <input id="apiBase" placeholder="Example: http://139.180.218.119 or http://127.0.0.1:5000" />
+
+        <div class="small" id="aiWorkerStatus">AI Worker: Ready</div>
+
+        <label class="small">Project Root / Open Folder Path</label>
+        <input id="projectRoot" placeholder="Example: /var/www/5xliving/Web-Workstation or F:\5XLiving VS Code\Astro-Sanctuary" />
+
+        <label class="small">GitHub Repository</label>
+        <input id="repoUrl" placeholder="Example: https://github.com/5XLiving/Astro-Sanctuary.git" />
+
+        <label class="small">SSH Server</label>
+        <input id="sshHost" placeholder="Example: root@139.180.218.119" />
+
+        <div class="row">
+          <button onclick="connectProject()">Connect</button>
+          <button onclick="openFolderPrompt()">Open Folder</button>
+        </div>
+        <div class="row">
+          <button onclick="cloneRepoPrompt()">Clone Repo</button>
+          <button onclick="connectServerPrompt()">Connect Server</button>
+        </div>
+
+        <div class="left-section-label">Project Files</div>
+        <div id="fileTree" class="file-tree"></div>
+        <div class="small">
+          GitHub = memory bank. SSH server = live machine control. Butler appears only after AI confirms an executable action.
+        </div>
+      </div>
+    </aside>
+
+    <section class="editor-panel">
+      <div class="editor-tabs">
+        <div class="tab-name" id="currentFile">No file opened</div>
+        <div class="editor-actions">
+          <button onclick="searchInFile()">Find Line</button>
+          <button onclick="saveFile()">Save</button>
+          <button onclick="previewFile()">Preview</button>
+        </div>
+      </div>
+      <div class="editor-wrap">
+        <pre class="lines" id="lineNums">1</pre>
+        <textarea id="editor" spellcheck="false" oninput="updateLines()"></textarea>
+      </div>
+    </section>
+
+    <aside class="panel right">
+      <div class="chat-workspace">
+        <section class="chat-project-panel">
+          <div class="mini-head">
+            <div>
+              <div class="panel-title">Projects</div>
+              <div class="small" id="chatStorageStatus">Chat memory: Local</div>
+            </div>
+            <button class="ghost" onclick="createChatProject()">+</button>
+          </div>
+          <div id="chatProjectList" class="chat-project-list"></div>
+
+          <div class="mini-head topics-head">
+            <div>
+              <div class="panel-title">Topics</div>
+              <div class="small">Drag topic to project</div>
+            </div>
+            <button class="ok" onclick="newChat()">+</button>
+          </div>
+
+          <div class="history-tabs">
+            <button id="historyTabAll" class="active" onclick="filterHistory('all')">Recent</button>
+            <button id="historyTabPinned" onclick="filterHistory('pinned')">Pinned</button>
+          </div>
+
+          <div id="chatHistoryList" class="chat-history-list topic-list"></div>
+        </section>
+
+        <section class="chat">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title" id="activeChatTitle">AI Worker</div>
+              <div class="small">Normal chat first · Butler only for approved workstation actions</div>
+            </div>
+            <div class="row" style="width:auto">
+              <button class="ghost" onclick="renameCurrentChat()">Rename</button>
+              <button class="ghost" onclick="clearChat()">Clear</button>
+            </div>
+          </div>
+
+          <div class="messages" id="messages">
+            <div class="msg ai">
+              <div class="who">AI Worker</div>
+              Chat normally. I will plan first. When an executable action is ready, I will ask you to confirm before 5X Butler appears.
+            </div>
+          </div>
+
+          <div class="chat-input">
+            <textarea id="chatInput" placeholder="Ask normally. Enter = send, Shift+Enter = new line. Example: connect my Astro folder, scan homepage wording, explain how to push..."></textarea>
+            <button onclick="sendToAI()">Send</button>
+          </div>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <section class="terminal">
+    <div class="terminal-head">
+      <div>
+        <strong style="color:#ffffff">Terminal / Activity Log</strong>
+        <span class="small"> backend execution output</span>
+      </div>
+      <div class="term-actions">
+        <input id="manualCmd" placeholder="Manual command locked behind approval" style="width:310px" />
+        <button onclick="prepareCommand()">Prepare</button>
+        <button class="ghost" onclick="clearTerminal()">Clear</button>
+      </div>
+    </div>
+    <pre id="terminalOut">[system] Workstation loaded.
+[system] Connect to backend before real file/git operations.
+</pre>
+  </section>
+
+  <footer class="statusbar">
+    <div id="statusLeft">Local page ready · backend required for real directory access</div>
+    <div><span class="kbd">Ctrl</span> + <span class="kbd">S</span> save current file</div>
+  </footer>
+</div>
+
+<div class="butler-overlay" id="butlerOverlay" aria-hidden="true">
+  <div class="butler-modal">
+    <div class="butler-modal-head">
+      <div>
+        <div class="butler-title">5X Butler approval required</div>
+        <div class="small">Review the action. Nothing runs until you press Execute.</div>
+      </div>
+      <button class="ghost" onclick="closeButler()">Close</button>
+    </div>
+    <div id="butlerPanel"></div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_AI_WORKER_BASE = 'https://throbbing-lab-1440.hello5xliving.workers.dev';
+
+const state = {
+  apiBase: localStorage.getItem('5x_api_base') || '',
+  projectRoot: localStorage.getItem('5x_project_root') || '',
+  currentFile: '',
+  currentContent: '',
+  tree: [],
+  pendingTask: null,
+  pendingQuestionOpen: false,
+  currentChatId: localStorage.getItem('5x_current_chat_id') || createChatId(),
+  currentChatProjectId: localStorage.getItem('5x_current_chat_project_id') || '',
+  historyFilter: 'all',
+  chatMessages: []
+};
+
+const demoTree = [
+  {path:'astro.html', type:'file', size:'main'},
+  {path:'vip_soul_sanctuary.html', type:'file', size:'vip'},
+  {path:'assets', type:'folder'},
+  {path:'assets/style.css', type:'file', size:'css'},
+  {path:'api', type:'folder'},
+  {path:'api/app.py', type:'file', size:'backend'},
+];
+
+function createChatId(){
+  const id = 'chat_' + Date.now();
+  localStorage.setItem('5x_current_chat_id', id);
+  return id;
+}
+
+function getProjectStore(){
+  try{
+    const raw = JSON.parse(localStorage.getItem('5x_workspace_projects') || '[]');
+    return Array.isArray(raw) ? raw : [];
+  }catch(e){ return []; }
+}
+
+function saveProjectStore(projects){
+  localStorage.setItem('5x_workspace_projects', JSON.stringify(projects));
+  syncChatProjectsToServer(projects);
+}
+
+function migrateOldChatsIfNeeded(){
+  let projects = getProjectStore();
+  if(projects.length) return projects;
+
+  let oldChats = [];
+  try{ oldChats = JSON.parse(localStorage.getItem('5x_workspace_chats') || '[]'); }
+  catch(e){ oldChats = []; }
+
+  projects = [
+    {
+      id:'project_workstation',
+      name:'Workstation',
+      createdAt:new Date().toISOString(),
+      updatedAt:new Date().toISOString(),
+      chats:Array.isArray(oldChats) ? oldChats : []
+    },
+    {
+      id:'project_astro',
+      name:'Astro Sanctuary',
+      createdAt:new Date().toISOString(),
+      updatedAt:new Date().toISOString(),
+      chats:[]
+    },
+    {
+      id:'project_3d',
+      name:'3D Model Maker',
+      createdAt:new Date().toISOString(),
+      updatedAt:new Date().toISOString(),
+      chats:[]
+    }
+  ];
+
+  localStorage.setItem('5x_workspace_projects', JSON.stringify(projects));
+  return projects;
+}
+
+function ensureCurrentProject(){
+  let projects = migrateOldChatsIfNeeded();
+  let currentId = localStorage.getItem('5x_current_chat_project_id');
+
+  if(!currentId || !projects.find(p => p.id === currentId)){
+    currentId = projects[0]?.id || 'project_workstation';
+    localStorage.setItem('5x_current_chat_project_id', currentId);
+  }
+
+  state.currentChatProjectId = currentId;
+  return projects.find(p => p.id === currentId) || projects[0];
+}
+
+function getCurrentProject(){
+  return ensureCurrentProject();
+}
+
+function findChat(chatId){
+  const projects = getProjectStore();
+  for(const project of projects){
+    const chat = (project.chats || []).find(c => c.id === chatId);
+    if(chat) return {project, chat};
+  }
+  return null;
+}
+
+function loadChatMessages(id){
+  const found = findChat(id);
+  return found ? (found.chat.messages || []) : [];
+}
+
+function syncChatProjectsToServer(projects){
+  // Local-first now. If backend later adds /api/workstation/chats/save,
+  // this silently syncs so history can continue on another PC after login.
+  if(!state.apiBase) return;
+  fetch(state.apiBase.replace(/\/$/,'') + '/api/workstation/chats/save', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      user:'local',
+      projects
+    })
+  }).then(r=>{
+    if(r.ok) setChatStorageStatus('Chat memory: Server synced');
+    else setChatStorageStatus('Chat memory: Local');
+  }).catch(()=>setChatStorageStatus('Chat memory: Local'));
+}
+
+function setChatStorageStatus(text){
+  const el = $('chatStorageStatus');
+  if(el) el.textContent = text;
+}
+
+function renderProjectFolders(){
+  const box = $('chatProjectList');
+  if(!box) return;
+
+  const projects = migrateOldChatsIfNeeded();
+  const currentId = state.currentChatProjectId || localStorage.getItem('5x_current_chat_project_id') || projects[0]?.id;
+
+  box.innerHTML = projects.map(project => `
+    <div class="chat-project-item ${project.id === currentId ? 'active' : ''}"
+         onclick="selectChatProject('${project.id}')"
+         ondragover="event.preventDefault(); this.classList.add('drop-target')"
+         ondragleave="this.classList.remove('drop-target')"
+         ondrop="dropChatOnProject(event,'${project.id}')">
+      <div class="chat-project-name">${escapeHtml(project.name || 'Project')}</div>
+      <div class="chat-project-count">${(project.chats || []).length} topic${(project.chats || []).length === 1 ? '' : 's'}</div>
+      <div class="project-actions" onclick="event.stopPropagation()">
+        <button class="ghost" onclick="renameChatProject('${project.id}')">Rename</button>
+        <button class="danger" onclick="deleteChatProject('${project.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectChatProject(projectId){
+  const projects = getProjectStore();
+  const project = projects.find(p => p.id === projectId);
+  if(!project) return;
+
+  state.currentChatProjectId = projectId;
+  localStorage.setItem('5x_current_chat_project_id', projectId);
+
+  const chats = project.chats || [];
+  const firstChat = chats.sort((a,b)=>{
+    if(Boolean(a.pinned) !== Boolean(b.pinned)) return Boolean(b.pinned) - Boolean(a.pinned);
+    return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+  })[0];
+
+  if(firstChat){
+    state.currentChatId = firstChat.id;
+    localStorage.setItem('5x_current_chat_id', firstChat.id);
+    state.chatMessages = firstChat.messages || [];
+    restoreChatMessages();
+  }else{
+    state.currentChatId = createChatId();
+    localStorage.setItem('5x_current_chat_id', state.currentChatId);
+    state.chatMessages = [];
+    restoreChatMessages(true);
+  }
+
+  renderProjectFolders();
+  renderChatHistory();
+  updateActiveChatTitle();
+}
+
+function createChatProject(){
+  const name = prompt('Project folder name:', 'New Project');
+  if(!name) return;
+
+  const projects = getProjectStore();
+  const id = 'project_' + Date.now();
+  projects.unshift({
+    id,
+    name:name.trim(),
+    createdAt:new Date().toISOString(),
+    updatedAt:new Date().toISOString(),
+    chats:[]
+  });
+
+  saveProjectStore(projects);
+  selectChatProject(id);
+}
+
+function renameChatProject(projectId){
+  const projects = getProjectStore();
+  const project = projects.find(p => p.id === projectId);
+  if(!project) return;
+
+  const name = prompt('Rename project folder:', project.name || 'Project');
+  if(!name) return;
+
+  project.name = name.trim();
+  project.updatedAt = new Date().toISOString();
+  saveProjectStore(projects);
+  renderProjectFolders();
+  renderChatHistory();
+}
+
+function deleteChatProject(projectId){
+  const projects = getProjectStore();
+  const project = projects.find(p => p.id === projectId);
+  if(!project) return;
+
+  if(projects.length <= 1){
+    alert('Keep at least one project folder.');
+    return;
+  }
+
+  if(!confirm('Delete this project folder and all chat topics inside it?')) return;
+
+  const next = projects.filter(p => p.id !== projectId);
+  saveProjectStore(next);
+
+  if(state.currentChatProjectId === projectId){
+    state.currentChatProjectId = next[0].id;
+    localStorage.setItem('5x_current_chat_project_id', next[0].id);
+  }
+
+  selectChatProject(state.currentChatProjectId);
+}
+
+function saveActiveChat(){
+  const realMessages = state.chatMessages.filter(m => !m.system);
+  if(!realMessages.length){
+    renderChatHistory();
+    return;
+  }
+
+  const projects = migrateOldChatsIfNeeded();
+  const project = projects.find(p => p.id === state.currentChatProjectId) || projects[0];
+  state.currentChatProjectId = project.id;
+
+  let chat = (project.chats || []).find(c => c.id === state.currentChatId);
+  const firstUser = realMessages.find(m => m.role === 'user');
+  const title = (firstUser ? firstUser.content : realMessages[0].content || 'New Workspace Chat').slice(0, 58);
+
+  if(!chat){
+    chat = {
+      id: state.currentChatId,
+      title,
+      pinned:false,
+      createdAt:new Date().toISOString(),
+      updatedAt:new Date().toISOString(),
+      messages:[]
+    };
+    project.chats = project.chats || [];
+    project.chats.unshift(chat);
+  }
+
+  chat.title = chat.title || title || 'New Workspace Chat';
+  if(chat.title === 'New Workspace Chat' && title) chat.title = title;
+  chat.messages = realMessages;
+  chat.updatedAt = new Date().toISOString();
+  project.updatedAt = new Date().toISOString();
+
+  saveProjectStore(projects);
+  renderProjectFolders();
+  renderChatHistory();
+  updateActiveChatTitle();
+}
+
+function renderChatHistory(){
+  const box = $('chatHistoryList');
+  if(!box) return;
+
+  const project = getCurrentProject();
+  let chats = [...(project.chats || [])];
+
+  if(state.historyFilter === 'pinned') chats = chats.filter(c => c.pinned);
+
+  chats.sort((a,b)=>{
+    if(Boolean(a.pinned) !== Boolean(b.pinned)) return Boolean(b.pinned) - Boolean(a.pinned);
+    return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+  });
+
+  if($('historyTabAll')) $('historyTabAll').classList.toggle('active', state.historyFilter === 'all');
+  if($('historyTabPinned')) $('historyTabPinned').classList.toggle('active', state.historyFilter === 'pinned');
+
+  if(!chats.length){
+    box.innerHTML = '<div class="small">No topic yet. Click + to start one.</div>';
+    return;
+  }
+
+  box.innerHTML = chats.map(chat => `
+    <div class="chat-history-item ${chat.id === state.currentChatId ? 'active' : ''}"
+         draggable="true"
+         ondragstart="dragChatStart(event,'${chat.id}')"
+         ondragend="this.classList.remove('dragging')"
+         onclick="loadChat('${chat.id}')">
+      <div class="chat-history-title">${chat.pinned ? '📌 ' : ''}${escapeHtml(chat.title || 'New Workspace Chat')}</div>
+      <div class="chat-history-date">${new Date(chat.updatedAt || chat.createdAt).toLocaleString()}</div>
+      <div class="topic-actions" onclick="event.stopPropagation()">
+        <button class="ghost" onclick="togglePinChat('${chat.id}')">${chat.pinned ? 'Unpin' : 'Pin'}</button>
+        <button class="ghost" onclick="renameChat('${chat.id}')">Rename</button>
+        <button class="danger" onclick="deleteChat('${chat.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function dragChatStart(event, chatId){
+  event.dataTransfer.setData('text/plain', chatId);
+  event.currentTarget.classList.add('dragging');
+}
+
+function dropChatOnProject(event, projectId){
+  event.preventDefault();
+  event.currentTarget.classList.remove('drop-target');
+  const chatId = event.dataTransfer.getData('text/plain');
+  if(!chatId) return;
+  moveChatToProject(chatId, projectId);
+}
+
+function moveChatToProject(chatId, targetProjectId){
+  const projects = getProjectStore();
+  let movingChat = null;
+  let sourceProject = null;
+
+  for(const project of projects){
+    const idx = (project.chats || []).findIndex(c => c.id === chatId);
+    if(idx >= 0){
+      movingChat = project.chats.splice(idx,1)[0];
+      sourceProject = project;
+      break;
+    }
+  }
+
+  if(!movingChat) return;
+
+  const target = projects.find(p => p.id === targetProjectId);
+  if(!target) return;
+
+  target.chats = target.chats || [];
+  target.chats.unshift(movingChat);
+  target.updatedAt = new Date().toISOString();
+  if(sourceProject) sourceProject.updatedAt = new Date().toISOString();
+
+  saveProjectStore(projects);
+  state.currentChatProjectId = targetProjectId;
+  localStorage.setItem('5x_current_chat_project_id', targetProjectId);
+  renderProjectFolders();
+  renderChatHistory();
+}
+
+function filterHistory(type){
+  state.historyFilter = type;
+  renderChatHistory();
+}
+
+function loadChat(id){
+  const found = findChat(id);
+  if(!found) return;
+
+  state.currentChatProjectId = found.project.id;
+  localStorage.setItem('5x_current_chat_project_id', found.project.id);
+
+  state.currentChatId = id;
+  localStorage.setItem('5x_current_chat_id', id);
+  state.chatMessages = found.chat.messages || [];
+  restoreChatMessages();
+  renderProjectFolders();
+  renderChatHistory();
+  updateActiveChatTitle();
+  setStatus('Loaded chat topic · ' + (found.chat.title || 'Workspace Chat'));
+}
+
+function newChat(){
+  const project = getCurrentProject();
+  state.currentChatId = createChatId();
+  state.chatMessages = [];
+  restoreChatMessages(true);
+  updateActiveChatTitle('New Chat');
+  renderProjectFolders();
+  renderChatHistory();
+  setStatus('New chat topic started in ' + (project.name || 'Project'));
+}
+
+function togglePinChat(id){
+  const projects = getProjectStore();
+  const found = findChat(id);
+  if(found) found.chat.pinned = !found.chat.pinned;
+  saveProjectStore(projects);
+  renderChatHistory();
+}
+
+function renameChat(id){
+  const projects = getProjectStore();
+  const found = findChat(id);
+  if(!found) return;
+
+  const name = prompt('Rename chat topic:', found.chat.title || 'New Workspace Chat');
+  if(!name) return;
+
+  found.chat.title = name.trim();
+  found.chat.updatedAt = new Date().toISOString();
+  saveProjectStore(projects);
+  renderChatHistory();
+  updateActiveChatTitle();
+}
+
+function renameCurrentChat(){
+  if(!state.currentChatId) return;
+  renameChat(state.currentChatId);
+}
+
+function deleteChat(id){
+  const projects = getProjectStore();
+
+  for(const project of projects){
+    const idx = (project.chats || []).findIndex(c => c.id === id);
+    if(idx >= 0){
+      if(!confirm('Delete this chat topic?')) return;
+      project.chats.splice(idx,1);
+      project.updatedAt = new Date().toISOString();
+      saveProjectStore(projects);
+
+      if(id === state.currentChatId){
+        state.currentChatId = createChatId();
+        localStorage.setItem('5x_current_chat_id', state.currentChatId);
+        state.chatMessages = [];
+        restoreChatMessages(true);
+      }
+
+      renderProjectFolders();
+      renderChatHistory();
+      updateActiveChatTitle();
+      return;
+    }
+  }
+}
+
+function updateActiveChatTitle(forceTitle){
+  const titleEl = $('activeChatTitle');
+  if(!titleEl) return;
+
+  if(forceTitle){
+    titleEl.textContent = forceTitle;
+    return;
+  }
+
+  const found = findChat(state.currentChatId);
+  titleEl.textContent = found?.chat?.title || 'AI Worker';
+}
+function restoreChatMessages(showIntro=false){
+  const box = $('messages');
+  if(!box) return;
+  box.innerHTML = '';
+  if(showIntro || !state.chatMessages.length){
+    const intro = 'Chat normally. I will plan first. When an executable action is ready, I will ask you to confirm before 5X Butler appears.';
+    appendMsgToDom('AI Worker', intro, 'ai');
+    return;
+  }
+  state.chatMessages.forEach(m => appendMsgToDom(m.role === 'user' ? 'You' : 'AI Worker', m.content, m.role === 'user' ? 'user' : 'ai'));
+}
+
+function $(id){return document.getElementById(id)}
+function log(text){
+  const out = $('terminalOut');
+  const time = new Date().toLocaleTimeString();
+  out.textContent += `\n[${time}] ${text}`;
+  out.scrollTop = out.scrollHeight;
+}
+function setStatus(text){$('statusLeft').textContent = text}
+function getApiBase(){
+  state.apiBase = $('apiBase').value.trim().replace(/\/$/,'');
+  state.projectRoot = $('projectRoot').value.trim();
+  localStorage.setItem('5x_api_base', state.apiBase);
+  localStorage.setItem('5x_project_root', state.projectRoot);
+  return state.apiBase;
+}
+function getAiWorkerBase(){
+  return DEFAULT_AI_WORKER_BASE.replace(/\/$/,'');
+}
+function setAiWorkerStatus(text){
+  const el = $('aiWorkerStatus');
+  if(el) el.textContent = text;
+}
+async function api(path, body){
+  const base = getApiBase();
+  const res = await fetch(base + path, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body || {project_root:state.projectRoot})
+  });
+  if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return await res.json();
+}
+function renderTree(items){
+  const box = $('fileTree');
+  box.innerHTML = '';
+  items.forEach(item=>{
+    const div = document.createElement('div');
+    div.className = 'file-item ' + (item.type === 'folder' ? 'folder' : '');
+    div.innerHTML = `<span>${item.type === 'folder' ? '▸' : '•'}</span><span>${item.path}</span><span class="file-meta">${item.size || ''}</span>`;
+    div.onclick = ()=> item.type === 'file' ? openFile(item.path) : null;
+    box.appendChild(div);
+  });
+}
+async function connectProject(){
+  getApiBase();
+  if(!state.apiBase || !state.projectRoot){
+    log('Please enter Backend API Base and Project Root first.');
+    setStatus('Waiting for backend API base and project root');
+    return;
+  }
+  log(`Connecting project: ${state.projectRoot}`);
+  try{
+    const data = await api('/api/workstation/files/tree', {project_root:state.projectRoot});
+    state.tree = data.files || data.tree || [];
+    renderTree(state.tree);
+    log('Project tree loaded from backend.');
+    setStatus('Connected to backend · project tree loaded');
+  }catch(err){
+    log('Backend not available or endpoint missing. ' + err.message);
+    renderTree([]);
+    setStatus('Backend not connected');
+  }
+}
+async function refreshWorkspacePanel(){
+  getApiBase();
+  renderChatHistory();
+
+  log('Refreshing Workspace Explorer...');
+
+  if(!state.apiBase || !state.projectRoot){
+    renderTree([]);
+    log('Refresh skipped: Backend API Base or Project Root is empty.');
+    setStatus('Workspace refresh failed · missing backend or project root');
+    return;
+  }
+
+  try{
+    const data = await api('/api/workstation/files/tree', {
+      project_root: state.projectRoot
+    });
+
+    state.tree = data.files || data.tree || [];
+    renderTree(state.tree);
+
+    log('Workspace Explorer refreshed.');
+    setStatus('Workspace Explorer refreshed');
+  }catch(err){
+    renderTree([]);
+    log('Refresh failed: ' + err.message);
+    setStatus('Refresh failed · backend route missing or offline');
+  }
+}
+
+function resetWorkspaceInputs(){
+  localStorage.removeItem('5x_api_base');
+  localStorage.removeItem('5x_project_root');
+
+  if($('apiBase')) $('apiBase').value = '';
+  if($('projectRoot')) $('projectRoot').value = '';
+
+  state.apiBase = '';
+  state.projectRoot = '';
+  state.tree = [];
+  state.currentFile = '';
+  state.currentContent = '';
+
+  if($('currentFile')) $('currentFile').textContent = 'No file opened';
+  if($('editor')) $('editor').value = '';
+  renderTree([]);
+  updateLines();
+
+  log('Workspace inputs cleared only. No server refresh, no backend scan.');
+  setStatus('Workspace inputs cleared · no server action');
+}
+
+async function openFile(path){
+  state.currentFile = path;
+  if($('currentFile')) $('currentFile').textContent = path;
+  log('Opening file: ' + path);
+
+  try{
+    const data = await api('/api/workstation/files/read', {
+      project_root: state.projectRoot,
+      path
+    });
+
+    state.currentContent = data.content || '';
+    if($('editor')) $('editor').value = state.currentContent;
+    updateLines();
+    setStatus('Opened ' + path);
+  }catch(err){
+    log('Could not open file: ' + err.message);
+    setStatus('Open file failed');
+  }
+}
+
+async function saveFile(){
+  if(!state.currentFile){ log('No file selected.'); return; }
+  const content = $('editor').value;
+  const task = {
+    type:'save_file',
+    title:'Save current file',
+    risk:'Medium',
+    file:state.currentFile,
+    summary:`Save edited content to ${state.currentFile}`,
+    payload:{project_root:state.projectRoot,path:state.currentFile,content}
+  };
+  showButlerTask(task);
+}
+function updateLines(){
+  const count = $('editor').value.split('\n').length || 1;
+  let nums = '';
+  for(let i=1;i<=count;i++) nums += i + '\n';
+  $('lineNums').textContent = nums;
+}
+function appendMsgToDom(who,text,cls){
+  const box = $('messages');
+  if(!box) return;
+  const div = document.createElement('div');
+  div.className = 'msg ' + (cls || '');
+  div.innerHTML = `<div class="who">${who}</div>${escapeHtml(text).replace(/\n/g,'<br>')}`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+function addMsg(who,text,cls, options={}){
+  appendMsgToDom(who,text,cls);
+  if(!options.noSave){
+    state.chatMessages.push({
+      role: cls === 'user' ? 'user' : 'assistant',
+      content:String(text || ''),
+      time:new Date().toISOString()
+    });
+    saveActiveChat();
+  }
+}
+function clearChat(){ newChat(); }
+function clearButler(){ 
+  $('butlerPanel').innerHTML='';
+  closeButler();
+}
+function closeButler(){
+  const overlay = $('butlerOverlay');
+  if(overlay){
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden','true');
+  }
+}
+function clearTerminal(){ $('terminalOut').textContent='[system] Terminal cleared.'; }
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+
+function isConfirmReply(text){
+  const t = String(text || '').trim().toLowerCase();
+  return ['yes','y','ok','okay','confirm','execute','proceed','run','run it','do it','执行','确认','可以','去做'].includes(t);
+}
+function isCancelReply(text){
+  const t = String(text || '').trim().toLowerCase();
+  return ['no','n','cancel','stop','不要','取消'].includes(t);
+}
+function setPendingTask(task, message){
+  state.pendingTask = task;
+  state.pendingQuestionOpen = true;
+  if(message){
+    addMsg('AI Worker', message, 'ai');
+  }
+  log('AI Worker prepared pending action: ' + (task.title || task.type));
+}
+function clearPendingTask(){
+  state.pendingTask = null;
+  state.pendingQuestionOpen = false;
+}
+
+async function callAiWorker(text){
+  const base = getAiWorkerBase();
+
+  const cleanHistory = state.chatMessages
+    .filter(m => m.content && m.content !== 'Thinking...')
+    .map(m => ({
+      role: m.role === "user" ? "user" : "assistant",
+      content: String(m.content || "")
+    }));
+
+  const payload = {
+    messages: [
+      {
+        role: "system",
+        content: `
+You are 5X Butler AI inside 5xLiving Workstation.
+Behave like normal ChatGPT.
+Answer the user naturally first.
+If the user asks to connect folder, open file, save file, git pull, git push, scan, or run command, explain what will happen and say the action needs Butler approval.
+Do not return empty replies.
+Keep replies practical and concise.
+        `.trim()
+      },
+      ...cleanHistory
+    ]
+  };
+
+  setAiWorkerStatus('AI Worker: Connecting...');
+
+  const res = await fetch(base + "/api/chat", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if(!res.ok || data.ok === false){
+    setAiWorkerStatus('AI Worker: Offline');
+    throw new Error(data.msg || data.error || res.statusText || "AI Worker failed");
+  }
+
+  const reply = data.reply || data.message || data.answer || data.content || '';
+
+  if(!reply || !String(reply).trim()){
+    setAiWorkerStatus('AI Worker: Online');
+    return {
+      ok: true,
+      data,
+      reply: "I am online. Tell me what you want to build, debug, connect, scan, or edit."
+    };
+  }
+
+  setAiWorkerStatus('AI Worker: Online');
+
+  return {
+    ok: true,
+    data,
+    reply
+  };
+}
+
+async function sendToAI(){
+  const text = $('chatInput').value.trim();
+  if(!text) return;
+
+  $('chatInput').value = '';
+  addMsg('You', text, 'user');
+  log('AI Worker received instruction: ' + text);
+
+  if(state.pendingTask && state.pendingQuestionOpen){
+    if(isConfirmReply(text)){
+      addMsg('AI Worker', 'Confirmed. Sending this to 5X Butler for final approval.', 'ai');
+      showButlerTask(state.pendingTask);
+      state.pendingQuestionOpen = false;
+      return;
+    }
+
+    if(isCancelReply(text)){
+      addMsg('AI Worker', 'Cancelled. No action will be executed.', 'ai');
+      clearPendingTask();
+      return;
+    }
+  }
+
+  const task = inferTask(text);
+  const actionTypes = [
+    'command','git','scan','edit_request',
+    'open_folder','connect_server','clone_repo','connect_project'
+  ];
+
+  if(actionTypes.includes(task.type)){
+    setPendingTask(
+      task,
+      'I can do that. This needs workstation access, so I prepared it for 5X Butler. Reply "yes" to continue, or "no" to cancel.'
+    );
+    return;
+  }
+
+  addMsg('AI Worker', 'Thinking...', 'ai', {noSave:true});
+
+  try{
+    const result = await callAiWorker(text);
+    removeThinkingMessage();
+    addMsg('AI Worker', result.reply, 'ai');
+    log('AI Worker connected.');
+  }catch(err){
+    removeThinkingMessage();
+    addMsg('AI Worker', 'Chat worker error: ' + err.message, 'ai');
+    log('AI Worker error: ' + err.message);
+  }
+}
+function removeThinkingMessage(){
+  const box = $('messages');
+  if(!box) return;
+  const all = Array.from(box.querySelectorAll('.msg.ai'));
+  const last = all[all.length - 1];
+  if(last && last.textContent.includes('Thinking...')) last.remove();
+}
+function inferTask(text){
+  const t = text.toLowerCase();
+  const projectRoot = $('projectRoot') ? $('projectRoot').value.trim() : state.projectRoot;
+  const repoUrl = $('repoUrl') ? $('repoUrl').value.trim() : '';
+  const sshHost = $('sshHost') ? $('sshHost').value.trim() : '';
+
+  if((t.includes('connect') || t.includes('open')) && (t.includes('folder') || t.includes('project') || t.includes('astro'))){
+    return {
+      type:'open_folder',
+      title:'Open project folder',
+      risk:'Low',
+      summary:'Open an existing project folder and load its file tree.',
+      payload:{project_root:projectRoot}
+    };
+  }
+  if(t.includes('server') || t.includes('ssh')){
+    return {
+      type:'connect_server',
+      title:'Connect SSH server',
+      risk:'Medium',
+      summary:'Connect to a server using the configured SSH host. SSH key handling must be done by backend.',
+      payload:{ssh_host:sshHost, project_root:projectRoot}
+    };
+  }
+  if(t.includes('clone')){
+    return {
+      type:'clone_repo',
+      title:'Clone GitHub repository',
+      risk:'Medium',
+      summary:'Clone the GitHub memory-bank repository into the selected project folder.',
+      command:`git clone ${repoUrl || '<repo-url>'} ${projectRoot || '<target-folder>'}`,
+      payload:{repo_url:repoUrl, project_root:projectRoot}
+    };
+  }
+  if(t.includes('restart') && t.includes('backend')){
+    return {
+      type:'command',
+      title:'Restart backend',
+      risk:'Medium',
+      summary:'Restart the 5xLiving backend service.',
+      command:'systemctl restart 5xliving-backend'
+    };
+  }
+  if(t.includes('pull')){
+    return {
+      type:'git',
+      title:'Git pull from memory bank',
+      risk:'Low',
+      summary:'Pull latest changes from GitHub memory bank into the active workspace.',
+      command:'git pull'
+    };
+  }
+  if(t.includes('push')){
+    return {
+      type:'git',
+      title:'Git push to memory bank',
+      risk:'Medium',
+      summary:'Commit and push current workspace changes to GitHub memory bank.',
+      command:'git status && git add . && git commit -m "Workstation update" && git push origin main'
+    };
+  }
+  if(t.includes('scan') || t.includes('find') || t.includes('where')){
+    return {
+      type:'scan',
+      title:'Scan project files',
+      risk:'Low',
+      summary:'Search the active project directory for matching text, class, id, function, or wording.',
+      query:text,
+      payload:{project_root:projectRoot, query:text}
+    };
+  }
+  if(t.includes('change') || t.includes('update') || t.includes('edit') || t.includes('modify')){
+    return {
+      type:'edit_request',
+      title:'Prepare file edit',
+      risk:'Medium',
+      summary:'Scan directory, find matching lines, prepare before/after patch, then wait for approval.',
+      instruction:text,
+      payload:{project_root:projectRoot, current_file:state.currentFile, instruction:text}
+    };
+  }
+  return {
+    type:'chat_only',
+    reply:'I can explain the steps first. When you want action, say connect, open folder, clone, scan, edit, pull, push, or restart.'
+  };
+}
+function showButlerTask(task){
+  const overlay = $('butlerOverlay');
+  const panel = $('butlerPanel');
+  if(overlay){
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden','false');
+  }
+  panel.innerHTML = '';
+  const card = document.createElement('div');
+  card.className='butler-card';
+  const detail = task.command || task.query || task.summary || JSON.stringify(task.payload || {}, null, 2);
+  card.innerHTML = `
+    <span class="badge">${escapeHtml(task.risk || 'Review')}</span>
+    <div style="font-weight:950;margin-top:8px;color:#ffffff">${escapeHtml(task.title || 'Butler Task')}</div>
+    <div class="small" style="margin-top:5px">${escapeHtml(task.summary || 'Ready for approval.')}</div>
+    <div class="codebox">${escapeHtml(detail)}</div>
+    <div class="card-actions">
+      <button class="ok">Execute</button>
+      <button class="danger">Cancel</button>
+    </div>
+  `;
+  const [execBtn,cancelBtn] = card.querySelectorAll('button');
+  execBtn.onclick = ()=>executeTask(task, card);
+  cancelBtn.onclick = ()=>{card.remove(); closeButler(); log('Task cancelled: '+(task.title||''));};
+  panel.prepend(card);
+  log('5X Butler prepared task: ' + (task.title || task.type));
+}
+async function executeTask(task, card){
+  log('Executing: ' + (task.title || task.type));
+  try{
+    let data;
+    if(task.type === 'save_file'){
+      data = await api('/api/workstation/files/save', task.payload);
+    }else if(task.type === 'scan'){
+      data = await api('/api/workstation/files/search', task.payload);
+    }else if(task.type === 'edit_request'){
+      data = await api('/api/workstation/butler/execute', task.payload);
+    }else if(task.type === 'open_folder' || task.type === 'connect_project'){
+      data = await api('/api/workstation/files/tree', task.payload);
+      state.tree = data.files || data.tree || [];
+      renderTree(state.tree);
+    }else if(task.type === 'connect_server'){
+      data = await api('/api/workstation/server/connect', task.payload);
+    }else if(task.type === 'clone_repo'){
+      data = await api('/api/workstation/git/clone', task.payload);
+    }else if(task.type === 'command' || task.type === 'git'){
+      data = await api('/api/workstation/terminal/run', {
+        project_root:state.projectRoot,
+        command:task.command
+      });
+    }else{
+      data = await api('/api/workstation/butler/execute', task);
+    }
+    log(data.output || data.message || JSON.stringify(data,null,2));
+    card.querySelector('.badge').textContent='Done';
+    clearPendingTask();
+  }catch(err){
+    log('Execution failed or backend endpoint missing: ' + err.message);
+    card.querySelector('.badge').textContent='Failed';
+  }
+}
+function prepareCommand(){
+  const command = $('manualCmd').value.trim();
+  if(!command) return;
+  showButlerTask({
+    type:'command',
+    title:'Manual terminal command',
+    risk:'High',
+    summary:'Run this command only after approval.',
+    command
+  });
+}
+function apiGit(action){
+  const commandMap = {
+    pull:'git pull',
+    status:'git status',
+    push:'git status && git add . && git commit -m "Workstation update" && git push origin main'
+  };
+  showButlerTask({
+    type:'git',
+    title:'Git ' + action,
+    risk: action === 'status' ? 'Low' : 'Medium',
+    summary:'Run Git ' + action + ' in the connected project directory.',
+    command:commandMap[action]
+  });
+}
+function searchInFile(){
+  const q = prompt('Search text / CSS class / id / function:');
+  if(!q) return;
+  showButlerTask({
+    type:'scan',
+    title:'Find exact line',
+    risk:'Low',
+    summary:'Search current project and report exact matching file and line numbers.',
+    query:q,
+    payload:{project_root:state.projectRoot, query:q, current_file:state.currentFile}
+  });
+}
+function previewFile(){
+  if(!state.currentFile){ log('No file selected for preview.'); return; }
+  const url = state.apiBase + '/api/workstation/preview?project_root=' + encodeURIComponent(state.projectRoot) + '&path=' + encodeURIComponent(state.currentFile);
+  window.open(url, '_blank');
+}
+
+function openFolderPrompt(){
+  const target = $('projectRoot').value.trim() || prompt('Project folder path to open:');
+  if(!target) return;
+  showButlerTask({
+    type:'open_folder',
+    title:'Open project folder',
+    risk:'Low',
+    summary:'Open this existing folder and load its file tree.',
+    payload:{project_root:target}
+  });
+}
+function connectServerPrompt(){
+  const sshHost = $('sshHost').value.trim() || prompt('SSH host, example root@139.180.218.119:');
+  if(!sshHost) return;
+  showButlerTask({
+    type:'connect_server',
+    title:'Connect SSH server',
+    risk:'Medium',
+    summary:'Connect to this server. Backend should use stored SSH key, not password.',
+    payload:{ssh_host:sshHost, project_root:$('projectRoot').value.trim()}
+  });
+}
+
+function cloneRepoPrompt(){
+  const repo = ($('repoUrl') ? $('repoUrl').value.trim() : '') || prompt('GitHub repo URL to clone:');
+  if(!repo) return;
+  const target = ($('projectRoot') ? $('projectRoot').value.trim() : state.projectRoot) || prompt('Target folder:', state.projectRoot);
+  if(!target) return;
+  showButlerTask({
+    type:'command',
+    title:'Clone GitHub repo',
+    risk:'Medium',
+    summary:'Clone GitHub repo into local directory, then refresh file tree.',
+    command:`git clone ${repo} ${target}`
+  });
+}
+function openSettings(){
+  alert('Workstation needs a backend on the target machine. Local PC folders need a local backend. Server folders need the server backend. GitHub is the memory bank; SSH is live machine control.');
+}
+document.addEventListener('keydown', e=>{
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='s'){
+    e.preventDefault();
+    saveFile();
+  }
+});
+$('apiBase').value = state.apiBase || '';
+$('projectRoot').value = state.projectRoot || '';
+migrateOldChatsIfNeeded();
+ensureCurrentProject();
+state.chatMessages = loadChatMessages(state.currentChatId);
+if(!state.chatMessages.length){
+  const project = getCurrentProject();
+  const latest = (project.chats || []).sort((a,b)=>new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0))[0];
+  if(latest){
+    state.currentChatId = latest.id;
+    localStorage.setItem('5x_current_chat_id', latest.id);
+    state.chatMessages = latest.messages || [];
+  }
+}
+restoreChatMessages();
+renderProjectFolders();
+renderChatHistory();
+updateActiveChatTitle();
+if($('backendMode')){
+  $('backendMode').value = localStorage.getItem('5x_backend_mode') || 'server';
+  $('backendMode').addEventListener('change', e=>localStorage.setItem('5x_backend_mode', e.target.value));
+}
+renderTree([]);
+updateLines();
+
+if($('chatInput')){
+  $('chatInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendToAI();
+    }
+  });
+}
+</script>
+</body>
+</html>
