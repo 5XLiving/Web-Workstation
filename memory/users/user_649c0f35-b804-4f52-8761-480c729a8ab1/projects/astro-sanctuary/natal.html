@@ -1,8 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head><title>Astro Sanctuary</title></head>
+<head><title>Natal Chart</title></head>
 <body>
-<h1>Astro Sanctuary</h1>
-<p>Welcome</p>
+<h1>Natal Chart</h1>
+<script>
+const API_BASE = "http://127.0.0.1:8010/api";
+const NATAL_API_BASE = "http://127.0.0.1:8010/api/natal";
+
+async function calculateNatal() {
+    const response = await fetch(`${NATAL_API_BASE}/calculate`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ birthdate: date, birthtime: time || "12:00", place: "Singapore" })
+    });
+    const data = await response.json();
+    console.log(data);
+}
+</script>
 </body>
 </html>
